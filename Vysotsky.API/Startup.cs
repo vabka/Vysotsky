@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Vysotsky.API
@@ -9,6 +8,7 @@ namespace Vysotsky.API
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -17,7 +17,7 @@ namespace Vysotsky.API
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("/", async context => { await context.Response.WriteAsync("Hello World!"); });
+                endpoints.MapControllers();
             });
         }
     }
