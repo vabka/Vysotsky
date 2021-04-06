@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.API.Models;
-using Vysotsky.API.Utils;
 
 namespace Vysotsky.API.Controllers.Rooms
 {
@@ -16,6 +15,11 @@ namespace Vysotsky.API.Controllers.Rooms
             _roomRepository = roomRepository;
         }
 
+        /// <summary>
+        /// Создать помещение
+        /// </summary>
+        /// <param name="roomProperties">Свойства комнаты</param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<ApiResponse<Room>>> CreateRoom([FromBody] RoomProperties roomProperties)
         {
@@ -26,14 +30,19 @@ namespace Vysotsky.API.Controllers.Rooms
                 roomProperties.Status));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="paginationParameters"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PaginatedData<Room>>>> GetRooms(
             [FromQuery] PaginationParameters paginationParameters)
         {
-            var start = paginationParameters.TimeStamp.ToDateTime();
+            var start = paginationParameters.Until;
             var total = await _roomRepository.Count(start);
             var data = await _roomRepository.GetAll(start,
-                paginationParameters.ToTake, paginationParameters.ToSkip);
+                paginationParameters.ToTake(), paginationParameters.ToSkip());
             return Ok(PaginatedData.Create(paginationParameters, total, data, Resources.Rooms));
         }
     }

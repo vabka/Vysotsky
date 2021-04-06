@@ -19,6 +19,7 @@ namespace Vysotsky.API
                     options.JsonSerializerOptions.WriteIndented = true;
                     options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
             services.AddSingleton<UnhandledExceptionMiddleware>();
             // Add OpenAPI/Swagger document

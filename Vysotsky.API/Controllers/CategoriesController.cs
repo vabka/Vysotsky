@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Flurl;
 using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.API.Models;
@@ -26,10 +27,12 @@ namespace Vysotsky.API.Controllers
         {
             return Ok(PaginatedData.Create(pagination, 3,
                 MockData
-                    .Skip(pagination.ToSkip)
-                    .Take(pagination.ToTake)
+                    .Skip(pagination.ToSkip())
+                    .Take(pagination.ToTake())
                     .ToArray(),
-                Resources.Categories));
+                string.IsNullOrEmpty(search.Query)
+                    ? Resources.Categories
+                    : Resources.Categories.SetQueryParam("q", search.Query)));
         }
     }
 }

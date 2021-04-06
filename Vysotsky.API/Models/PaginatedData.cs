@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using Flurl;
 
 namespace Vysotsky.API.Models
@@ -9,8 +10,11 @@ namespace Vysotsky.API.Models
         public int Total { get; init; }
         public int PageSize { get; init; }
         public int PageNumber { get; init; }
+        public DateTime Until { get; init; }
 
-        public Paginator Iterator { get; } = new();
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public Pages? Pages { get; init; }
+
         public IReadOnlyCollection<T> Data { get; init; } = Array.Empty<T>();
     }
 
@@ -20,28 +24,34 @@ namespace Vysotsky.API.Models
             IReadOnlyCollection<T> data,
             string resource)
         {
-            var hasNext = total - paginationParameters.ToSkip - data.Count > 0;
+            var hasNext = total - paginationParameters.ToSkip() - data.Count > 0;
+            var next = hasNext
+                ? resource
+                    .SetQueryParams(
+                        paginationParameters with {PageNumber = paginationParameters.PageNumber + 1})
+                : null;
+
+            var hasPrevious = paginationParameters.PageNumber > 1;
+            var previous = hasPrevious
+                ? resource
+                    .SetQueryParams(
+                        paginationParameters with {PageNumber = paginationParameters.PageNumber - 1})
+                : null;
+            
             return new PaginatedData<T>
             {
                 Total = total,
                 PageNumber = paginationParameters.PageNumber,
                 PageSize = paginationParameters.PageSize,
                 Data = data,
-                Iterator =
-                {
-                    Next = hasNext
-                        ? resource.SetQueryParams(paginationParameters with
-                        {
-                            PageNumber = paginationParameters.PageNumber + 1
-                        })
-                        : null,
-                    Previous = paginationParameters.PageNumber > 1
-                        ? resource.SetQueryParams(paginationParameters with
-                        {
-                            PageNumber = paginationParameters.PageNumber - 1
-                        })
-                        : null
-                }
+                Until = paginationParameters.Until,
+                Pages = hasNext || hasPrevious
+                    ? new Pages
+                    {
+                        Next = next,
+                        Previous = previous
+                    }
+                    : null
             };
         }
     }
