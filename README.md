@@ -16,8 +16,8 @@
   "result": {}
 }
 ```
-status - ok
-result - undefined | null | Object | Array | number | string | boolean
+- status - ok
+- result - undefined | null | Object | Array | number | string | boolean
 
 (в случае ошибки)
 ```json
