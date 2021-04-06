@@ -31,7 +31,8 @@ namespace Vysotsky.API.Infrastructure
                     Status = ResponseStatus.Error,
                     Error = new ApiError
                     {
-                        Message = "Unexpected error"
+                        Message = "Unexpected error",
+                        Code = "unexpectedError"
                     }
                 });
                 _logger.LogError(exception, "Unhandled exception");

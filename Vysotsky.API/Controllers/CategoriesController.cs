@@ -1,56 +1,36 @@
+using System;
+using System.Linq;
 using Flurl;
 using Microsoft.AspNetCore.Mvc;
+using Vysotsky.API.Infrastructure;
 using Vysotsky.API.Models;
 
 namespace Vysotsky.API.Controllers
 {
-    [Route("/api/categories")]
+    [Route(Resources.Categories)]
     public class CategoriesController : ApiController
     {
         [HttpPost]
         public IActionResult CreateCategory()
         {
-            return Ok();
+            throw new NotImplementedException();
         }
 
-        [HttpGet]
-        public ActionResult<ApiResponse<PaginatedData<Category>>> GetAllCategories(
-            [FromQuery(Name = "q")] string? query,
-            [FromQuery(Name = "page_size")] int? pageSize,
-            [FromQuery(Name = "page_number")] int? pageNumber)
+        private static readonly Category[] MockData =
         {
-            pageNumber ??= 1;
-            pageSize ??= 50;
-            var result = new PaginatedData<Category>
-            {
-                Total = 2,
-                Count = 2,
-                PageNumber = pageNumber.Value,
-                PageSize = pageSize.Value,
-                Iterator =
-                {
-                    Previous = null,
-                    Next = "/categories".SetQueryParams(new
-                    {
-                        query,
-                        pageSize,
-                        pageNumber,
-                    })
-                },
+            new() {Name = "A"}, new() {Name = "B"}, new() {Name = "C"}
+        };
 
-                Data =
-                {
-                    new()
-                    {
-                        Name = "Электрика"
-                    },
-                    new()
-                    {
-                        Name = "Вентиляция"
-                    },
-                },
-            };
-            return Success(result);
+        [HttpGet]
+        public ActionResult<ApiResponse<PaginatedData<Category>>> GetAllCategories([FromQuery] SearchParameters search,
+            [FromQuery] PaginationParameters pagination)
+        {
+            return Ok(PaginatedData.Create(pagination, 3,
+                MockData
+                    .Skip(pagination.ToSkip)
+                    .Take(pagination.ToTake)
+                    .ToArray(),
+                Resources.Categories));
         }
     }
 }
