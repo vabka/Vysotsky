@@ -1,4 +1,6 @@
+using Flurl;
 using Microsoft.AspNetCore.Mvc;
+using Vysotsky.API.Models;
 
 namespace Vysotsky.API.Controllers
 {
@@ -8,27 +10,39 @@ namespace Vysotsky.API.Controllers
         [HttpPost]
         public IActionResult CreateCategory()
         {
-            return NoContent();
+            return Ok();
         }
 
         [HttpGet]
-        public ActionResult<ApiResponse<Paginated<Category>>> GetAllCategories([FromQuery(Name = "q")] string? query,
+        public ActionResult<ApiResponse<PaginatedData<Category>>> GetAllCategories(
+            [FromQuery(Name = "q")] string? query,
             [FromQuery(Name = "page_size")] int? pageSize,
             [FromQuery(Name = "page_number")] int? pageNumber)
         {
-            var result = new Paginated<Category>
+            pageNumber ??= 1;
+            pageSize ??= 50;
+            var result = new PaginatedData<Category>
             {
                 Total = 2,
                 Count = 2,
-                PageNumber = pageNumber ?? 0,
-                PageSize = pageSize ?? 50,
-                HasMore = false,
-                NextPage = null,
-                Data = new Category[]
+                PageNumber = pageNumber.Value,
+                PageSize = pageSize.Value,
+                Iterator =
+                {
+                    Previous = null,
+                    Next = "/categories".SetQueryParams(new
+                    {
+                        query,
+                        pageSize,
+                        pageNumber,
+                    })
+                },
+
+                Data =
                 {
                     new()
                     {
-                        Name ="Электрика" 
+                        Name = "Электрика"
                     },
                     new()
                     {
@@ -38,10 +52,5 @@ namespace Vysotsky.API.Controllers
             };
             return Success(result);
         }
-    }
-
-    public class Category
-    {
-        public string Name { get; init; } = "";
     }
 }
