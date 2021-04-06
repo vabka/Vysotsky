@@ -3,7 +3,7 @@
 ## Ресурсы:
 - /api/categories - категории работ
 - /api/employee - сотрудники УК
-- /api/notifications - уведомления/новости
+- /api/notifications - уведомления/новости от УК
 - /api/owners - Арендаторы и владельцы помещений
 - /api/rooms - помещения
 - /api/tasks - заявки
