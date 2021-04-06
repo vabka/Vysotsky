@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using Flurl;
 using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.API.Models;

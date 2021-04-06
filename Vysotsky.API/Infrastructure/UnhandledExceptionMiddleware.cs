@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Vysotsky.API.Controllers;
 using Vysotsky.API.Models;
 
 namespace Vysotsky.API.Infrastructure
