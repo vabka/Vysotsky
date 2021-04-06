@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Vysotsky.API.Controllers
 {
     [Route("/api/news")]
-    public class NotificationsController : Controller
+    public class NotificationsController : ApiController
     {
     }
 }

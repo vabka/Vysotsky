@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Vysotsky.API.Controllers
 {
     [Route("/api/employees")]
-    public class EmployeeController : Controller
+    public class EmployeeController : ApiController
     {
     }
 }
