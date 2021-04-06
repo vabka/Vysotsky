@@ -3,9 +3,10 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <Nullable>enable</Nullable>
+        <MSBuildWarningsAsErrors>true</MSBuildWarningsAsErrors>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="NSwag.AspNetCore" Version="13.10.8" />
-        <PackageReference Include="Flurl" Version="3.0.1" />
+        <PackageReference Include="NSwag.AspNetCore" Version="13.10.8"/>
+        <PackageReference Include="Flurl" Version="3.0.1"/>
     </ItemGroup>
 </Project>
