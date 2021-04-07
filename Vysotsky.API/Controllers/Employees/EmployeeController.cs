@@ -6,6 +6,9 @@ using Vysotsky.API.Models;
 
 namespace Vysotsky.API.Controllers.Employees
 {
+    /// <summary>
+    /// Контроллер сотрудников УК
+    /// </summary>
     [Route(Resources.Employees)]
     public class EmployeeController : ApiController
     {
