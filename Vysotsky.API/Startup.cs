@@ -7,7 +7,7 @@ using Vysotsky.API.Infrastructure;
 
 namespace Vysotsky.API
 {
-    public class Startup
+    internal class Startup
     {
         public void ConfigureServices(IServiceCollection services)
         {

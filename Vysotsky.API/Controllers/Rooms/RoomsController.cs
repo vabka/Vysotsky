@@ -5,12 +5,15 @@ using Vysotsky.API.Models;
 
 namespace Vysotsky.API.Controllers.Rooms
 {
+    /// <summary>
+    /// Контроллер помещений
+    /// </summary>
     [Route(Resources.Rooms)]
     public class RoomsController : ApiController
     {
         private readonly IRoomRepository _roomRepository;
 
-        public RoomsController(IRoomRepository roomRepository)
+        internal RoomsController(IRoomRepository roomRepository)
         {
             _roomRepository = roomRepository;
         }
@@ -31,7 +34,7 @@ namespace Vysotsky.API.Controllers.Rooms
         }
 
         /// <summary>
-        /// 
+        /// Получить список всех помещений
         /// </summary>
         /// <param name="paginationParameters"></param>
         /// <returns></returns>

@@ -6,7 +6,7 @@ using Vysotsky.API.Models;
 
 namespace Vysotsky.API.Infrastructure
 {
-    public class UnhandledExceptionMiddleware : IMiddleware
+    internal class UnhandledExceptionMiddleware : IMiddleware
     {
         private readonly ILogger<UnhandledExceptionMiddleware> _logger;
 

@@ -1,13 +1,18 @@
 using System;
-using Vysotsky.API.Controllers.Customers;
+using Vysotsky.API.Controllers.Rooms;
 
-namespace Vysotsky.API.Controllers.Users
+namespace Vysotsky.API.Controllers.Customers
 {
     /// <summary>
-    /// Параметры для регистрации клиента
+    /// Клиент
     /// </summary>
-    public class CustomerProps
+    public class Customer
     {
+        /// <summary>
+        /// Уникальный Идентификатор
+        /// </summary>
+        public int Id { get; init; }
+
         /// <summary>
         /// ФИО клиента
         /// </summary>
@@ -19,9 +24,9 @@ namespace Vysotsky.API.Controllers.Users
         public OrganizationInfo? Organization { get; init; }
 
         /// <summary>
-        /// Идентификаторы помещений клиента
+        /// Помещения клиента
         /// </summary>
-        public int[] Rooms { get; init; } = Array.Empty<int>();
+        public Room[] Rooms { get; init; } = Array.Empty<Room>();
 
         /// <summary>
         /// Контакты клиента

@@ -16,14 +16,21 @@ namespace Vysotsky.API.Controllers.Users
             _userRepository = userRepository;
         }
 
+        /// <summary>
+        /// Зарегистрировать нового пользователя
+        /// </summary>
+        /// <param name="userProperties"></param>
+        /// <returns></returns>
         [HttpPost]
+        [ProducesResponseType(typeof(ApiResponse<User>), 201)]
+        [ProducesResponseType(typeof(ApiResponse), 400)]
         public async Task<ActionResult<ApiResponse<User>>> CreateUser([FromBody] UserProperties userProperties)
         {
             //TODO validate
             await using var _ = await _userRepository.BeginRegistrationProcedure();
             if (!await _userRepository.IsUniqueUsername(userProperties.Auth.Username))
                 return BadRequest("Username is not unique", "users.registration.username.unique");
-            
+
             var user = _userRepository.CreateUser(userProperties.Auth.Username, userProperties.Auth.Password);
             if (userProperties.Customer != null)
             {
@@ -44,7 +51,6 @@ namespace Vysotsky.API.Controllers.Users
             }
 
             return Created(Resources.Users.AppendPathSegment($"/{user.Id}"), user);
-
         }
     }
 }

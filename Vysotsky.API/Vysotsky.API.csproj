@@ -7,7 +7,6 @@
         <ServerGarbageCollection>true</ServerGarbageCollection>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <NoWarn>CS1519</NoWarn>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="NSwag.AspNetCore" Version="13.10.8" />
