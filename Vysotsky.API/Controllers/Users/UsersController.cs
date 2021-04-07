@@ -6,7 +6,7 @@ using Vysotsky.API.Models;
 
 namespace Vysotsky.API.Controllers.Users
 {
-    [Microsoft.AspNetCore.Components.Route(Resources.Users)]
+    [Route(Resources.Users)]
     public class UsersController : ApiController
     {
         private readonly IUserRepository _userRepository;
