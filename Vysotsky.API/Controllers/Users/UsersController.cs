@@ -6,12 +6,15 @@ using Vysotsky.API.Models;
 
 namespace Vysotsky.API.Controllers.Users
 {
+    /// <summary>
+    /// Контроллер пользователей
+    /// </summary>
     [Route(Resources.Users)]
     public class UsersController : ApiController
     {
         private readonly IUserRepository _userRepository;
 
-        public UsersController(IUserRepository userRepository)
+        internal UsersController(IUserRepository userRepository)
         {
             _userRepository = userRepository;
         }
