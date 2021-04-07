@@ -3,7 +3,7 @@
     /// <summary>
     /// Свойста для регистрации помещения
     /// </summary>
-    public class RoomProperties
+    public class RoomDto
     {
         /// <summary>
         /// Номер помещения

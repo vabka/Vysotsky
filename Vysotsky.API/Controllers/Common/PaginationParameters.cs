@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Vysotsky.API.Models
+namespace Vysotsky.API.Controllers.Common
 {
     public record PaginationParameters
     {

@@ -23,11 +23,12 @@ namespace Vysotsky.API
                 });
             services.AddSingleton<UnhandledExceptionMiddleware>();
             // Add OpenAPI/Swagger document
-            services.AddOpenApiDocument(c => { c.DocumentName = "Vysotsky"; });
+            services.AddOpenApiDocument();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseHsts();
             // Add OpenAPI/Swagger middlewares
             app.UseOpenApi(); // Serves the registered OpenAPI/Swagger documents by default on `/swagger/{documentName}/swagger.json`
             app.UseSwaggerUi3(); // Serves the Swagger UI 3 web ui to view the OpenAPI/Swagger documents by default on `/swagger`

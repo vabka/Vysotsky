@@ -1,8 +1,8 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
+using Vysotsky.API.Controllers.Common;
 using Vysotsky.API.Controllers.Users;
 using Vysotsky.API.Infrastructure;
-using Vysotsky.API.Models;
 
 namespace Vysotsky.API.Controllers.Employees
 {

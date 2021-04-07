@@ -1,4 +1,4 @@
-﻿namespace Vysotsky.API.Models
+﻿namespace Vysotsky.API.Controllers.Common
 {
     /// <summary>
     /// Состояние ответа

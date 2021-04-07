@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Vysotsky.API.Models;
+using Vysotsky.API.Controllers.Common;
 
 namespace Vysotsky.API.Infrastructure
 {
@@ -31,7 +31,7 @@ namespace Vysotsky.API.Infrastructure
                     Error = new ApiError
                     {
                         Message = "Unexpected error",
-                        Code = "unexpectedError"
+                        Code = "internalError"
                     }
                 });
                 _logger.LogError(exception, "Unhandled exception");

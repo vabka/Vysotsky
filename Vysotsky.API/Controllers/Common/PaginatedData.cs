@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Flurl;
 
-namespace Vysotsky.API.Models
+namespace Vysotsky.API.Controllers.Common
 {
     /// <summary>
     /// Данные с разбивкой по страницам

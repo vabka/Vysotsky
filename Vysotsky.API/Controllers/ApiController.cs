@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Vysotsky.API.Models;
+using Vysotsky.API.Controllers.Common;
 
 namespace Vysotsky.API.Controllers
 {
@@ -16,11 +16,15 @@ namespace Vysotsky.API.Controllers
         /// <param name="result"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        protected ActionResult<ApiResponse<T>> Created<T>(string location, T result)
-        {
-            var apiResponse = CreateSuccess(result);
-            return new CreatedResult(location, apiResponse);
-        }
+        protected ActionResult<ApiResponse<T>> Created<T>(string location, T result) =>
+            new CreatedResult(location, CreateSuccess(result));
+
+        /// <summary>
+        /// Создать ответ с произвольным кодом, без контента
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        protected static ActionResult Code(int code) => new StatusCodeResult(code);
 
         /// <summary>
         /// Создать ответ с кодом 200
@@ -28,11 +32,7 @@ namespace Vysotsky.API.Controllers
         /// <param name="result"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        protected ActionResult<ApiResponse<T>> Ok<T>(T result)
-        {
-            var apiResponse = CreateSuccess(result);
-            return new OkObjectResult(apiResponse);
-        }
+        protected static OkObjectResult Ok<T>(T result) => new(CreateSuccess(result));
 
         /// <summary>
         /// Создать ответ с кодом 400
@@ -40,9 +40,8 @@ namespace Vysotsky.API.Controllers
         /// <param name="message"></param>
         /// <param name="code"></param>
         /// <returns></returns>
-        protected BadRequestObjectResult BadRequest(string message, string code)
-        {
-            var apiResponse = new ApiResponse
+        protected static BadRequestObjectResult BadRequest(string message, string code) =>
+            new(new ApiResponse
             {
                 Status = ResponseStatus.Error,
                 Error = new ApiError
@@ -50,18 +49,27 @@ namespace Vysotsky.API.Controllers
                     Message = message,
                     Code = code
                 }
-            };
-            return new BadRequestObjectResult(apiResponse);
-        }
+            });
 
-        private static ApiResponse<T> CreateSuccess<T>(T result)
-        {
-            var apiResponse = new ApiResponse<T>
+        /// <summary>
+        /// Создать ответ с кодом 404
+        /// </summary>
+        protected NotFoundObjectResult NotFound(string message, string code) =>
+            new(new ApiResponse
+            {
+                Status = ResponseStatus.Error,
+                Error = new ApiError
+                {
+                    Message = message,
+                    Code = code,
+                }
+            });
+
+        private static ApiResponse<T> CreateSuccess<T>(T result) =>
+            new()
             {
                 Status = ResponseStatus.Ok,
                 Result = result
             };
-            return apiResponse;
-        }
     }
 }

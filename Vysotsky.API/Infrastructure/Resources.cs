@@ -10,5 +10,6 @@
         public const string Customers = "/api/customers";
         public const string Announcements = "/api/announcements";
         public const string Notifications = "/api/notifications";
+        public const string Auth = "/api/auth";
     }
 }
