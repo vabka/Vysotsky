@@ -1,4 +1,6 @@
 ﻿namespace Vysotsky.API.Controllers.Categories
 {
-    public record Category(string Name);
+    public record Category(int Id, string Name, SubCategory[] SubCategories);
+
+    public record SubCategory(int Id, string Name);
 }

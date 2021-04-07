@@ -18,14 +18,15 @@ namespace Vysotsky.API.Controllers
             return new OkObjectResult(apiResponse);
         }
 
-        protected ActionResult<ApiResponse<T>> BadRequest<T>(string message)
+        protected BadRequestObjectResult BadRequest(string message, string code)
         {
-            var apiResponse = new ApiResponse<T>
+            var apiResponse = new ApiResponse
             {
                 Status = ResponseStatus.Error,
                 Error = new ApiError
                 {
-                    Message = message
+                    Message = message,
+                    Code = code
                 }
             };
             return new BadRequestObjectResult(apiResponse);
