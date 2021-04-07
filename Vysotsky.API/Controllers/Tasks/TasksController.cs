@@ -4,6 +4,7 @@ using Vysotsky.API.Infrastructure;
 
 namespace Vysotsky.API.Controllers.Tasks
 {
+    //TODO у задачи есть ещё срок выполнения, который устанавливает модератор aka диспетчер
     /// <summary>
     /// Контроллер заявок
     /// </summary>
