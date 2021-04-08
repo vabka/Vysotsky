@@ -7,7 +7,7 @@ using FluentMigrator.Builders.Execute;
 namespace Vysotsky.Migrations.Migrations
 {
     [CustomMigration("Init", 2021, 04, 09, 14, 21)]
-    public class InitialMigration : Migration
+    public class InitDatabase : Migration
     {
         public override void Up()
         {
@@ -23,14 +23,16 @@ namespace Vysotsky.Migrations.Migrations
             Create.Entity("building")
                 .WithColumn("name").AsString();
             Create.Entity("floor")
-                .WithColumn("name").AsString().Nullable()
+                .WithColumn("number").AsString()
                 .WithReference("building_id", "building");
 
             Execute.CreateEnum("room_status", "Free", "Owned", "Rented", "Unavailable");
             Create.Entity("room")
                 .WithReference("floor_id", "floor")
                 .WithReference("owner_id", "organization").Nullable()
-                .WithColumn("status").AsEnum("room_status");
+                .WithColumn("status").AsEnum("room_status")
+                .WithColumn("name").AsString().Nullable()
+                .WithColumn("number").AsString().Nullable();
 
 
             Execute.CreateEnum("user_role",

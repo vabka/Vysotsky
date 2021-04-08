@@ -5,8 +5,7 @@ namespace Vysotsky.Data
     [Table("floor")]
     public class Floor : Entity
     {
-        [Column("name")]
-        public string? Name { get; init; }
+        [Column("number")] public string Number { get; init; } = null!;
         [Column("building_id")]
         public long BuildingId { get; init; }
     }
