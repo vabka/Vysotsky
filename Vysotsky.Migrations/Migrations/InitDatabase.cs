@@ -7,29 +7,32 @@ namespace Vysotsky.Migrations.Migrations
     {
         public override void Up()
         {
+            Create.Entity("user");
+            Create.Entity("organization")
+                .WithColumn("name").AsString()
+                .WithColumn("owner_id").References("user");
             Create.Entity("image")
                 .WithColumn("external_id").AsString();
 
             Create.Entity("area")
                 .WithColumn("name").AsString()
-                .WithReference("image_id", "image");
+                .WithColumn("image_id").References("image");
             Create.Entity("category")
-                .WithReference("area_id", "area");
+                .WithColumn("area_id").References("area");
 
             Create.Entity("building")
                 .WithColumn("name").AsString();
             Create.Entity("floor")
                 .WithColumn("number").AsString()
-                .WithReference("building_id", "building");
+                .WithColumn("building_id").References("building");
 
             Execute.CreateEnum("room_status", "Free", "Owned", "Rented", "Unavailable");
             Create.Entity("room")
-                .WithReference("floor_id", "floor")
-                .WithReference("owner_id", "organization").Nullable()
+                .WithColumn("floor_id").References("floor")
+                .WithColumn("owner_id").References("organization").Nullable()
                 .WithColumn("status").AsEnum("room_status")
                 .WithColumn("name").AsString().Nullable()
                 .WithColumn("number").AsString().Nullable();
-
 
             Execute.CreateEnum("user_role",
                 "SuperUser",
@@ -37,24 +40,20 @@ namespace Vysotsky.Migrations.Migrations
                 "Worker",
                 "OrganizationOwner",
                 "OrganizationMember");
-            Create.Entity("user")
-                .WithColumn("username").AsString()
-                .WithColumn("password_hash").AsBinary(512 / 8)
-                .WithReference("image_id", "image").Nullable()
-                .WithColumn("firstname").AsString()
-                .WithColumn("lastname").AsString()
-                .WithColumn("patronymic").AsString().Nullable()
-                .WithColumn("contacts").AsJsonb()
-                .WithColumn("role").AsEnum("user_role")
-                .WithReference("organization_id", "organization").Nullable()
+            Alter.Table("user").AddColumn("username").AsString()
+                .AddColumn("password_hash")
+                .AsBinary(512 / 8)
+                .AddColumn("image_id").References("image").Nullable()
+                .AddColumn("firstname").AsString()
+                .AddColumn("lastname").AsString()
+                .AddColumn("patronymic").AsString().Nullable()
+                .AddColumn("contacts").AsJsonb()
+                .AddColumn("role").AsEnum("user_role")
+                .AddColumn("organization_id").References("organization").Nullable()
                 .WithColumnDescription("Only for members of organization");
             Create.Entity("token")
-                .WithReference("user_id", "user")
+                .WithColumn("user_id").References("user")
                 .WithColumn("value").AsString();
-
-            Create.Entity("organization")
-                .WithColumn("name").AsString()
-                .WithReference("owner_id", "user");
 
             Execute.CreateEnum("issue_status",
                 "New",
@@ -70,23 +69,23 @@ namespace Vysotsky.Migrations.Migrations
                 .WithColumn("title").AsString()
                 .WithColumn("description").AsString()
                 .WithColumn("note").AsString()
-                .WithReference("area_id", "area")
-                .WithReference("category_id", "category").Nullable()
-                .WithReference("author_id", "user")
-                .WithReference("supervisor_id", "user")
-                .WithReference("worker_id", "user")
-                .WithReference("room_id", "room");
+                .WithColumn("area_id").References("area")
+                .WithColumn("category_id").References("category").Nullable()
+                .WithColumn("author_id").References("user")
+                .WithColumn("supervisor_id").References("user")
+                .WithColumn("worker_id").References("user")
+                .WithColumn("room_id").References("room");
             Create.Table("issue_image")
-                .WithReference("issue_id", "issue").PrimaryKey()
-                .WithReference("image_id", "image").PrimaryKey();
+                .WithColumn("issue_id").References("issue").PrimaryKey()
+                .WithColumn("image_id").References("image").PrimaryKey();
 
             Create.Entity("issue_comment")
-                .WithReference("issue_id", "issue")
-                .WithReference("author_id", "user")
+                .WithColumn("issue_id").References("issue")
+                .WithColumn("author_id").References("user")
                 .WithColumn("text").AsString();
             Create.Table("issue_comment_image")
-                .WithReference("issue_comment_id", "issue_comment")
-                .WithReference("image_id", "image");
+                .WithColumn("issue_comment_id").References("issue_comment")
+                .WithColumn("image_id").References("image");
 
             Execute.CreateEnum("issue_event",
                 "StatusChanged",
@@ -95,7 +94,7 @@ namespace Vysotsky.Migrations.Migrations
                 "DescriptionChanged",
                 "CommentAdded");
             Create.Entity("issue_history")
-                .WithReference("issue_id", "issue")
+                .WithColumn("issue_id").References("issue")
                 .WithColumn("event").AsEnum("issue_event")
                 .WithColumn("extension").AsJsonb();
         }

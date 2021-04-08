@@ -1,7 +1,10 @@
 ﻿using System.Linq;
+using FluentMigrator.Builders;
+using FluentMigrator.Builders.Alter.Table;
 using FluentMigrator.Builders.Create;
 using FluentMigrator.Builders.Create.Table;
 using FluentMigrator.Builders.Execute;
+using FluentMigrator.Infrastructure;
 
 namespace Vysotsky.Migrations
 {
@@ -22,18 +25,17 @@ namespace Vysotsky.Migrations
         public static void DropEnum(this IExecuteExpressionRoot execute, string name) =>
             execute.Sql($"DROP TYPE {name};");
 
-        public static ICreateTableColumnOptionOrForeignKeyCascadeOrWithColumnSyntax WithReference(
-            this ICreateTableWithColumnSyntax table, string name,
-            string primaryTable) =>
-            table.WithColumn(name)
-                .AsInt64()
-                .ForeignKey(primaryTable, "id");
+        public static ICreateTableColumnOptionOrForeignKeyCascadeOrWithColumnSyntax References(
+            this ICreateTableColumnAsTypeSyntax column, string primary) =>
+            column.AsInt64().ForeignKey(primary, "id");
 
-        public static ICreateTableColumnOptionOrWithColumnSyntax AsJsonb(this ICreateTableColumnAsTypeSyntax column) =>
+        public static IAlterTableColumnOptionOrAddColumnOrAlterColumnOrForeignKeyCascadeSyntax References(this IAlterTableColumnAsTypeSyntax column, string primary) =>
+            column.AsInt64().ForeignKey(primary, "id");
+
+        public static TNext AsJsonb<TNext>(this IColumnTypeSyntax<TNext> column) where TNext : IFluentSyntax =>
             column.AsCustom("jsonb");
 
-        public static ICreateTableColumnOptionOrWithColumnSyntax AsEnum(this ICreateTableColumnAsTypeSyntax column,
-            string enumName) =>
-            column.AsCustom(enumName);
+        public static TNext AsEnum<TNext>(this IColumnTypeSyntax<TNext> column,
+            string enumName) where TNext : IFluentSyntax => column.AsCustom(enumName);
     }
 }
