@@ -1,10 +1,9 @@
-
 using LinqToDB.Mapping;
 
 namespace Vysotsky.Data
 {
-    [Table("building")]
-    public class Building : Entity
+    [Table("area")]
+    public class Area : Entity
     {
         [Column("name")]
         public string Name { get; init; } = null!;

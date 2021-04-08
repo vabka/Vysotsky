@@ -1,6 +1,6 @@
 namespace Vysotsky.Data
 {
-    public enum TaskAction
+    public enum IssueEvent
     {
         StatusChanged,
         WorkerChanged,

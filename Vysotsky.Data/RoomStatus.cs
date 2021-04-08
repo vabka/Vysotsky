@@ -3,7 +3,7 @@ namespace Vysotsky.Data
     public enum RoomStatus
     {
         Free,
-        Owner,
+        Owned,
         Rented,
         Unavailable
     }
