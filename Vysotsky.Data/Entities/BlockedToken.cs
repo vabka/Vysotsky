@@ -3,7 +3,7 @@ using LinqToDB.Mapping;
 
 namespace Vysotsky.Data.Entities
 {
-    [Table("token_block_list")]
+    [Table("blocked_token")]
     public class BlockedToken : Entity
     {
         [Column("value")] public string Value { get; init; } = null!;

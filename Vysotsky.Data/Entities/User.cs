@@ -1,4 +1,4 @@
-using System;
+using LinqToDB;
 using LinqToDB.Mapping;
 
 namespace Vysotsky.Data.Entities
@@ -13,8 +13,34 @@ namespace Vysotsky.Data.Entities
         [Column("firstname")] public string FirstName { get; init; } = null!;
         [Column("lastname")] public string LastName { get; init; } = null!;
         [Column("patronymic")] public string? Patronymic { get; init; }
-        [Column("contacts")] public UserContact[] Contacts { get; init; } = Array.Empty<UserContact>();
+
+        [Column("contacts", DataType = DataType.BinaryJson)]
+        public UserContact[] Contacts { get; init; } = null!;
+
         [Column("role")] public UserRole Role { get; init; }
         [Column("organization_id")] public long? OrganizationId { get; init; }
+    }
+
+    public enum UserRole
+    {
+        [MapValue("SuperUser")] SuperUser,
+        [MapValue("Supervisor")] Supervisor,
+        [MapValue("Worker")] Worker,
+        [MapValue("OrganizationOwner")] OrganizationOwner,
+        [MapValue("OrganizationMember")] OrganizationMember
+    }
+
+    public record UserContact
+    {
+        public string Name { get; init; } = null!;
+        public string Value { get; init; } = null!;
+        public ContactType Type { get; init; }
+    }
+
+    public enum ContactType
+    {
+        Phone,
+        Telegram,
+        Whatsapp,
     }
 }

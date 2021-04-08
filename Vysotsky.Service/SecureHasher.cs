@@ -17,7 +17,7 @@ namespace Vysotsky.Service
 
         public byte[] Hash(string source)
         {
-            using var alg = new HMACSHA256(_key);
+            using var alg = new HMACSHA512(_key);
             return alg.ComputeHash(Encoding.UTF8.GetBytes(source));
         }
     }

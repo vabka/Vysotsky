@@ -6,11 +6,17 @@ namespace Vysotsky.Data.Entities
     [Column("issue_history")]
     public class IssueHistoryRecord : Entity
     {
-        [Column("issue_id")]
-        public long IssueId { get; init; }
-        [Column("event")]
-        public IssueEvent Event { get; init; }
-        [Column("extension")]
-        public Dictionary<string, string>? Extension { get; init; }
+        [Column("issue_id")] public long IssueId { get; init; }
+        [Column("event")] public IssueEvent Event { get; init; }
+        [Column("extension")] public Dictionary<string, string>? Extension { get; init; }
+    }
+
+    public enum IssueEvent
+    {
+        [MapValue("StatusChanged")] StatusChanged,
+        [MapValue("SupervisorChanged")] SupervisorChanged,
+        [MapValue("WorkerChanged")] WorkerChanged,
+        [MapValue("DescriptionChanged")] DescriptionChanged,
+        [MapValue("CommentAdded")] CommentAdded
     }
 }

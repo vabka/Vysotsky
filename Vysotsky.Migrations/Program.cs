@@ -1,24 +1,34 @@
 ﻿using System;
 using FluentMigrator.Runner;
 using Microsoft.Extensions.DependencyInjection;
+using Vysotsky.Migrations;
 using Vysotsky.Migrations.Migrations;
 
 
-var serviceProvider = CreateServices();
+var serviceProvider = Migrator.CreateServices(Environment.GetEnvironmentVariable("PG_CONNECTION_STRING"));
 using var scope = serviceProvider.CreateScope();
-UpdateDatabase(scope.ServiceProvider);
-static IServiceProvider CreateServices() =>
-    new ServiceCollection()
-        .AddFluentMigratorCore()
-        .ConfigureRunner(rb => rb
-            .AddPostgres()
-            .WithGlobalConnectionString(Environment.GetEnvironmentVariable("PG_CONNECTION_STRING"))
-            .ScanIn(typeof(InitDatabase).Assembly).For.Migrations())
-        .AddLogging(lb => lb.AddFluentMigratorConsole())
-        .BuildServiceProvider(false);
+Migrator.UpdateDatabase(scope.ServiceProvider);
 
-static void UpdateDatabase(IServiceProvider serviceProvider)
+namespace Vysotsky.Migrations
 {
-    var runner = serviceProvider.GetRequiredService<IMigrationRunner>();
-    runner.MigrateUp();
+    public static class Migrator
+    {
+        public static IServiceProvider CreateServices(string connectionString)
+        {
+            return new ServiceCollection()
+                .AddFluentMigratorCore()
+                .ConfigureRunner(rb => rb
+                    .AddPostgres()
+                    .WithGlobalConnectionString(connectionString)
+                    .ScanIn(typeof(InitDatabase).Assembly).For.Migrations())
+                .AddLogging(lb => lb.AddFluentMigratorConsole())
+                .BuildServiceProvider(false);
+        }
+
+        public static void UpdateDatabase(IServiceProvider serviceProvider)
+        {
+            var runner = serviceProvider.GetRequiredService<IMigrationRunner>();
+            runner.MigrateUp();
+        }
+    }
 }

@@ -6,7 +6,7 @@ namespace Vysotsky.API.Controllers.Auth
     public class AccessTokenContainer
     {
         /// <summary>
-        /// Токен доступа
+        /// Токен
         /// </summary>
         public string AccessToken { get; init; } = null!;
     }

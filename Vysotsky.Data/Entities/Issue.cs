@@ -16,4 +16,16 @@ namespace Vysotsky.Data.Entities
         [Column("worker_id")] public long? WorkerId { get; init; }
         [Column("note")] public string Note { get; init; } = "";
     }
+
+    public enum IssueStatus
+    {
+        [MapValue("New")] New,
+        [MapValue("Cancelled")] CancelledByCustomer,
+        [MapValue("NeedInfo")] NeedInfo,
+        [MapValue("Rejected")] Rejected,
+        [MapValue("InProgress")] InProgress,
+        [MapValue("Completed")] Completed,
+        [MapValue("Accepted")] Accepted,
+        [MapValue("Closed")] Closed
+    }
 }

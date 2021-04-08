@@ -11,4 +11,12 @@ namespace Vysotsky.Data.Entities
         [Column("floor_id")] public long FloorId { get; init; }
         [Column("status")] public RoomStatus Status { get; init; }
     }
+
+    public enum RoomStatus
+    {
+        [MapValue("Free")] Free,
+        [MapValue("Owned")] Owned,
+        [MapValue("Rented")] Rented,
+        [MapValue("Unavailable")] Unavailable
+    }
 }

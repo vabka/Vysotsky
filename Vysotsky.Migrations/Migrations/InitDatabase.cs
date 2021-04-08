@@ -51,10 +51,11 @@ namespace Vysotsky.Migrations.Migrations
                 .AddColumn("role").AsEnum("user_role")
                 .AddColumn("organization_id").References("organization").Nullable()
                 .WithColumnDescription("Only for members of organization");
-            Create.Entity("token_block_list")
+
+            Create.Entity("blocked_token")
                 .WithColumn("expiration_time").AsDateTime()
                 .WithColumn("user_id").References("user")
-                .WithColumn("value").AsString();
+                .WithColumn("value").AsString().Unique();
 
             Execute.CreateEnum("issue_status",
                 "New",
@@ -111,7 +112,7 @@ namespace Vysotsky.Migrations.Migrations
             Execute.DropEnum("room_status");
             Delete.Table("user");
             Execute.DropEnum("user_role");
-            Delete.Table("token_block_list");
+            Delete.Table("blocked_token");
             Delete.Table("organization");
             Delete.Table("issue");
             Execute.DropEnum("issue_status");
