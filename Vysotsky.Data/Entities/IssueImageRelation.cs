@@ -1,6 +1,6 @@
 ﻿using LinqToDB.Mapping;
 
-namespace Vysotsky.Data
+namespace Vysotsky.Data.Entities
 {
     [Table("issue_image")]
     public class IssueImageRelation

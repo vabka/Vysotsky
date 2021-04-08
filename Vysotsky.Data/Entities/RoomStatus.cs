@@ -1,6 +1,6 @@
 using LinqToDB.Mapping;
 
-namespace Vysotsky.Data
+namespace Vysotsky.Data.Entities
 {
     public enum RoomStatus
     {

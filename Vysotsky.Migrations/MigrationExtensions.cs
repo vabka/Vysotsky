@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using FluentMigrator;
 using FluentMigrator.Builders;
 using FluentMigrator.Builders.Alter.Table;
 using FluentMigrator.Builders.Create;
@@ -17,7 +18,8 @@ namespace Vysotsky.Migrations
                 .Identity()
                 .PrimaryKey()
                 .WithColumn("created_at")
-                .AsDateTime();
+                .AsDateTimeOffset()
+                .WithDefault(SystemMethods.CurrentUTCDateTime);
 
         public static void CreateEnum(this IExecuteExpressionRoot execute, string name, params string[] values) =>
             execute.Sql($"CREATE TYPE {name} as ENUM ({string.Join(", ", values.Select(v => $"'{v}'"))});");

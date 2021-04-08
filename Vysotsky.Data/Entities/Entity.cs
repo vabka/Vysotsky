@@ -1,7 +1,7 @@
 using System;
 using LinqToDB.Mapping;
 
-namespace Vysotsky.Data
+namespace Vysotsky.Data.Entities
 {
     public abstract class Entity
     {
@@ -10,6 +10,6 @@ namespace Vysotsky.Data
         [Identity]
         public long Id { get; init; }
         [Column("created_at")]
-        public DateTime CreatedAt { get; init; }
+        public DateTimeOffset CreatedAt { get; init; }
     }
 }

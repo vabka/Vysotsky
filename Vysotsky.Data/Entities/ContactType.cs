@@ -1,4 +1,4 @@
-namespace Vysotsky.Data
+namespace Vysotsky.Data.Entities
 {
     public enum ContactType
     {

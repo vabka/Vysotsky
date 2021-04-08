@@ -4,9 +4,9 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Vysotsky.API.Infrastructure
+namespace Vysotsky.Service
 {
-    internal class SecureHasher
+    public class SecureHasher
     {
         private readonly byte[] _key;
 
@@ -17,18 +17,18 @@ namespace Vysotsky.API.Infrastructure
 
         public byte[] Hash(string source)
         {
-            using var alg = new HMACSHA512(_key);
+            using var alg = new HMACSHA256(_key);
             return alg.ComputeHash(Encoding.UTF8.GetBytes(source));
         }
     }
 
-    internal static class SecureHasherExtensions
+    public static class SecureHasherExtensions
     {
         public static IServiceCollection AddSecureHasher(this IServiceCollection serviceCollection) =>
             serviceCollection.AddSingleton(s =>
             {
                 var configuration = s.GetRequiredService<IConfiguration>();
-                var salt = configuration.GetValue<string>("SALT");
+                var salt = configuration["SALT"];
                 return new SecureHasher(Convert.FromBase64String(salt));
             });
     }

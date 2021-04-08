@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using LinqToDB.Mapping;
 
-namespace Vysotsky.Data
+namespace Vysotsky.Data.Entities
 {
     [Column("issue_history")]
     public class IssueHistoryRecord : Entity

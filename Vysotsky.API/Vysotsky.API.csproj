@@ -12,4 +12,7 @@
         <PackageReference Include="NSwag.AspNetCore" Version="13.10.8" />
         <PackageReference Include="Flurl" Version="3.0.1" />
     </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Vysotsky.Service\Vysotsky.Service.csproj" />
+    </ItemGroup>
 </Project>

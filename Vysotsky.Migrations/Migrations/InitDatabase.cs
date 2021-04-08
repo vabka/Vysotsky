@@ -40,7 +40,7 @@ namespace Vysotsky.Migrations.Migrations
                 "Worker",
                 "OrganizationOwner",
                 "OrganizationMember");
-            Alter.Table("user").AddColumn("username").AsString()
+            Alter.Table("user").AddColumn("username").AsString().Unique()
                 .AddColumn("password_hash")
                 .AsBinary(512 / 8)
                 .AddColumn("image_id").References("image").Nullable()
@@ -51,7 +51,8 @@ namespace Vysotsky.Migrations.Migrations
                 .AddColumn("role").AsEnum("user_role")
                 .AddColumn("organization_id").References("organization").Nullable()
                 .WithColumnDescription("Only for members of organization");
-            Create.Entity("token")
+            Create.Entity("token_block_list")
+                .WithColumn("expiration_time").AsDateTime()
                 .WithColumn("user_id").References("user")
                 .WithColumn("value").AsString();
 

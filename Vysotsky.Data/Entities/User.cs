@@ -1,7 +1,7 @@
 using System;
 using LinqToDB.Mapping;
 
-namespace Vysotsky.Data
+namespace Vysotsky.Data.Entities
 {
     [Table("user")]
     public class User : Entity

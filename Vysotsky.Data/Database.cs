@@ -1,11 +1,12 @@
 ﻿using LinqToDB;
+using Vysotsky.Data.Entities;
 
 namespace Vysotsky.Data
 {
     public class Database : DataContext
     {
         public ITable<User> Users => this.GetTable<User>();
-        public ITable<Token> Tokens => this.GetTable<Token>();
+        public ITable<BlockedToken> BlockedTokens => this.GetTable<BlockedToken>();
         public ITable<Organization> Organizations => this.GetTable<Organization>();
 
         public ITable<Building> Buildings => this.GetTable<Building>();

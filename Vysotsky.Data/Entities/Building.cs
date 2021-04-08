@@ -1,7 +1,7 @@
 
 using LinqToDB.Mapping;
 
-namespace Vysotsky.Data
+namespace Vysotsky.Data.Entities
 {
     [Table("building")]
     public class Building : Entity

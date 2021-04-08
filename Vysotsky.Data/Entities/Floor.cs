@@ -1,6 +1,6 @@
 ﻿using LinqToDB.Mapping;
 
-namespace Vysotsky.Data
+namespace Vysotsky.Data.Entities
 {
     [Table("floor")]
     public class Floor : Entity

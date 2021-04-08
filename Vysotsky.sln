@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vysotsky.Data", "Vysotsky.D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vysotsky.Migrations", "Vysotsky.Migrations\Vysotsky.Migrations.csproj", "{E623ABFD-8152-46D8-8ACC-953093CF922D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vysotsky.Service", "Vysotsky.Service\Vysotsky.Service.csproj", "{57C76242-BF68-4E29-B09F-5F4C127E63DE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,5 +60,17 @@ Global
 		{E623ABFD-8152-46D8-8ACC-953093CF922D}.Release|x64.Build.0 = Release|Any CPU
 		{E623ABFD-8152-46D8-8ACC-953093CF922D}.Release|x86.ActiveCfg = Release|Any CPU
 		{E623ABFD-8152-46D8-8ACC-953093CF922D}.Release|x86.Build.0 = Release|Any CPU
+		{57C76242-BF68-4E29-B09F-5F4C127E63DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57C76242-BF68-4E29-B09F-5F4C127E63DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57C76242-BF68-4E29-B09F-5F4C127E63DE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{57C76242-BF68-4E29-B09F-5F4C127E63DE}.Debug|x64.Build.0 = Debug|Any CPU
+		{57C76242-BF68-4E29-B09F-5F4C127E63DE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{57C76242-BF68-4E29-B09F-5F4C127E63DE}.Debug|x86.Build.0 = Debug|Any CPU
+		{57C76242-BF68-4E29-B09F-5F4C127E63DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57C76242-BF68-4E29-B09F-5F4C127E63DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57C76242-BF68-4E29-B09F-5F4C127E63DE}.Release|x64.ActiveCfg = Release|Any CPU
+		{57C76242-BF68-4E29-B09F-5F4C127E63DE}.Release|x64.Build.0 = Release|Any CPU
+		{57C76242-BF68-4E29-B09F-5F4C127E63DE}.Release|x86.ActiveCfg = Release|Any CPU
+		{57C76242-BF68-4E29-B09F-5F4C127E63DE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
