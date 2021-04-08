@@ -111,7 +111,7 @@ namespace Vysotsky.Migrations.Migrations
             Execute.DropEnum("room_status");
             Delete.Table("user");
             Execute.DropEnum("user_role");
-            Delete.Table("token");
+            Delete.Table("token_block_list");
             Delete.Table("organization");
             Delete.Table("issue");
             Execute.DropEnum("issue_status");
