@@ -1,6 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Controllers.Common;
+using Vysotsky.API.Controllers.Customers.Dto;
 using Vysotsky.API.Infrastructure;
 
 namespace Vysotsky.API.Controllers.Customers

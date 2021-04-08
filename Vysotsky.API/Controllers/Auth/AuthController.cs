@@ -13,7 +13,7 @@ namespace Vysotsky.API.Controllers.Auth
     public class AuthController : ApiController
     {
         [HttpGet("/login")]
-        public async Task<ActionResult<ApiResponse<AccessTokenContainer>>> Login(
+        public Task<ActionResult<ApiResponse<AccessTokenContainer>>> Login(
             [FromForm(Name = "username")] string username,
             [FromForm(Name = "password")] string password)
         {

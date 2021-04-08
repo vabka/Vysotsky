@@ -1,7 +1,7 @@
 using System;
 using Vysotsky.API.Controllers.Rooms;
 
-namespace Vysotsky.API.Controllers.Customers
+namespace Vysotsky.API.Controllers.Customers.Dto
 {
     /// <summary>
     /// Клиент

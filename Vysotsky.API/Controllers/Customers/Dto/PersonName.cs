@@ -1,4 +1,4 @@
-namespace Vysotsky.API.Controllers.Customers
+namespace Vysotsky.API.Controllers.Customers.Dto
 {
     /// <summary>
     /// ФИО

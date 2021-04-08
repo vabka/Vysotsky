@@ -18,7 +18,7 @@ namespace Vysotsky.API.Controllers.Rooms
         /// <param name="roomDto">Свойства комнаты</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<Room>>> CreateRoom([FromBody] RoomDto roomDto)
+        public Task<ActionResult<ApiResponse<Room>>> CreateRoom([FromBody] RoomDto roomDto)
         {
             //TODO room number is unique?
             //TODO floor range?
@@ -32,7 +32,7 @@ namespace Vysotsky.API.Controllers.Rooms
         /// <param name="paginationParameters"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<PaginatedData<Room>>>> GetRooms(
+        public Task<ActionResult<ApiResponse<PaginatedData<Room>>>> GetRooms(
             [FromQuery] PaginationParameters paginationParameters)
         {
             throw new NotImplementedException();

@@ -1,5 +1,5 @@
 using System;
-using Vysotsky.API.Controllers.Customers;
+using Vysotsky.API.Controllers.Customers.Dto;
 
 namespace Vysotsky.API.Controllers.Users
 {
