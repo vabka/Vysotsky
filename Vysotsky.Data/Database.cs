@@ -16,10 +16,11 @@ namespace Vysotsky.Data
 
 
         public ITable<Issue> Issues => this.GetTable<Issue>();
+        public ITable<IssueImageRelation> IssueImages => this.GetTable<IssueImageRelation>();
+        public ITable<IssueComment> IssueComments => this.GetTable<IssueComment>();
+        public ITable<IssueCommentImageRelation> IssueCommentImages => this.GetTable<IssueCommentImageRelation>();
         public ITable<Category> Categories => this.GetTable<Category>();
         public ITable<Area> Areas => this.GetTable<Area>();
         public ITable<IssueHistoryRecord> IssueHistory => this.GetTable<IssueHistoryRecord>();
-        
-
     }
 }

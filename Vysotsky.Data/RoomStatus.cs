@@ -1,10 +1,12 @@
+using LinqToDB.Mapping;
+
 namespace Vysotsky.Data
 {
     public enum RoomStatus
     {
-        Free,
-        Owned,
-        Rented,
-        Unavailable
+        [MapValue("Free")] Free,
+        [MapValue("Owned")] Owned,
+        [MapValue("Rented")] Rented,
+        [MapValue("Unavailable")] Unavailable
     }
 }

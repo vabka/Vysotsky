@@ -1,10 +1,13 @@
+using LinqToDB.Mapping;
+
 namespace Vysotsky.Data
 {
     public enum IssueEvent
     {
-        StatusChanged,
-        WorkerChanged,
-        SupervisorChanged,
-        DescriptionChanged
+        [MapValue("StatusChanged")] StatusChanged,
+        [MapValue("SupervisorChanged")] SupervisorChanged,
+        [MapValue("WorkerChanged")] WorkerChanged,
+        [MapValue("DescriptionChanged")] DescriptionChanged,
+        [MapValue("CommentAdded")] CommentAdded
     }
 }

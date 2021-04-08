@@ -1,11 +1,13 @@
+using LinqToDB.Mapping;
+
 namespace Vysotsky.Data
 {
     public enum UserRole
     {
-        SuperUser,
-        Supervisor,
-        Worker,
-        OrganizationOwner,
-        OrganizationMember
+        [MapValue("SuperUser")] SuperUser,
+        [MapValue("Supervisor")] Supervisor,
+        [MapValue("Worker")] Worker,
+        [MapValue("OrganizationOwner")] OrganizationOwner,
+        [MapValue("OrganizationMember")] OrganizationMember
     }
 }

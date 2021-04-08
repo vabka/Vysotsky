@@ -6,5 +6,6 @@ namespace Vysotsky.Data
     public class Token : Entity
     {
         [Column("value")] public string Value { get; init; } = null!;
+        [Column("user_id")] public long UserId { get; init; }
     }
 }
