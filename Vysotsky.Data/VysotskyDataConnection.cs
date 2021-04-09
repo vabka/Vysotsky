@@ -18,7 +18,7 @@ namespace Vysotsky.Data
     {
         static VysotskyDataConnection()
         {
-            var jsonSerializerOptions = new JsonSerializerOptions()
+            var jsonSerializerOptions = new JsonSerializerOptions
             {
                 Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
                 Converters = {new JsonStringEnumConverter()}

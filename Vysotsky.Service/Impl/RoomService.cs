@@ -85,6 +85,23 @@ namespace Vysotsky.Service.Impl
                 })
                 .ToArrayAsync();
 
+        public async Task DeleteBuildingCascadeByIdAsync(long buildingId)
+        {
+            var buildingToDelete = _dataConnection.Buildings.Where(building => building.Id == buildingId);
+            var allFloors = _dataConnection.Floors.Where(floor => floor.BuildingId == buildingId);
+            var allRoomsInBuilding = from room in _dataConnection.Rooms
+                join floor in _dataConnection.Floors on room.FloorId equals floor.Id
+                where floor.BuildingId == buildingId
+                select room;
+
+
+            await using var transaction = await _dataConnection.BeginTransactionAsync();
+            await allRoomsInBuilding.DeleteAsync();
+            await allFloors.DeleteAsync();
+            await buildingToDelete.DeleteAsync();
+            await transaction.CommitAsync();
+        }
+
         public async Task<Floor> CreateFloor(Building building, string number)
         {
             var id = await _dataConnection.Floors.InsertWithInt64IdentityAsync(() => new FloorRecord

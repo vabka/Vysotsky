@@ -33,6 +33,13 @@ namespace Vysotsky.API.Controllers.Buildings
             });
         }
 
+        [HttpDelete("{buildingId:long}")]
+        public async Task<ActionResult<ApiResponse>> DeleteBuilding(long buildingId)
+        {
+            await _roomService.DeleteBuildingCascadeByIdAsync(buildingId);
+            return Ok();
+        }
+
         [HttpPost("{buildingId:long}/floors")]
         [ProducesResponseType(201)]
         public async Task<ActionResult<ApiResponse<PersistedFloorDto>>> CreateFloor([FromRoute] long buildingId,
@@ -114,7 +121,7 @@ namespace Vysotsky.API.Controllers.Buildings
                 Number = f.Number
             }));
         }
-
+        
         [HttpGet("{buildingId:long}/floors/{floorId:long}/rooms")]
         public async Task<ActionResult<ApiResponse<PersistedRoomDto[]>>> GetAllRoomsOnFloor([FromRoute] long buildingId,
             [FromRoute] long floorId)

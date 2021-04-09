@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Security;
@@ -50,10 +52,34 @@ namespace Vysotsky.API
                 })
                 .AddScoped(s =>
                 {
+                    var logger = s.GetRequiredService<ILogger<VysotskyDataConnection>>();
                     var connectionString =
                         s.GetRequiredService<IConfiguration>().GetValue<string>("PG_CONNECTION_STRING");
                     var options = new LinqToDbConnectionOptionsBuilder()
                         .UsePostgreSQL(connectionString)
+                        .WriteTraceWith((param1, param2, l) =>
+                        {
+                            switch (l)
+                            {
+                                case TraceLevel.Off:
+                                    logger.LogCritical("{Param1}: {Param2}", param1, param2);
+                                    break;
+                                case TraceLevel.Error:
+                                    logger.LogError("{Param1}: {Param2}", param1, param2);
+                                    break;
+                                case TraceLevel.Warning:
+                                    logger.LogWarning("{Param1}: {Param2}", param1, param2);
+                                    break;
+                                case TraceLevel.Info:
+                                    logger.LogInformation("{Param1}: {Param2}", param1, param2);
+                                    break;
+                                case TraceLevel.Verbose:
+                                    logger.LogDebug("{Param1}: {Param2}", param1, param2);
+                                    break;
+                                default:
+                                    throw new ArgumentOutOfRangeException(nameof(l), l, null);
+                            }
+                        })
                         .Build<VysotskyDataConnection>();
                     return new VysotskyDataConnection(options);
                 })
