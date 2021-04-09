@@ -17,7 +17,8 @@ using NSwag.Generation.Processors.Security;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Data;
 using Vysotsky.Data.Entities;
-using Vysotsky.Service;
+using Vysotsky.Service.Impl;
+using Vysotsky.Service.Interfaces;
 
 namespace Vysotsky.API
 {
@@ -47,8 +48,6 @@ namespace Vysotsky.API
                             "Type into the textbox: Bearer {your JWT token}. You can get a JWT token from /Authorization/Authenticate."
                     }));
                 })
-                .AddAuthenticationService()
-                .AddSecureHasher()
                 .AddScoped(s =>
                 {
                     var connectionString =
@@ -87,11 +86,25 @@ namespace Vysotsky.API
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
+
+            services.Scan(t =>
+                t.FromAssemblyOf<IStringHasher>()
+                    .AddClasses(f => f.InExactNamespaces("Vysotsky.Service.Impl"))
+                    .AsImplementedInterfaces()
+                    .WithScopedLifetime());
+            services.AddSingleton(s => new SecureHasherOptions
+            {
+                Salt = s.GetRequiredService<IConfiguration>().GetValue<string>("SALT")
+            });
+            services.AddSingleton(s => new AuthenticationServiceOptions
+            {
+                Secret = s.GetRequiredService<IConfiguration>().GetValue<string>("SECRET")
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseHsts();
+            // app.UseHsts();
             // Add OpenAPI/Swagger middlewares
             app.UseSwaggerUi3(); // Serves the Swagger UI 3 web ui to view the OpenAPI/Swagger documents by default on `/swagger`
             app.UseOpenApi(); // Serves the registered OpenAPI/Swagger documents by default on `/swagger/{documentName}/swagger.json`
@@ -109,7 +122,7 @@ namespace Vysotsky.API
                         var hasher = ctx.RequestServices.GetRequiredService<IStringHasher>();
                         var database = ctx.RequestServices.GetRequiredService<VysotskyDataConnection>();
                         var hash = hasher.Hash("admin");
-                        await database.Users.InsertAsync(() => new User
+                        await database.Users.InsertAsync(() => new UserRecord
                         {
                             Username = "admin",
                             PasswordHash = hash,

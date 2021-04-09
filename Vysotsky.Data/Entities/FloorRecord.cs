@@ -3,7 +3,7 @@
 namespace Vysotsky.Data.Entities
 {
     [Table("floor")]
-    public class Floor : Entity
+    public class FloorRecord : Entity
     {
         [Column("number")] public string Number { get; init; } = null!;
         [Column("building_id")]

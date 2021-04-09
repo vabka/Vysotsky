@@ -2,11 +2,9 @@ using LinqToDB.Mapping;
 
 namespace Vysotsky.Data.Entities
 {
-    [Table("category")]
-    public class Category : Entity
+    [Table("area")]
+    public class AreaRecord : Entity
     {
-        [Column("area_id")]
-        public long AreaId { get; init; }
         [Column("name")]
         public string Name { get; init; } = null!;
     }

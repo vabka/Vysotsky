@@ -46,21 +46,22 @@ namespace Vysotsky.Data
 
         public VysotskyDataConnection(LinqToDbConnectionOptions<VysotskyDataConnection> options) : base(options)
         {
+            InlineParameters = true;
         }
 
-        public ITable<User> Users => GetTable<User>();
-        public ITable<BlockedToken> BlockedTokens => GetTable<BlockedToken>();
-        public ITable<Organization> Organizations => GetTable<Organization>();
-        public ITable<Building> Buildings => GetTable<Building>();
-        public ITable<Floor> Floors => GetTable<Floor>();
-        public ITable<Room> Rooms => GetTable<Room>();
-        public ITable<Image> Images => GetTable<Image>();
-        public ITable<Issue> Issues => GetTable<Issue>();
+        public ITable<UserRecord> Users => GetTable<UserRecord>();
+        public ITable<BlockedTokenRecord> BlockedTokens => GetTable<BlockedTokenRecord>();
+        public ITable<OrganizationRecord> Organizations => GetTable<OrganizationRecord>();
+        public ITable<BuildingRecord> Buildings => GetTable<BuildingRecord>();
+        public ITable<FloorRecord> Floors => GetTable<FloorRecord>();
+        public ITable<RoomRecord> Rooms => GetTable<RoomRecord>();
+        public ITable<ImageRecord> Images => GetTable<ImageRecord>();
+        public ITable<IssueRecord> Issues => GetTable<IssueRecord>();
         public ITable<IssueImageRelation> IssueImages => GetTable<IssueImageRelation>();
-        public ITable<IssueComment> IssueComments => GetTable<IssueComment>();
+        public ITable<IssueCommentRecord> IssueComments => GetTable<IssueCommentRecord>();
         public ITable<IssueCommentImageRelation> IssueCommentImages => GetTable<IssueCommentImageRelation>();
-        public ITable<Category> Categories => GetTable<Category>();
-        public ITable<Area> Areas => GetTable<Area>();
+        public ITable<CategoryRecord> Categories => GetTable<CategoryRecord>();
+        public ITable<AreaRecord> Areas => GetTable<AreaRecord>();
         public ITable<IssueHistoryRecord> IssueHistory => GetTable<IssueHistoryRecord>();
     }
 }

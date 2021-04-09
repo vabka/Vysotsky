@@ -11,5 +11,6 @@
         public const string Announcements = "/api/announcements";
         public const string Notifications = "/api/notifications";
         public const string Auth = "/api/auth";
+        public const string Buildings = "/api/buildings";
     }
 }

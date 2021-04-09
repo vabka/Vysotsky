@@ -4,35 +4,26 @@ using System.Threading.Tasks;
 using JWT.Algorithms;
 using JWT.Builder;
 using LinqToDB;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Vysotsky.Data;
 using Vysotsky.Data.Entities;
+using Vysotsky.Service.Interfaces;
+using Vysotsky.Service.Types;
 
-namespace Vysotsky.Service
+namespace Vysotsky.Service.Impl
 {
-    public interface IAuthenticationService
-    {
-        Task<TokenContainer?> TryIssueTokenByUserCredentialsAsync(string username, string password,
-            bool longLiving = false);
-
-        Task RevokeTokenAsync(string token);
-    }
-
-    public record TokenContainer(string Token, DateTimeOffset ExpiresAt, DateTimeOffset IssuedAt);
-
     public class AuthenticationService : IAuthenticationService
     {
         private readonly VysotskyDataConnection _vysotskyDataConnection;
         private readonly IStringHasher _hasher;
-        private readonly string _secret;
+        private readonly AuthenticationServiceOptions _options;
 
-        public AuthenticationService(VysotskyDataConnection vysotskyDataConnection, IStringHasher hasher, string secret)
+        public AuthenticationService(VysotskyDataConnection vysotskyDataConnection, IStringHasher hasher,
+            AuthenticationServiceOptions options)
         {
             _vysotskyDataConnection = vysotskyDataConnection;
             _hasher = hasher;
-            _secret = secret;
+            _options = options;
         }
 
         public async Task<TokenContainer?> TryIssueTokenByUserCredentialsAsync(string username, string password,
@@ -81,18 +72,19 @@ namespace Vysotsky.Service
         {
             var payload = DecodeToken(token);
             var exp = DateTimeOffset.FromUnixTimeSeconds(payload.Expiration);
-            await _vysotskyDataConnection.BlockedTokens.InsertAsync(() => new BlockedToken
+            await _vysotskyDataConnection.BlockedTokens.InsertAsync(() => new BlockedTokenRecord
             {
                 UserId = payload.UserId,
                 ExpirationTime = exp,
                 Value = token
             });
         }
+
         private string EncodeToken(TokenPayload payload)
         {
             return JwtBuilder.Create()
                 .WithAlgorithm(new HMACSHA256Algorithm())
-                .WithSecret(_secret)
+                .WithSecret(_options.Secret)
                 .AddClaim("exp", payload.Expiration)
                 .AddClaim("iat", payload.IssuedAt)
                 .AddClaim("role", payload.Role.ToString())
@@ -104,7 +96,7 @@ namespace Vysotsky.Service
         private TokenPayload DecodeToken(string token) =>
             JwtBuilder.Create()
                 .WithAlgorithm(new HMACSHA256Algorithm())
-                .WithSecret(_secret)
+                .WithSecret(_options.Secret)
                 .MustVerifySignature()
                 .Decode<TokenPayload>(token);
 
@@ -119,19 +111,8 @@ namespace Vysotsky.Service
         }
     }
 
-    public static class AuthenticationServiceExtensions
+    public class AuthenticationServiceOptions
     {
-        public static IServiceCollection AddAuthenticationService(this IServiceCollection serviceCollection)
-        {
-            return serviceCollection.AddScoped<IAuthenticationService>(s =>
-            {
-                var secret = s.GetRequiredService<IConfiguration>()["SECRET"];
-                return new AuthenticationService(
-                    s.GetRequiredService<VysotskyDataConnection>(),
-                    s.GetRequiredService<IStringHasher>(),
-                    secret
-                );
-            });
-        }
+        public string Secret { get; set; }
     }
 }

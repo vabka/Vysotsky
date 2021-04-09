@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Controllers.Common;
 
+
 namespace Vysotsky.API.Controllers
 {
     /// <summary>
@@ -12,7 +13,7 @@ namespace Vysotsky.API.Controllers
     public abstract class ApiController
     {
         /// <summary>
-        /// Создать отве с кодом 201
+        /// Создать ответ с кодом 201
         /// </summary>
         /// <param name="location"></param>
         /// <param name="result"></param>

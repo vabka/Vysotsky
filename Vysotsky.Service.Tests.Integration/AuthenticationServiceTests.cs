@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Vysotsky.Data;
 using Vysotsky.Data.Entities;
 using Vysotsky.Migrations;
+using Vysotsky.Service.Impl;
 using Xunit;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
@@ -36,8 +37,14 @@ namespace Vysotsky.Service.Tests.Integration
                 .Build<VysotskyDataConnection>();
             _database = new VysotskyDataConnection(options);
             DropDatabase(_database);
-            _hasher = new SecureHasher(new byte[] {0});
-            _authenticationService = new AuthenticationService(_database, _hasher, "secret");
+            _hasher = new SecureHasher(new SecureHasherOptions
+            {
+                Salt = "0"
+            });
+            _authenticationService = new AuthenticationService(_database, _hasher, new AuthenticationServiceOptions
+            {
+                Secret = "secret"
+            });
         }
 
         private readonly AuthenticationService _authenticationService;
@@ -51,7 +58,7 @@ namespace Vysotsky.Service.Tests.Integration
 
             container.Should().NotBeNull();
 
-            var payload = DecodeToken(container.Token);
+            var payload = DecodeToken(container!.Token);
 
             payload["role"].Should().Be("SuperUser");
             payload["user_id"].Should().Be(id);
@@ -69,7 +76,7 @@ namespace Vysotsky.Service.Tests.Integration
         }
 
         private Task<long> CreateAdminAsync() =>
-            _database.Users.InsertWithInt64IdentityAsync(() => new User
+            _database.Users.InsertWithInt64IdentityAsync(() => new UserRecord
             {
                 Username = "admin",
                 PasswordHash = _hasher.Hash("1234"),

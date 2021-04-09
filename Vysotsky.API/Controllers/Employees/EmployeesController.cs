@@ -1,7 +1,6 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Controllers.Common;
-using Vysotsky.API.Controllers.Users;
 using Vysotsky.API.Infrastructure;
 
 namespace Vysotsky.API.Controllers.Employees
@@ -10,16 +9,15 @@ namespace Vysotsky.API.Controllers.Employees
     /// Контроллер сотрудников УК
     /// </summary>
     [Route(Resources.Employees)]
-    public class EmployeeController : ApiController
+    public class EmployeesController : ApiController
     {
         /// <summary>
         /// Получить сотрудника УК по id
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
         [HttpGet("{id:int}")]
-        public ActionResult<ApiResponse<Employee>> GetEmployee(int id)
+        public ActionResult<ApiResponse> GetEmployee(int id)
         {
             throw new NotImplementedException();
         }

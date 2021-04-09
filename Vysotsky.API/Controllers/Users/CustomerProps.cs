@@ -4,15 +4,10 @@ using Vysotsky.API.Controllers.Customers.Dto;
 namespace Vysotsky.API.Controllers.Users
 {
     /// <summary>
-    /// Параметры для регистрации клиента
+    /// Параметры для регистрации владельца организации
     /// </summary>
     public class CustomerProps
     {
-        /// <summary>
-        /// ФИО клиента
-        /// </summary>
-        public PersonName? Person { get; init; }
-
         /// <summary>
         /// Организация клиента
         /// </summary>
@@ -22,10 +17,5 @@ namespace Vysotsky.API.Controllers.Users
         /// Идентификаторы помещений клиента
         /// </summary>
         public int[] Rooms { get; init; } = Array.Empty<int>();
-
-        /// <summary>
-        /// Контакты клиента
-        /// </summary>
-        public CustomerContact[] Contacts { get; init; } = Array.Empty<CustomerContact>();
     }
 }

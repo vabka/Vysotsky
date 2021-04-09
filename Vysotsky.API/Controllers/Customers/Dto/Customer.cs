@@ -1,5 +1,4 @@
 using System;
-using Vysotsky.API.Controllers.Rooms;
 
 namespace Vysotsky.API.Controllers.Customers.Dto
 {
@@ -23,14 +22,11 @@ namespace Vysotsky.API.Controllers.Customers.Dto
         /// </summary>
         public OrganizationInfo? Organization { get; init; }
 
-        /// <summary>
-        /// Помещения клиента
-        /// </summary>
-        public Room[] Rooms { get; init; } = Array.Empty<Room>();
+        // public Room[] Rooms { get; init; } = Array.Empty<Room>();
 
         /// <summary>
         /// Контакты клиента
         /// </summary>
-        public CustomerContact[] Contacts { get; init; } = Array.Empty<CustomerContact>();
+        public UserContact[] Contacts { get; init; } = Array.Empty<UserContact>();
     }
 }

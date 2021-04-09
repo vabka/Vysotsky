@@ -4,7 +4,7 @@ using LinqToDB.Mapping;
 namespace Vysotsky.Data.Entities
 {
     [Table("user")]
-    public class User : Entity
+    public class UserRecord : Entity
     {
         [Column("username")] public string Username { get; init; } = null!;
         [Column("password_hash")] public byte[] PasswordHash { get; init; } = null!;

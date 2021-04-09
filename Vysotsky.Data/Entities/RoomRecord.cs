@@ -3,7 +3,7 @@ using LinqToDB.Mapping;
 namespace Vysotsky.Data.Entities
 {
     [Table("room")]
-    public class Room : Entity
+    public class RoomRecord : Entity
     {
         [Column("name")] public string? Name { get; init; }
         [Column("number")] public string? Number { get; init; }
