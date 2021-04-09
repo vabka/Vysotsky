@@ -10,6 +10,7 @@ namespace Vysotsky.API.Controllers.Common
         /// <summary>
         /// Состояние
         /// </summary>
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public ResponseStatus Status { get; init; }
 
         /// <summary>

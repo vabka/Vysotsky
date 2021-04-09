@@ -6,7 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Vysotsky.Service
 {
-    public class SecureHasher
+    public interface IStringHasher
+    {
+        byte[] Hash(string source);
+    }
+
+    public class SecureHasher : IStringHasher
     {
         private readonly byte[] _key;
 
@@ -25,7 +30,7 @@ namespace Vysotsky.Service
     public static class SecureHasherExtensions
     {
         public static IServiceCollection AddSecureHasher(this IServiceCollection serviceCollection) =>
-            serviceCollection.AddSingleton(s =>
+            serviceCollection.AddSingleton<IStringHasher>(s =>
             {
                 var configuration = s.GetRequiredService<IConfiguration>();
                 var salt = configuration["SALT"];

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Controllers.Common;
 
 namespace Vysotsky.API.Controllers
@@ -7,6 +8,7 @@ namespace Vysotsky.API.Controllers
     /// Base API controller
     /// </summary>
     [ApiController]
+    [Authorize]
     public abstract class ApiController
     {
         /// <summary>
@@ -33,6 +35,8 @@ namespace Vysotsky.API.Controllers
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         protected static OkObjectResult Ok<T>(T result) => new(CreateSuccess(result));
+
+        protected static OkObjectResult Ok() => new(CreateSuccess());
 
         /// <summary>
         /// Создать ответ с кодом 400
@@ -70,6 +74,12 @@ namespace Vysotsky.API.Controllers
             {
                 Status = ResponseStatus.Ok,
                 Result = result
+            };
+
+        private static ApiResponse CreateSuccess() =>
+            new()
+            {
+                Status = ResponseStatus.Ok,
             };
     }
 }

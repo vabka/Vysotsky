@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using JWT.Algorithms;
 using JWT.Builder;
 using LinqToDB;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Vysotsky.Data;
 using Vysotsky.Data.Entities;
@@ -12,24 +14,28 @@ namespace Vysotsky.Service
 {
     public interface IAuthenticationService
     {
-        Task<string?> TryIssueTokenByUserCredentialsAsync(string username, string password, bool longLiving = false);
+        Task<TokenContainer?> TryIssueTokenByUserCredentialsAsync(string username, string password,
+            bool longLiving = false);
+
         Task RevokeTokenAsync(string token);
     }
+
+    public record TokenContainer(string Token, DateTimeOffset ExpiresAt, DateTimeOffset IssuedAt);
 
     public class AuthenticationService : IAuthenticationService
     {
         private readonly VysotskyDataConnection _vysotskyDataConnection;
-        private readonly SecureHasher _hasher;
+        private readonly IStringHasher _hasher;
         private readonly string _secret;
 
-        public AuthenticationService(VysotskyDataConnection vysotskyDataConnection, SecureHasher hasher, string secret)
+        public AuthenticationService(VysotskyDataConnection vysotskyDataConnection, IStringHasher hasher, string secret)
         {
             _vysotskyDataConnection = vysotskyDataConnection;
             _hasher = hasher;
             _secret = secret;
         }
 
-        public async Task<string?> TryIssueTokenByUserCredentialsAsync(string username, string password,
+        public async Task<TokenContainer?> TryIssueTokenByUserCredentialsAsync(string username, string password,
             bool longLiving = false)
         {
             var now = DateTimeOffset.UtcNow;
@@ -45,18 +51,21 @@ namespace Vysotsky.Service
                     x.OrganizationId
                 })
                 .SingleOrDefaultAsync();
-            var exp = now.AddDays(longLiving ? 180 : 1).ToUnixTimeSeconds();
-            var iat = now.ToUnixTimeSeconds();
+            var exp = now.AddDays(longLiving ? 180 : 1);
+            var iat = now;
             if (user?.PasswordHash.SequenceEqual(passwordHash) == true)
-                return EncodeToken(new TokenPayload
+            {
+                var token = EncodeToken(new TokenPayload
                 {
                     UserId = user.Id,
                     Username = user.Username,
                     Role = user.Role,
-                    OrganizationId = user.OrganizationId,
-                    Expiration = exp,
-                    IssuedAt = iat
+                    Expiration = exp.ToUnixTimeSeconds(),
+                    IssuedAt = iat.ToUnixTimeSeconds()
                 });
+                return new TokenContainer(token, exp, iat);
+            }
+
             return null;
         }
 
@@ -79,7 +88,6 @@ namespace Vysotsky.Service
                 Value = token
             });
         }
-
         private string EncodeToken(TokenPayload payload)
         {
             return JwtBuilder.Create()
@@ -89,8 +97,7 @@ namespace Vysotsky.Service
                 .AddClaim("iat", payload.IssuedAt)
                 .AddClaim("role", payload.Role.ToString())
                 .AddClaim("user_id", payload.UserId)
-                .AddClaim("username", payload.Username)
-                .AddClaim("organization_id", payload.OrganizationId)
+                .AddClaim("name", payload.Username)
                 .Encode();
         }
 
@@ -105,11 +112,26 @@ namespace Vysotsky.Service
         private record TokenPayload
         {
             [JsonProperty("user_id")] public long UserId { get; init; }
-            [JsonProperty("username")] public string Username { get; init; } = null!;
-            [JsonProperty("organization_id")] public long? OrganizationId { get; init; }
+            [JsonProperty("name")] public string Username { get; init; } = null!;
             [JsonProperty("role")] public UserRole Role { get; init; }
             [JsonProperty("exp")] public long Expiration { get; init; }
             [JsonProperty("iat")] public long IssuedAt { get; init; }
+        }
+    }
+
+    public static class AuthenticationServiceExtensions
+    {
+        public static IServiceCollection AddAuthenticationService(this IServiceCollection serviceCollection)
+        {
+            return serviceCollection.AddScoped<IAuthenticationService>(s =>
+            {
+                var secret = s.GetRequiredService<IConfiguration>()["SECRET"];
+                return new AuthenticationService(
+                    s.GetRequiredService<VysotskyDataConnection>(),
+                    s.GetRequiredService<IStringHasher>(),
+                    secret
+                );
+            });
         }
     }
 }

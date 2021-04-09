@@ -5,14 +5,14 @@
         <Nullable>enable</Nullable>
         <MSBuildWarningsAsErrors>true</MSBuildWarningsAsErrors>
         <ServerGarbageCollection>true</ServerGarbageCollection>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="NSwag.AspNetCore" Version="13.10.8" />
         <PackageReference Include="Flurl" Version="3.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.5" />
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\Vysotsky.Service\Vysotsky.Service.csproj" />
+        <ProjectReference Include="..\Vysotsky.Service\Vysotsky.Service.csproj" />
     </ItemGroup>
 </Project>

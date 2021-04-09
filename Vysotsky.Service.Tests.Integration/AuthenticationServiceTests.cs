@@ -47,16 +47,15 @@ namespace Vysotsky.Service.Tests.Integration
         {
             var id = await CreateAdminAsync();
 
-            var token = await _authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
+            var container = await _authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
 
-            token.Should().NotBeNullOrWhiteSpace();
+            container.Should().NotBeNull();
 
-            var payload = DecodeToken(token);
+            var payload = DecodeToken(container.Token);
 
             payload["role"].Should().Be("SuperUser");
             payload["user_id"].Should().Be(id);
-            payload["organization_id"].Should().Be(null);
-            payload["username"].Should().Be("admin");
+            payload["name"].Should().Be("admin");
             payload["exp"].Should().BeOfType<long>();
             payload["iat"].Should().BeOfType<long>();
         }
@@ -87,8 +86,8 @@ namespace Vysotsky.Service.Tests.Integration
         public async Task SuccessfullyValidateIssuedToken()
         {
             await CreateAdminAsync();
-            var token = await _authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
-            (await _authenticationService.ValidateTokenAsync(token!)).Should().BeTrue();
+            var container = await _authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
+            (await _authenticationService.ValidateTokenAsync(container!.Token)).Should().BeTrue();
         }
 
         [Fact]
@@ -96,9 +95,9 @@ namespace Vysotsky.Service.Tests.Integration
         {
             await CreateAdminAsync();
 
-            var token = await _authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
-            await _authenticationService.RevokeTokenAsync(token!);
-            (await _authenticationService.ValidateTokenAsync(token!)).Should().BeFalse();
+            var container = await _authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
+            await _authenticationService.RevokeTokenAsync(container!.Token);
+            (await _authenticationService.ValidateTokenAsync(container!.Token)).Should().BeFalse();
         }
 
         public void Dispose()
@@ -111,7 +110,6 @@ namespace Vysotsky.Service.Tests.Integration
         {
             connection.BlockedTokens.Delete(_ => true);
             connection.Users.Delete(_ => true);
-
         }
     }
 }
