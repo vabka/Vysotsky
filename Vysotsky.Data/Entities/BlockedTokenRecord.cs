@@ -4,11 +4,9 @@ using LinqToDB.Mapping;
 namespace Vysotsky.Data.Entities
 {
     [Table("blocked_token")]
-    public class BlockedTokenRecord : Entity
+    public class BlockedTokenRecord
     {
-        [Column("value")] public string Value { get; init; } = null!;
-        [Column("user_id")] public long UserId { get; init; }
-        [Column("issue_time")] public DateTimeOffset IssuedAt { get; init; }
+        [Column("jti")] public Guid Jti { get; init; }
         [Column("expiration_time")] public DateTimeOffset ExpirationTime { get; init; }
     }
 }

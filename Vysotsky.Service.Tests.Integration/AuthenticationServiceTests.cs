@@ -27,7 +27,7 @@ namespace Vysotsky.Service.Tests.Integration
         {
             var connectionString = "User ID=postgres;Password=postgres;Host=localhost;Port=5433;Database=vysotsky";
             var serviceProvider = Migrator.CreateServices(connectionString);
-            using (var scope = serviceProvider.CreateScope())
+            using (serviceProvider.CreateScope())
             {
                 Migrator.UpdateDatabase(serviceProvider);
             }
@@ -61,10 +61,10 @@ namespace Vysotsky.Service.Tests.Integration
             var payload = DecodeToken(container!.Token);
 
             payload["role"].Should().Be("SuperUser");
-            payload["user_id"].Should().Be(id);
-            payload["name"].Should().Be("admin");
+            payload["sub"].Should().Be("admin");
             payload["exp"].Should().BeOfType<long>();
             payload["iat"].Should().BeOfType<long>();
+            payload.ContainsKey("jti").Should().BeTrue();
         }
 
         private static Dictionary<string, object> DecodeToken(string? token)
@@ -86,7 +86,8 @@ namespace Vysotsky.Service.Tests.Integration
                 LastName = "Иванов",
                 Patronymic = "Иванович",
                 ImageId = null,
-                Contacts = Array.Empty<UserContact>()
+                Contacts = Array.Empty<UserContact>(),
+                LastPasswordChange = DateTimeOffset.Now
             });
 
         [Fact]

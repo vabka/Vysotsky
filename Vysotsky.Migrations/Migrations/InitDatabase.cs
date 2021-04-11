@@ -49,13 +49,14 @@ namespace Vysotsky.Migrations.Migrations
                 .AddColumn("patronymic").AsString().Nullable()
                 .AddColumn("contacts").AsJsonb()
                 .AddColumn("role").AsEnum("user_role")
+                .AddColumn("last_password_change").AsDateTimeOffset()
                 .AddColumn("organization_id").References("organization").Nullable()
                 .WithColumnDescription("Only for members of organization");
 
-            Create.Entity("blocked_token")
-                .WithColumn("expiration_time").AsDateTime()
-                .WithColumn("user_id").References("user")
-                .WithColumn("value").AsString().Unique();
+            Create.Table("blocked_token")
+                .WithColumn("jti").AsGuid().PrimaryKey()
+                .WithColumn("expiration_time").AsDateTime();
+
 
             Execute.CreateEnum("issue_status",
                 "New",

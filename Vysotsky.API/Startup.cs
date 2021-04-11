@@ -86,6 +86,8 @@ namespace Vysotsky.API
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
+                    options.SecurityTokenValidators.Add(
+                        new RevokableJwtSecurityTokenHandler(services!.BuildServiceProvider()));
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateLifetime = true,
@@ -96,10 +98,9 @@ namespace Vysotsky.API
                         ValidateTokenReplay = false,
                         IssuerSigningKey =
                             new SymmetricSecurityKey(
-                                Encoding.UTF8.GetBytes(Configuration.GetValue<string>("SECRET")))
+                                Encoding.UTF8.GetBytes(Configuration.GetValue<string>("SECRET"))),
                     };
                 });
-            services.AddScoped<BlockedTokenMiddleware>();
             services.AddHttpContextAccessor();
             services.AddAuthorizationCore();
             services.AddControllers()
@@ -138,12 +139,11 @@ namespace Vysotsky.API
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseMiddleware<BlockedTokenMiddleware>();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
                 if (env.IsDevelopment())
-                    endpoints.MapPost("/users/admin/create", async ctx =>
+                    endpoints.MapPost("/api/users/admin", async ctx =>
                     {
                         var hasher = ctx.RequestServices.GetRequiredService<IStringHasher>();
                         var database = ctx.RequestServices.GetRequiredService<VysotskyDataConnection>();

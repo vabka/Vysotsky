@@ -1,3 +1,4 @@
+using System;
 using LinqToDB;
 using LinqToDB.Mapping;
 
@@ -12,6 +13,7 @@ namespace Vysotsky.Data.Entities
 
         [Column("firstname")] public string FirstName { get; init; } = null!;
         [Column("lastname")] public string LastName { get; init; } = null!;
+        [Column("last_password_change")] public DateTimeOffset LastPasswordChange { get; init; }
         [Column("patronymic")] public string? Patronymic { get; init; }
 
         [Column("contacts", DataType = DataType.BinaryJson)]

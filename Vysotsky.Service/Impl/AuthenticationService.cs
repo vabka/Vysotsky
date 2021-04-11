@@ -48,11 +48,10 @@ namespace Vysotsky.Service.Impl
             {
                 var token = EncodeToken(new TokenPayload
                 {
-                    UserId = user.Id,
-                    Username = user.Username,
+                    Sub = user.Username,
                     Role = user.Role,
-                    Expiration = exp.ToUnixTimeSeconds(),
-                    IssuedAt = iat.ToUnixTimeSeconds()
+                    Exp = exp.ToUnixTimeSeconds(),
+                    Iat = iat.ToUnixTimeSeconds()
                 });
                 return new TokenContainer(token, exp, iat);
             }
@@ -62,36 +61,31 @@ namespace Vysotsky.Service.Impl
 
         public async Task<bool> ValidateTokenAsync(string token)
         {
-            var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var payload = DecodeToken(token);
-            return payload.Expiration > now &&
-                   await _vysotskyDataConnection.BlockedTokens.AllAsync(x => x.Value != token);
+            return await _vysotskyDataConnection.BlockedTokens.AllAsync(x => x.Jti != payload.Jti);
         }
 
         public async Task RevokeTokenAsync(string token)
         {
             var payload = DecodeToken(token);
-            var exp = DateTimeOffset.FromUnixTimeSeconds(payload.Expiration);
+            var exp = DateTimeOffset.FromUnixTimeSeconds(payload.Exp);
             await _vysotskyDataConnection.BlockedTokens.InsertAsync(() => new BlockedTokenRecord
             {
-                UserId = payload.UserId,
                 ExpirationTime = exp,
-                Value = token
+                Jti = payload.Jti
             });
         }
 
-        private string EncodeToken(TokenPayload payload)
-        {
-            return JwtBuilder.Create()
+        private string EncodeToken(TokenPayload payload) =>
+            JwtBuilder.Create()
                 .WithAlgorithm(new HMACSHA256Algorithm())
                 .WithSecret(_options.Secret)
-                .AddClaim("exp", payload.Expiration)
-                .AddClaim("iat", payload.IssuedAt)
+                .AddClaim("exp", payload.Exp)
+                .AddClaim("iat", payload.Iat)
                 .AddClaim("role", payload.Role.ToString())
-                .AddClaim("user_id", payload.UserId)
-                .AddClaim("name", payload.Username)
+                .AddClaim("sub", payload.Sub)
+                .AddClaim("jti", Guid.NewGuid())
                 .Encode();
-        }
 
         private TokenPayload DecodeToken(string token) =>
             JwtBuilder.Create()
@@ -103,16 +97,16 @@ namespace Vysotsky.Service.Impl
 
         private record TokenPayload
         {
-            [JsonProperty("user_id")] public long UserId { get; init; }
-            [JsonProperty("name")] public string Username { get; init; } = null!;
+            [JsonProperty("jti")] public Guid Jti { get; init; }
+            [JsonProperty("sub")] public string Sub { get; init; } = null!;
             [JsonProperty("role")] public UserRole Role { get; init; }
-            [JsonProperty("exp")] public long Expiration { get; init; }
-            [JsonProperty("iat")] public long IssuedAt { get; init; }
+            [JsonProperty("exp")] public long Exp { get; init; }
+            [JsonProperty("iat")] public long Iat { get; init; }
         }
     }
 
     public class AuthenticationServiceOptions
     {
-        public string Secret { get; set; }
+        public string Secret { get; init; }
     }
 }
