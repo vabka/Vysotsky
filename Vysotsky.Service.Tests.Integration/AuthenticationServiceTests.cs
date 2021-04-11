@@ -5,11 +5,7 @@ using FluentAssertions;
 using JWT.Algorithms;
 using JWT.Builder;
 using LinqToDB;
-using LinqToDB.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Vysotsky.Data;
 using Vysotsky.Data.Entities;
-using Vysotsky.Migrations;
 using Vysotsky.Service.Impl;
 using Xunit;
 
@@ -17,31 +13,17 @@ using Xunit;
 
 namespace Vysotsky.Service.Tests.Integration
 {
-    public class AuthenticationServiceTests : IDisposable
+    public class AuthenticationServiceTests : DatabaseTests
     {
-        private readonly VysotskyDataConnection _database;
-
         private readonly SecureHasher _hasher;
 
         public AuthenticationServiceTests()
         {
-            var connectionString = "User ID=postgres;Password=postgres;Host=localhost;Port=5433;Database=vysotsky";
-            var serviceProvider = Migrator.CreateServices(connectionString);
-            using (serviceProvider.CreateScope())
-            {
-                Migrator.UpdateDatabase(serviceProvider);
-            }
-
-            var options = new LinqToDbConnectionOptionsBuilder()
-                .UsePostgreSQL(connectionString)
-                .Build<VysotskyDataConnection>();
-            _database = new VysotskyDataConnection(options);
-            DropDatabase(_database);
             _hasher = new SecureHasher(new SecureHasherOptions
             {
                 Salt = "0"
             });
-            _authenticationService = new AuthenticationService(_database, _hasher, new AuthenticationServiceOptions
+            _authenticationService = new AuthenticationService(Database, _hasher, new AuthenticationServiceOptions
             {
                 Secret = "secret"
             });
@@ -76,7 +58,7 @@ namespace Vysotsky.Service.Tests.Integration
         }
 
         private Task<long> CreateAdminAsync() =>
-            _database.Users.InsertWithInt64IdentityAsync(() => new UserRecord
+            Database.Users.InsertWithInt64IdentityAsync(() => new UserRecord
             {
                 Username = "admin",
                 PasswordHash = _hasher.Hash("1234"),
@@ -106,18 +88,6 @@ namespace Vysotsky.Service.Tests.Integration
             var container = await _authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
             await _authenticationService.RevokeTokenAsync(container!.Token);
             (await _authenticationService.ValidateTokenAsync(container!.Token)).Should().BeFalse();
-        }
-
-        public void Dispose()
-        {
-            DropDatabase(_database);
-            _database?.Dispose();
-        }
-
-        private static void DropDatabase(VysotskyDataConnection connection)
-        {
-            connection.BlockedTokens.Delete(_ => true);
-            connection.Users.Delete(_ => true);
         }
     }
 }
