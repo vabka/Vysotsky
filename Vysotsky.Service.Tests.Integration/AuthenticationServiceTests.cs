@@ -42,7 +42,6 @@ namespace Vysotsky.Service.Tests.Integration
 
             var payload = DecodeToken(container!.Token);
 
-            payload["role"].Should().Be("SuperUser");
             payload["sub"].Should().Be("admin");
             payload["exp"].Should().BeOfType<long>();
             payload["iat"].Should().BeOfType<long>();

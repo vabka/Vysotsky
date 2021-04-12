@@ -7,7 +7,7 @@
         public const string Users = "/api/users";
         public const string Tasks = "/api/tasks";
         public const string Employees = "/api/employees";
-        public const string Customers = "/api/customers";
+        public const string Organizations = "/api/organizations";
         public const string Announcements = "/api/announcements";
         public const string Notifications = "/api/notifications";
         public const string Auth = "/api/auth";

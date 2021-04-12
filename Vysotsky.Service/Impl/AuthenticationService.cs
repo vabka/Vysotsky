@@ -49,7 +49,6 @@ namespace Vysotsky.Service.Impl
                 var token = EncodeToken(new TokenPayload
                 {
                     Sub = user.Username,
-                    Role = user.Role,
                     Exp = exp.ToUnixTimeSeconds(),
                     Iat = iat.ToUnixTimeSeconds()
                 });
@@ -82,7 +81,6 @@ namespace Vysotsky.Service.Impl
                 .WithSecret(_options.Secret)
                 .AddClaim("exp", payload.Exp)
                 .AddClaim("iat", payload.Iat)
-                .AddClaim("role", payload.Role.ToString())
                 .AddClaim("sub", payload.Sub)
                 .AddClaim("jti", Guid.NewGuid())
                 .Encode();
@@ -99,7 +97,6 @@ namespace Vysotsky.Service.Impl
         {
             [JsonProperty("jti")] public Guid Jti { get; init; }
             [JsonProperty("sub")] public string Sub { get; init; } = null!;
-            [JsonProperty("role")] public UserRole Role { get; init; }
             [JsonProperty("exp")] public long Exp { get; init; }
             [JsonProperty("iat")] public long Iat { get; init; }
         }
