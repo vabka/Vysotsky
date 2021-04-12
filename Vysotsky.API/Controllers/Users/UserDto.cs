@@ -24,13 +24,13 @@ namespace Vysotsky.API.Controllers.Users
         public UserCredentials Credentials { get; init; } = null!;
         public PersonName Name { get; init; } = null!;
         public UserContact[] Contacts { get; init; } = Array.Empty<UserContact>();
-        public UserRole Role { get; init; }
+        public UserRoleDto RoleDto { get; init; }
 
         public string? Image { get; init; }
         //public CustomerProps? Customer { get; init; }
     }
 
-    public enum UserRole
+    public enum UserRoleDto
     {
         Supervisor,
         Worker,

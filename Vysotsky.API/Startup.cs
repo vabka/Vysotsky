@@ -35,6 +35,7 @@ namespace Vysotsky.API
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHealthChecks();
             services
                 .AddSingleton<UnhandledExceptionMiddleware>()
                 .AddOpenApiDocument(document =>
@@ -133,6 +134,7 @@ namespace Vysotsky.API
         {
             // app.UseHsts();
             // Add OpenAPI/Swagger middlewares
+            app.UseHealthChecks("/api/health");
             app.UseSwaggerUi3(); // Serves the Swagger UI 3 web ui to view the OpenAPI/Swagger documents by default on `/swagger`
             app.UseOpenApi(); // Serves the registered OpenAPI/Swagger documents by default on `/swagger/{documentName}/swagger.json`
             app.UseMiddleware<UnhandledExceptionMiddleware>();

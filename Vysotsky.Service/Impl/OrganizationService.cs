@@ -46,10 +46,13 @@ namespace Vysotsky.Service.Impl
                 })
                 .SingleOrDefaultAsync(x => x.Id == organizationId);
 
-        public Task UpdateOrganization(Organization newOrganization)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task UpdateOrganization(Organization newOrganization) =>
+            _dataConnection.Organizations
+                .UpdateAsync(o => o.Id == newOrganization.Id, o =>
+                    new OrganizationRecord
+                    {
+                        Name = newOrganization.Name
+                    });
 
         public Task<Organization[]> GetAllOrganizations() =>
             _dataConnection.Organizations

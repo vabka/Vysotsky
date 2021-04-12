@@ -1,10 +1,12 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Flurl;
 using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Controllers.Common;
 using Vysotsky.API.Controllers.Organizations.Dto;
 using Vysotsky.API.Infrastructure;
+using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
 
 namespace Vysotsky.API.Controllers.Users
@@ -22,10 +24,33 @@ namespace Vysotsky.API.Controllers.Users
         }
 
         [HttpPost]
-        public ActionResult<ApiResponse> RegisterUser(UserDto user)
+        public async Task<ActionResult<ApiResponse<PersistedUserDto>>> RegisterUser(UserDto user)
         {
-            throw new NotImplementedException();
+            var usr = await _userService.RegisterUserAsync(user.Credentials.Username,
+                user.Credentials.Password,
+                user.Name.FirstName,
+                user.Name.LastName,
+                user.Name.Patronymic,
+                user.Contacts
+                    .Select(c => new Data.Entities.UserContact
+                    {
+                    })
+                    .ToArray(),
+                ToModel(user));
+            return Created(Resources.Organizations.AppendPathSegment(usr.Username), new PersistedUserDto
+            {
+            });
         }
+
+        private static UserRole ToModel(UserDto user) =>
+            user.RoleDto switch
+            {
+                UserRoleDto.Supervisor => UserRole.Supervisor,
+                UserRoleDto.Worker => UserRole.Worker,
+                UserRoleDto.Customer => UserRole.OrganizationOwner,
+                UserRoleDto.CustomerRepresentative => UserRole.OrganizationMember,
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
         [HttpPost("{userId:long}/organization")]
         public async Task<ActionResult<ApiResponse<PersistedOrganizationDto>>> CreateOrganization(
@@ -47,6 +72,10 @@ namespace Vysotsky.API.Controllers.Users
         [HttpGet]
         private NotFoundObjectResult UserNotFound(long userId) =>
             NotFound($"User by not found by id {userId}", "users.userNotFound");
+    }
+
+    public class PersistedUserDto
+    {
     }
 
     public class OrganizationDto
