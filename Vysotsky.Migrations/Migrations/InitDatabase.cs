@@ -9,8 +9,7 @@ namespace Vysotsky.Migrations.Migrations
         {
             Create.Entity("user");
             Create.Entity("organization")
-                .WithColumn("name").AsString()
-                .WithColumn("owner_id").References("user");
+                .WithColumn("name").AsString();
             Create.Entity("image")
                 .WithColumn("external_id").AsString();
 
@@ -50,8 +49,7 @@ namespace Vysotsky.Migrations.Migrations
                 .AddColumn("contacts").AsJsonb()
                 .AddColumn("role").AsEnum("user_role")
                 .AddColumn("last_password_change").AsDateTimeOffset()
-                .AddColumn("organization_id").References("organization").Nullable()
-                .WithColumnDescription("Only for members of organization");
+                .AddColumn("organization_id").References("organization").Nullable();
 
             Create.Table("blocked_token")
                 .WithColumn("jti").AsGuid().PrimaryKey()

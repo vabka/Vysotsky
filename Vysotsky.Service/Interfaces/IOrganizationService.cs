@@ -1,16 +1,14 @@
 using System.Threading.Tasks;
+using Vysotsky.Service.Types;
 
 namespace Vysotsky.Service.Interfaces
 {
     public interface IOrganizationService
     {
-        Task<Organization> CreateOrganization(string name);
+        Task<Organization> CreateOrganization(User owner, string name);
         Task<Organization?> GetOrganizationByIdOrNull(long organizationId);
-    }
-    
-    public class Organization
-    {
-        public long Id { get; init; }
-        public string Name { get; init; } = null!;
+        Task UpdateOrganization(Organization newOrganization);
+        Task<Organization[]> GetAllOrganizations();
+        Task<FullBuilding[]> GetOrganizationBuildings(Organization organization);
     }
 }

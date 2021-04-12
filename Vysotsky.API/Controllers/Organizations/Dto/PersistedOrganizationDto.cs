@@ -1,6 +1,6 @@
 namespace Vysotsky.API.Controllers.Organizations.Dto
 {
-    public class PersistedOrganization
+    public class PersistedOrganizationDto
     {
         public long Id { get; init; }
 
@@ -10,5 +10,6 @@ namespace Vysotsky.API.Controllers.Organizations.Dto
     public class Organization
     {
         public string Name { get; init; } = null!;
+        public long OwnerId { get; init; }
     }
 }

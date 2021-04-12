@@ -10,11 +10,13 @@ namespace Vysotsky.Service.Interfaces
             string firstName,
             string lastName,
             string? patronymic,
-            UserRole role,
-            Organization? customer);
+            UserRole role);
+
+        public Task<User?> GetUserByIdOrNull(long userId);
     }
 
     public class User
     {
+        public long Id { get; init; }
     }
 }

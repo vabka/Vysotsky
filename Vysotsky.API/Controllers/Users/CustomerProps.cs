@@ -4,6 +4,6 @@ namespace Vysotsky.API.Controllers.Users
 {
     public class CustomerProps
     {
-        public PersistedOrganization Organization { get; init; }
+        public PersistedOrganizationDto OrganizationDto { get; init; }
     }
 }
