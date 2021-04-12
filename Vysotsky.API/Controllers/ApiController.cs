@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Controllers.Common;
 
 
@@ -9,7 +8,6 @@ namespace Vysotsky.API.Controllers
     /// Base API controller
     /// </summary>
     [ApiController]
-    [Authorize]
     public abstract class ApiController
     {
         /// <summary>

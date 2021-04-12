@@ -23,51 +23,21 @@ namespace Vysotsky.API.Infrastructure
         public override ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters,
             out SecurityToken validatedToken)
         {
-            // make sure everything is valid first to avoid unnecessary calls to DB
-            // if it's not valid base.ValidateToken will throw an exception, we don't need to handle it because it's handled here: https://github.com/aspnet/Security/blob/beaa2b443d46ef8adaf5c2a89eb475e1893037c2/src/Microsoft.AspNetCore.Authentication.JwtBearer/JwtBearerHandler.cs#L107-L128
-            // we have to throw our own exception if the token is revoked, it will cause validation to fail
             var claimsPrincipal = base.ValidateToken(token, validationParameters, out validatedToken);
-
-            var jtiClaim = claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Jti);
-            var subClaim = claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Sub);
-            var iatClaim = claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Iat);
-            var expClaim = claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Exp);
-            if (jtiClaim is {ValueType: ClaimValueTypes.String})
+            if (validatedToken is JwtSecurityToken
+                {Id: var id, IssuedAt: var issuedAt, ValidTo: var validTo, Subject: var username})
             {
-                var claimGuid = Guid.Parse(jtiClaim.Value);
-                if (_db.BlockedTokens.Any(x => x.Jti == claimGuid)) // it's blacklisted! throw the exception
+                if (Guid.TryParse(id, out var guid) && JtiBlocked(guid))
                 {
-                    // there's a bunch of built-in token validation codes: https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/7692d12e49a947f68a44cd3abc040d0c241376e6/src/Microsoft.IdentityModel.Tokens/LogMessages.cs
-                    // but none of them is suitable for this
                     throw LogHelper.LogExceptionMessage(new SecurityTokenRevokedException(
                         LogHelper.FormatInvariant("The token has been revoked, securitytoken: '{0}'.",
                             validatedToken)));
                 }
-            }
 
-            if (subClaim is {ValueType: ClaimValueTypes.String, Value: var username} &&
-                iatClaim is {ValueType: ClaimValueTypes.Integer64, Value: var iatStr})
-            {
-                var iat = long.Parse(iatStr);
-                var issueTime = DateTimeOffset.FromUnixTimeSeconds(iat);
-                var user = _db.Users
-                    .Where(x => x.Username == username)
-                    .Select(x => new {x.LastPasswordChange})
-                    .SingleOrDefault();
-                if (user is not {LastPasswordChange: var lastPasswordChange} || lastPasswordChange > issueTime)
+                if (GetLastPasswordChange(username) >= issuedAt)
                 {
-                    if (expClaim is {ValueType: ClaimValueTypes.Integer64, Value: var expStr} &&
-                        jtiClaim is {ValueType: ClaimValueTypes.String})
-                    {
-                        var jti = Guid.Parse(jtiClaim.Value);
-                        var expiresAt = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expStr));
-                        _db.BlockedTokens.Insert(() => new BlockedTokenRecord
-                        {
-                            Jti = jti,
-                            ExpirationTime = expiresAt
-                        });
-                    }
-                    
+                    if (Guid.TryParse(id, out guid))
+                        BlockTokenByJti(guid, validTo);
                     throw LogHelper.LogExceptionMessage(new SecurityTokenIsNotActualException(
                         LogHelper.FormatInvariant(
                             "The token issued before last password change, securitytoken: '{0}'.",
@@ -75,8 +45,34 @@ namespace Vysotsky.API.Infrastructure
                 }
             }
 
-
             return claimsPrincipal;
+        }
+
+        private DateTimeOffset? GetLastPasswordChange(string username)
+        {
+            var user = _db.Users
+                .Where(x => x.Username == username)
+                .Select(x => new {x.LastPasswordChange})
+                .SingleOrDefault();
+            return user?.LastPasswordChange;
+        }
+
+        private static (Claim? jti, Claim? iat, Claim? exp) GetClaims(ClaimsPrincipal claimsPrincipal)
+        {
+            return (claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Jti),
+                claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Iat),
+                claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Exp));
+        }
+
+        private bool JtiBlocked(Guid jtiGuid) => _db.BlockedTokens.Any(x => x.Jti == jtiGuid);
+
+        private void BlockTokenByJti(Guid jti, DateTimeOffset expiresAt)
+        {
+            _db.BlockedTokens.Insert(() => new BlockedTokenRecord
+            {
+                Jti = jti,
+                ExpirationTime = expiresAt
+            });
         }
     }
 

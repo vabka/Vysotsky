@@ -86,6 +86,7 @@ namespace Vysotsky.API
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
+                    options.SecurityTokenValidators.Clear();
                     options.SecurityTokenValidators.Add(
                         new RevokableJwtSecurityTokenHandler(services!.BuildServiceProvider()));
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -94,7 +95,6 @@ namespace Vysotsky.API
                         ValidateIssuerSigningKey = true,
                         ValidateAudience = false,
                         ValidateIssuer = false,
-                        ValidateActor = false,
                         ValidateTokenReplay = false,
                         IssuerSigningKey =
                             new SymmetricSecurityKey(
@@ -155,7 +155,8 @@ namespace Vysotsky.API
                             Role = UserRole.SuperUser,
                             FirstName = "Админ",
                             LastName = "Админович",
-                            Contacts = Array.Empty<UserContact>()
+                            Contacts = Array.Empty<UserContact>(),
+                            LastPasswordChange = DateTimeOffset.Now
                         });
                         await ctx.Response.WriteAsync("OK");
                     });

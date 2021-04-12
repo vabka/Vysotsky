@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Flurl;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Controllers.Common;
 using Vysotsky.API.Infrastructure;
@@ -11,6 +12,7 @@ using Vysotsky.Service.Interfaces;
 namespace Vysotsky.API.Controllers.Buildings
 {
     [Route(Resources.Buildings)]
+    [Authorize]
     public class BuildingsController : ApiController
     {
         private readonly IRoomService _roomService;
