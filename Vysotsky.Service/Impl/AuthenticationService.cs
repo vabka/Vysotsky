@@ -30,7 +30,6 @@ namespace Vysotsky.Service.Impl
             bool longLiving = false)
         {
             var now = DateTimeOffset.UtcNow;
-            var passwordHash = _hasher.Hash(password);
             var user = await _vysotskyDataConnection.Users
                 .Where(x => x.Username == username)
                 .Select(x => new
@@ -42,18 +41,23 @@ namespace Vysotsky.Service.Impl
                     x.OrganizationId
                 })
                 .SingleOrDefaultAsync();
-            var exp = now.AddDays(longLiving ? 180 : 1);
-            var iat = now;
-            if (user?.PasswordHash.SequenceEqual(passwordHash) == true)
+            if (user != null)
             {
-                var token = EncodeToken(new TokenPayload
+                var passwordHash = _hasher.Hash(password);
+                if (user.PasswordHash.SequenceEqual(passwordHash))
                 {
-                    Sub = user.Username,
-                    Exp = exp.ToUnixTimeSeconds(),
-                    Iat = iat.ToUnixTimeSeconds()
-                });
-                return new TokenContainer(token, exp, iat);
+                    var exp = now.AddDays(longLiving ? 180 : 1);
+                    var iat = now;
+                    var token = EncodeToken(new TokenPayload
+                    {
+                        Sub = user.Username,
+                        Exp = exp.ToUnixTimeSeconds(),
+                        Iat = iat.ToUnixTimeSeconds()
+                    });
+                    return new TokenContainer(token, exp, iat);
+                }
             }
+
 
             return null;
         }
