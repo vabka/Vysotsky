@@ -9,25 +9,16 @@ using Vysotsky.Service.Interfaces;
 
 namespace Vysotsky.API.Controllers.Auth
 {
-    /// <summary>
-    /// Контроллер аутентификации
-    /// </summary>
     [Route(Resources.Auth)]
     public class AuthController : ApiController
     {
         private readonly IAuthenticationService _authenticationService;
 
-        /// <inheritdoc />
         public AuthController(IAuthenticationService authenticationService)
         {
             _authenticationService = authenticationService;
         }
 
-        /// <summary>
-        /// Выпустить токен
-        /// </summary>
-        /// <param name="credentials"></param>
-        /// <returns></returns>
         [AllowAnonymous]
         [HttpPost("authenticate")]
         public async Task<ActionResult<ApiResponse<AccessTokenContainer>>> Authenticate(
@@ -42,10 +33,6 @@ namespace Vysotsky.API.Controllers.Auth
             };
         }
 
-        /// <summary>
-        /// Отозвать текущий токен
-        /// </summary>
-        /// <returns></returns>
         [HttpPost("unauthenticate")]
         public async Task<ActionResult<ApiResponse>> Unauthenticate([FromServices] IHttpContextAccessor httpContextAccessor)
         {
