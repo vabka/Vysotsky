@@ -6,6 +6,5 @@ namespace Vysotsky.Data.Entities
     public class OrganizationRecord : Entity
     {
         [Column("name")] public string Name { get; init; } = null!;
-        [Column("owner_id")] public long OwnerId { get; init; }
     }
 }

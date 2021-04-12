@@ -9,6 +9,5 @@ namespace Vysotsky.Service.Interfaces
         Task<Organization?> GetOrganizationByIdOrNull(long organizationId);
         Task UpdateOrganization(Organization newOrganization);
         Task<Organization[]> GetAllOrganizations();
-        Task<FullBuilding[]> GetOrganizationBuildings(Organization organization);
     }
 }

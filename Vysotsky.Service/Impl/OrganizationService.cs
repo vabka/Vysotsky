@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using LinqToDB;
 using Vysotsky.Data;
@@ -18,13 +19,17 @@ namespace Vysotsky.Service.Impl
 
         public async Task<Organization> CreateOrganization(User owner, string name)
         {
+            await using var transaction = await _dataConnection.BeginTransactionAsync();
             var organizationId = await _dataConnection.Organizations.InsertWithInt64IdentityAsync(() =>
                 new OrganizationRecord
                 {
                     Name = name,
-                    OwnerId = owner.Id
                 });
-            
+            await _dataConnection.Users.UpdateAsync(_ => new UserRecord
+            {
+                OrganizationId = organizationId
+            });
+            await transaction.CommitAsync();
             return new Organization
             {
                 Id = organizationId,
@@ -32,24 +37,28 @@ namespace Vysotsky.Service.Impl
             };
         }
 
-        public Task<Organization?> GetOrganizationByIdOrNull(long organizationId)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task<Organization?> GetOrganizationByIdOrNull(long organizationId) =>
+            _dataConnection.Organizations
+                .Select(o => new Organization
+                {
+                    Id = o.Id,
+                    Name = o.Name
+                })
+                .SingleOrDefaultAsync(x => x.Id == organizationId);
 
         public Task UpdateOrganization(Organization newOrganization)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task<Organization[]> GetAllOrganizations()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<FullBuilding[]> GetOrganizationBuildings(Organization organization)
-        {
-            throw new System.NotImplementedException();
-        }
+        public Task<Organization[]> GetAllOrganizations() =>
+            _dataConnection.Organizations
+                .OrderBy(o => o.CreatedAt)
+                .Select(o => new Organization
+                {
+                    Id = o.Id,
+                    Name = o.Name
+                })
+                .ToArrayAsync();
     }
 }

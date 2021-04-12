@@ -6,6 +6,7 @@ namespace Vysotsky.Service.Interfaces
 {
     public interface IRoomService
     {
+        Task<FullBuilding[]> GetOrganizationBuildings(Organization organization);
         Task<Floor> CreateFloor(Building building, string number);
         Task<Room> CreateRoom(Floor floor, string? name, string? number, RoomStatus status);
         Task<Building> CreateBuildingAsync(string name);

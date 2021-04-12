@@ -14,10 +14,12 @@ namespace Vysotsky.API.Controllers.Organizations
     public class OrganizationsController : ApiController
     {
         private readonly IOrganizationService _organizationService;
+        private readonly IRoomService _roomService;
 
-        public OrganizationsController(IOrganizationService organizationService)
+        public OrganizationsController(IOrganizationService organizationService, IRoomService roomService)
         {
             _organizationService = organizationService;
+            _roomService = roomService;
         }
 
         [HttpGet("{organizationId:long}/rooms")]
@@ -27,7 +29,7 @@ namespace Vysotsky.API.Controllers.Organizations
             var organization = await _organizationService.GetOrganizationByIdOrNull(organizationId);
             if (organization == null)
                 return OrganizationNotFound(organizationId);
-            var buildings = await _organizationService.GetOrganizationBuildings(organization);
+            var buildings = await _roomService.GetOrganizationBuildings(organization);
             return Ok(buildings.Select(b => new OrganizationBuildingDto
             {
                 Id = b.Id,

@@ -136,5 +136,46 @@ namespace Vysotsky.Service.Impl
                 Status = status
             };
         }
+
+        public async Task<FullBuilding[]> GetOrganizationBuildings(Organization organization)
+        {
+            var roomsQuery = _dataConnection.Rooms
+                .Where(x => x.OwnerId == organization.Id);
+
+            var floorsQuery = from room in roomsQuery
+                group room by room.FloorId
+                into r
+                join floor in _dataConnection.Floors on r.Key equals floor.Id
+                select floor;
+
+            var buildingsQuery = from floor in floorsQuery
+                group floor by floor.BuildingId
+                into f
+                join building in _dataConnection.Buildings on f.Key equals building.Id
+                select building;
+
+            var roomsData = await roomsQuery.ToArrayAsync();
+            var rooms = roomsData.GroupBy(x => x.FloorId, x => new Room
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Number = x.Number,
+                Status = x.Status,
+            }).ToDictionary(x => x.Key, x => x.ToArray());
+            var floorsData = await floorsQuery.ToArrayAsync();
+            var floors = floorsData.GroupBy(x => x.BuildingId, x => new FullFloor
+            {
+                Id = x.Id,
+                Number = x.Number,
+                Rooms = rooms[x.Id]
+            }).ToDictionary(x => x.Key, x => x.ToArray());
+            var buildingsData = await buildingsQuery.ToArrayAsync();
+            return buildingsData.Select(x => new FullBuilding
+                {
+                    Id = x.Id,
+                    Floors = floors[x.Id]
+                })
+                .ToArray();
+        }
     }
 }

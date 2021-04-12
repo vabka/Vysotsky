@@ -32,7 +32,9 @@ namespace Vysotsky.Migrations.Migrations
                 .WithColumn("status").AsEnum("room_status")
                 .WithColumn("name").AsString().Nullable()
                 .WithColumn("number").AsString().Nullable();
-
+            Create.Index()
+                .OnTable("room")
+                .OnColumn("owner_id");
             Execute.CreateEnum("user_role",
                 "SuperUser",
                 "Supervisor",
