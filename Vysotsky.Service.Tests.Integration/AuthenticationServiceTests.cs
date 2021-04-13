@@ -34,7 +34,7 @@ namespace Vysotsky.Service.Tests.Integration
         [Fact]
         public async Task SuccessfullyIssueTokenWithCorrectCredentials()
         {
-            var id = await CreateAdminAsync();
+            await CreateAdminAsync();
 
             var container = await _authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
 

@@ -42,7 +42,7 @@ namespace Vysotsky.Service.Impl
 
         public Task<User?> GetUserByIdOrNull(long userId)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

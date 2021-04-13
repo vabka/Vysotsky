@@ -21,5 +21,8 @@ namespace Vysotsky.Service.Interfaces
 
         public long Id { get; init; }
         public string Username { get; init; } = null!;
+        public string Firstname { get; init; } = null!;
+        public string LastName { get; init; } = null!;
+        public string? Patronymic { get; init; }
     }
 }

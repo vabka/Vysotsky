@@ -28,7 +28,7 @@ namespace Vysotsky.Service.Tests.Integration
         public void Dispose()
         {
             DropDatabase();
-            Database?.Dispose();
+            Database.Dispose();
         }
 
         private void DropDatabase()

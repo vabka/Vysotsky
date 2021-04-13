@@ -89,6 +89,7 @@ namespace Vysotsky.API
                 {
                     options.SecurityTokenValidators.Clear();
                     options.SecurityTokenValidators.Add(
+                        // ReSharper disable once ASP0000
                         new RevokableJwtSecurityTokenHandler(services!.BuildServiceProvider()));
                     options.TokenValidationParameters = new TokenValidationParameters
                     {

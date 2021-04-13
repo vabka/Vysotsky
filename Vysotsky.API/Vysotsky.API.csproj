@@ -3,18 +3,17 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <Nullable>enable</Nullable>
-        <PublishReadyToRun Condition="Configuration=='Release'">true</PublishReadyToRun>
         <MSBuildWarningsAsErrors>true</MSBuildWarningsAsErrors>
         <ServerGarbageCollection>true</ServerGarbageCollection>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="NSwag.AspNetCore" Version="13.10.8"/>
-        <PackageReference Include="Flurl" Version="3.0.1"/>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.5"/>
-        <PackageReference Include="Scrutor" Version="3.3.0"/>
+        <PackageReference Include="NSwag.AspNetCore" Version="13.10.8" />
+        <PackageReference Include="Flurl" Version="3.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.5" />
+        <PackageReference Include="Scrutor" Version="3.3.0" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Vysotsky.Service\Vysotsky.Service.csproj" PrivateAssets="All"/>
+        <ProjectReference Include="..\Vysotsky.Service\Vysotsky.Service.csproj" PrivateAssets="All" />
     </ItemGroup>
 </Project>

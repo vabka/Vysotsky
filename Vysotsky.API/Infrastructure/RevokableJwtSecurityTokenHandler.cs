@@ -57,13 +57,6 @@ namespace Vysotsky.API.Infrastructure
             return user?.LastPasswordChange;
         }
 
-        private static (Claim? jti, Claim? iat, Claim? exp) GetClaims(ClaimsPrincipal claimsPrincipal)
-        {
-            return (claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Jti),
-                claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Iat),
-                claimsPrincipal.FindFirst(JwtRegisteredClaimNames.Exp));
-        }
-
         private bool JtiBlocked(Guid jtiGuid) => _db.BlockedTokens.Any(x => x.Jti == jtiGuid);
 
         private void BlockTokenByJti(Guid jti, DateTimeOffset expiresAt)

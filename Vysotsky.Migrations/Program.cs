@@ -5,7 +5,7 @@ using Vysotsky.Migrations;
 using Vysotsky.Migrations.Migrations;
 
 
-var serviceProvider = Migrator.CreateServices(Environment.GetEnvironmentVariable("PG_CONNECTION_STRING"));
+var serviceProvider = Migrator.CreateServices(Environment.GetEnvironmentVariable("PG_CONNECTION_STRING") ?? throw new InvalidOperationException("PG_CONNECTION_STRING is not defined"));
 using var scope = serviceProvider.CreateScope();
 Migrator.UpdateDatabase(scope.ServiceProvider);
 

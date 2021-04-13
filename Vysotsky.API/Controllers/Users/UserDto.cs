@@ -15,15 +15,23 @@ namespace Vysotsky.API.Controllers.Users
         public string? Patronymic { get; init; }
     }
 
-    public class UserContact
+    public class UserContactDto
     {
+        public UserContactTypeDto Type { get; init; } = UserContactTypeDto.Phone;
+        public string Name { get; init; } = null!;
+        public string Value { get; init; } = null!;
+    }
+
+    public enum UserContactTypeDto
+    {
+        Phone
     }
 
     public class UserDto
     {
         public UserCredentials Credentials { get; init; } = null!;
         public PersonName Name { get; init; } = null!;
-        public UserContact[] Contacts { get; init; } = Array.Empty<UserContact>();
+        public UserContactDto[] Contacts { get; init; } = Array.Empty<UserContactDto>();
         public UserRoleDto RoleDto { get; init; }
 
         public string? Image { get; init; }

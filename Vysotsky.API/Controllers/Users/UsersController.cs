@@ -26,21 +26,39 @@ namespace Vysotsky.API.Controllers.Users
         [HttpPost]
         public async Task<ActionResult<ApiResponse<PersistedUserDto>>> RegisterUser(UserDto user)
         {
-            var usr = await _userService.RegisterUserAsync(user.Credentials.Username,
+            var createdUser = await _userService.RegisterUserAsync(user.Credentials.Username,
                 user.Credentials.Password,
                 user.Name.FirstName,
                 user.Name.LastName,
                 user.Name.Patronymic,
                 user.Contacts
-                    .Select(c => new Data.Entities.UserContact
+                    .Select(c => new UserContact
                     {
+                        Name = c.Name,
+                        Value = c.Value,
+                        Type = ToModel(c.Type)
                     })
                     .ToArray(),
                 ToModel(user));
-            return Created(Resources.Organizations.AppendPathSegment(usr.Username), new PersistedUserDto
+            return Created(Resources.Organizations.AppendPathSegment(createdUser.Username), new PersistedUserDto
             {
+                Id = createdUser.Id,
+                Username = createdUser.Username,
+                Name = new PersonName
+                {
+                    FirstName   = createdUser.Firstname,
+                    LastName = createdUser.LastName,
+                    Patronymic = createdUser.Patronymic
+                }
             });
         }
+
+        private static ContactType ToModel(UserContactTypeDto c) =>
+            c switch
+            {
+                UserContactTypeDto.Phone => ContactType.Phone,
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
         private static UserRole ToModel(UserDto user) =>
             user.RoleDto switch
@@ -76,6 +94,9 @@ namespace Vysotsky.API.Controllers.Users
 
     public class PersistedUserDto
     {
+        public long Id { get; init; }
+        public string Username { get; init; } = null!;
+        public PersonName Name { get; init; } = null!;
     }
 
     public class OrganizationDto
