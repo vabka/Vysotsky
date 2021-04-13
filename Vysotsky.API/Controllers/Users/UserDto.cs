@@ -2,12 +2,6 @@ using System;
 
 namespace Vysotsky.API.Controllers.Users
 {
-    public class UserCredentials
-    {
-        public string Username { get; init; } = null!;
-        public string Password { get; init; } = null!;
-    }
-
     public class PersonName
     {
         public string FirstName { get; init; } = null!;
@@ -29,7 +23,8 @@ namespace Vysotsky.API.Controllers.Users
 
     public class UserDto
     {
-        public UserCredentials Credentials { get; init; } = null!;
+        public string Username { get; init; } = null!;
+        public string Password { get; init; } = null!;
         public PersonName Name { get; init; } = null!;
         public UserContactDto[] Contacts { get; init; } = Array.Empty<UserContactDto>();
         public UserRoleDto RoleDto { get; init; }

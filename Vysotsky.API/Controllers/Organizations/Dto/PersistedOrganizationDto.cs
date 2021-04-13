@@ -7,9 +7,8 @@ namespace Vysotsky.API.Controllers.Organizations.Dto
         public string Name { get; init; } = null!;
     }
 
-    public class Organization
+    public class OrganizationDto
     {
         public string Name { get; init; } = null!;
-        public long OwnerId { get; init; }
     }
 }

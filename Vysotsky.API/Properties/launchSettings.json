@@ -8,7 +8,8 @@
       "applicationUrl": "http://localhost:5001",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "DOTNET_ENVIRONMENT": "Development"
+        "DOTNET_ENVIRONMENT": "Development",
+        "PG_CONNECTION_STRING": "User ID=postgres;Password=postgres;Host=localhost;Port=5433;Database=vysotsky"
       }
     }
   }

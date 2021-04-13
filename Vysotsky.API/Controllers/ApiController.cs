@@ -19,15 +19,24 @@ namespace Vysotsky.API.Controllers
         /// <param name="result"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        protected ActionResult<ApiResponse<T>> Created<T>(string location, T result) =>
+        protected static ActionResult<ApiResponse<T>> Created<T>(string location, T result) =>
             new CreatedResult(location, CreateSuccess(result));
 
-        /// <summary>
-        /// Создать ответ с произвольным кодом, без контента
-        /// </summary>
-        /// <param name="code"></param>
-        /// <returns></returns>
-        protected static ActionResult Code(int code) => new StatusCodeResult(code);
+        protected static ObjectResult Error(string message, string code, int status = 400)
+        {
+            return new ObjectResult(new ApiResponse
+            {
+                Error = new ApiError
+                {
+                    Code = code,
+                    Message = message
+                },
+                Status = ResponseStatus.Error
+            })
+            {
+                StatusCode = status
+            };
+        } 
 
         /// <summary>
         /// Создать ответ с кодом 200

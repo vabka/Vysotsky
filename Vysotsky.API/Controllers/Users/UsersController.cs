@@ -23,11 +23,37 @@ namespace Vysotsky.API.Controllers.Users
             _userService = userService;
         }
 
+        [HttpPost("{username}/organization")]
+        public async Task<ActionResult<ApiResponse<PersistedOrganizationDto>>> CreateOrganization(string username,
+            [FromBody] OrganizationDto organizationDto)
+        {
+            var user = await _userService.GetUserByUsernameOrNullAsync(username);
+            if (user == null)
+                return UserNotFound(username);
+            if (user.OrganizationId != null)
+                return Error("Organization is readonly", "users.organization.readonly", 405);
+            if (user.Role != UserRole.OrganizationOwner)
+                return NotFound("This user cant own organization", "user.organization.invalidUser");
+            var createdOrganization = await _organizationService.CreateOrganization(user, organizationDto.Name);
+            return Created(Resources.Organizations.AppendPathSegment(createdOrganization.Id),
+                new PersistedOrganizationDto
+                {
+                    Id = createdOrganization.Id,
+                    Name = createdOrganization.Name
+                });
+        }
+
         [HttpPost]
         public async Task<ActionResult<ApiResponse<PersistedUserDto>>> RegisterUser(UserDto user)
         {
-            var createdUser = await _userService.RegisterUserAsync(user.Credentials.Username,
-                user.Credentials.Password,
+            var alreadyCreatedUser = await _userService.GetUserByUsernameOrNullAsync(user.Username);
+            if (alreadyCreatedUser != null)
+                return BadRequest("User with same username exists", "users.usernameExists");
+            if (user.RoleDto == UserRoleDto.CustomerRepresentative)
+                return BadRequest("Representative can be created only in organization",
+                    "users.cannotCreateUnattachedRepresentative");
+            var createdUser = await _userService.RegisterUserAsync(user.Username,
+                user.Password,
                 user.Name.FirstName,
                 user.Name.LastName,
                 user.Name.Patronymic,
@@ -46,12 +72,26 @@ namespace Vysotsky.API.Controllers.Users
                 Username = createdUser.Username,
                 Name = new PersonName
                 {
-                    FirstName   = createdUser.Firstname,
+                    FirstName = createdUser.Firstname,
                     LastName = createdUser.LastName,
                     Patronymic = createdUser.Patronymic
-                }
+                },
+                Contacts = createdUser.Contacts
+                    .Select(c => new UserContactDto
+                    {
+                        Name = c.Name,
+                        Value = c.Value,
+                        Type = ToDto(c.Type)
+                    })
+                    .ToArray()
             });
         }
+
+        private UserContactTypeDto ToDto(ContactType argType) => argType switch
+        {
+            ContactType.Phone => UserContactTypeDto.Phone,
+            _ => throw new ArgumentOutOfRangeException(nameof(argType), argType, null)
+        };
 
         private static ContactType ToModel(UserContactTypeDto c) =>
             c switch
@@ -70,26 +110,9 @@ namespace Vysotsky.API.Controllers.Users
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-        [HttpPost("{userId:long}/organization")]
-        public async Task<ActionResult<ApiResponse<PersistedOrganizationDto>>> CreateOrganization(
-            [FromRoute] long userId,
-            [FromBody] OrganizationDto organization)
-        {
-            var user = await _userService.GetUserByIdOrNull(userId);
-            if (user == null)
-                return UserNotFound(userId);
-            var createdOrganization = await _organizationService.CreateOrganization(user, organization.Name);
-            return Created(Resources.Organizations.AppendPathSegment(createdOrganization.Id),
-                new PersistedOrganizationDto
-                {
-                    Id = createdOrganization.Id,
-                    Name = createdOrganization.Name
-                });
-        }
-
         [HttpGet]
-        private NotFoundObjectResult UserNotFound(long userId) =>
-            NotFound($"User by not found by id {userId}", "users.userNotFound");
+        private NotFoundObjectResult UserNotFound(string username) =>
+            NotFound($"User by not found by id {username}", "users.userNotFound");
     }
 
     public class PersistedUserDto
@@ -97,6 +120,7 @@ namespace Vysotsky.API.Controllers.Users
         public long Id { get; init; }
         public string Username { get; init; } = null!;
         public PersonName Name { get; init; } = null!;
+        public UserContactDto[] Contacts { get; init; } = Array.Empty<UserContactDto>();
     }
 
     public class OrganizationDto

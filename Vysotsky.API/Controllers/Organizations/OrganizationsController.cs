@@ -6,7 +6,6 @@ using Vysotsky.API.Controllers.Common;
 using Vysotsky.API.Controllers.Organizations.Dto;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Service.Interfaces;
-using OrganizationDto = Vysotsky.API.Controllers.Organizations.Dto.Organization;
 
 namespace Vysotsky.API.Controllers.Organizations
 {
@@ -66,12 +65,12 @@ namespace Vysotsky.API.Controllers.Organizations
 
         [HttpPut("{organizationId:long}")]
         public async Task<ActionResult<ApiResponse>> UpdateOrganization([FromRoute] long organizationId,
-            [FromBody] OrganizationDto organizationProperties)
+            [FromBody] OrganizationDto organizationDtoProperties)
         {
             var organization = await _organizationService.GetOrganizationByIdOrNull(organizationId);
             if (organization == null)
                 return OrganizationNotFound(organizationId);
-            var newOrganization = organization with {Name = organizationProperties.Name};
+            var newOrganization = organization with {Name = organizationDtoProperties.Name};
             await _organizationService.UpdateOrganization(newOrganization);
             return Ok();
         }
