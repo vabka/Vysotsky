@@ -1,71 +1,35 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
-using LinqToDB;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Vysotsky.Data;
-using Vysotsky.Data.Entities;
 
 namespace Vysotsky.API.Infrastructure
 {
     public class RevokableJwtSecurityTokenHandler : JwtSecurityTokenHandler
     {
-        private readonly VysotskyDataConnection _db;
-
-        public RevokableJwtSecurityTokenHandler(IServiceProvider serviceProvider)
-        {
-            _db = serviceProvider.GetRequiredService<VysotskyDataConnection>();
-        }
-
         public override ClaimsPrincipal ValidateToken(string token, TokenValidationParameters validationParameters,
-            out SecurityToken validatedToken)
+            out SecurityToken securityToken)
         {
-            var claimsPrincipal = base.ValidateToken(token, validationParameters, out validatedToken);
-            if (validatedToken is JwtSecurityToken
-                {Id: var id, IssuedAt: var issuedAt, ValidTo: var validTo, Subject: var username})
+            var claimsPrincipal = base.ValidateToken(token, validationParameters, out securityToken);
+            return securityToken switch
             {
-                if (Guid.TryParse(id, out var guid) && JtiBlocked(guid))
-                {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenRevokedException(
-                        LogHelper.FormatInvariant("The token has been revoked, securitytoken: '{0}'.",
-                            validatedToken)));
-                }
-
-                if (GetLastPasswordChange(username) >= issuedAt)
-                {
-                    if (Guid.TryParse(id, out guid))
-                        BlockTokenByJti(guid, validTo);
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenIsNotActualException(
-                        LogHelper.FormatInvariant(
-                            "The token issued before last password change, securitytoken: '{0}'.",
-                            validatedToken)));
-                }
-            }
-
-            return claimsPrincipal;
+                JwtSecurityToken {Id: var id, IssuedAt: var issuedAt, ValidTo: var validTo, Subject: not ""}
+                    when Guid.TryParse(id, out _) &&
+                         issuedAt != default &&
+                         validTo != default
+                    => claimsPrincipal,
+                _ => throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidException(
+                    LogHelper.FormatInvariant("Invalid securitytoken: '{0}'.",
+                        securityToken)))
+            };
         }
+    }
 
-        private DateTimeOffset? GetLastPasswordChange(string username)
+    public class SecurityTokenInvalidException : SecurityTokenException
+    {
+        public SecurityTokenInvalidException(string message) : base(message)
         {
-            var user = _db.Users
-                .Where(x => x.Username == username)
-                .Select(x => new {x.LastPasswordChange})
-                .SingleOrDefault();
-            return user?.LastPasswordChange;
-        }
-
-        private bool JtiBlocked(Guid jtiGuid) => _db.BlockedTokens.Any(x => x.Jti == jtiGuid);
-
-        private void BlockTokenByJti(Guid jti, DateTimeOffset expiresAt)
-        {
-            _db.BlockedTokens.Insert(() => new BlockedTokenRecord
-            {
-                Jti = jti,
-                ExpirationTime = expiresAt
-            });
         }
     }
 

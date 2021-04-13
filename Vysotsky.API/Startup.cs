@@ -37,7 +37,9 @@ namespace Vysotsky.API
         {
             services.AddHealthChecks();
             services
+                .AddSingleton<ICurrentUserProvider, CurrentUserProvider>()
                 .AddSingleton<UnhandledExceptionMiddleware>()
+                .AddScoped<RevokableAuthenticationMiddleware>()
                 .AddOpenApiDocument(document =>
                 {
                     // Add an authenticate button to Swagger for JWT tokens
@@ -88,9 +90,7 @@ namespace Vysotsky.API
                 .AddJwtBearer(options =>
                 {
                     options.SecurityTokenValidators.Clear();
-                    options.SecurityTokenValidators.Add(
-                        // ReSharper disable once ASP0000
-                        new RevokableJwtSecurityTokenHandler(services!.BuildServiceProvider()));
+                    options.SecurityTokenValidators.Add(new RevokableJwtSecurityTokenHandler());
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateLifetime = true,
@@ -118,7 +118,9 @@ namespace Vysotsky.API
 
             services.Scan(t =>
                 t.FromAssemblyOf<IStringHasher>()
-                    .AddClasses(f => f.InExactNamespaces("Vysotsky.Service.Impl"))
+                    .AddClasses(f =>
+                        f.InExactNamespaces("Vysotsky.Service.Impl")
+                            .Where(x => x.IsPublic))
                     .AsImplementedInterfaces()
                     .WithScopedLifetime());
             services.AddSingleton(s => new SecureHasherOptions
@@ -142,10 +144,12 @@ namespace Vysotsky.API
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseMiddleware<RevokableAuthenticationMiddleware>();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
                 if (env.IsDevelopment())
+                {
                     endpoints.MapPost("/api/users/admin", async ctx =>
                     {
                         var hasher = ctx.RequestServices.GetRequiredService<IStringHasher>();
@@ -163,6 +167,12 @@ namespace Vysotsky.API
                         });
                         await ctx.Response.WriteAsync("OK");
                     });
+                    endpoints.MapGet("/api/currentUser", async ctx =>
+                    {
+                        var currentUser = ctx.RequestServices.GetRequiredService<ICurrentUserProvider>().CurrentUser;
+                        await ctx.Response.WriteAsJsonAsync(currentUser);
+                    });
+                }
             });
         }
     }

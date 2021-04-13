@@ -72,12 +72,26 @@ namespace Vysotsky.Service.Impl
         {
             var payload = DecodeToken(token);
             var exp = DateTimeOffset.FromUnixTimeSeconds(payload.Exp);
-            await _vysotskyDataConnection.BlockedTokens.InsertAsync(() => new BlockedTokenRecord
-            {
-                ExpirationTime = exp,
-                Jti = payload.Jti
-            });
+            await RevokeTokenByJtiAsync(payload.Jti, exp);
         }
+
+        public Task RevokeTokenByJtiAsync(Guid tokenIdentifier, DateTimeOffset expiration) =>
+            _vysotskyDataConnection.BlockedTokens
+                .InsertAsync(() => new BlockedTokenRecord
+                {
+                    ExpirationTime = expiration,
+                    Jti = tokenIdentifier
+                });
+
+        public Task<DateTimeOffset?> TryGetLastPasswordChangeTimeAsync(string username) =>
+            _vysotskyDataConnection.Users
+                .Where(u => u.Username == username)
+                .Select(u => u.LastPasswordChange)
+                .Cast<DateTimeOffset?>()
+                .SingleOrDefaultAsync();
+
+        public Task<bool> CheckTokenRevokedAsync(Guid tokenIdentifier) =>
+            _vysotskyDataConnection.BlockedTokens.AnyAsync(x => x.Jti == tokenIdentifier);
 
         private string EncodeToken(TokenPayload payload) =>
             JwtBuilder.Create()

@@ -37,8 +37,8 @@ namespace Vysotsky.Service.Impl
             };
         }
 
-        public Task<Organization?> GetOrganizationByIdOrNullAsync(long organizationId) =>
-            _dataConnection.Organizations
+        public async Task<Organization?> GetOrganizationByIdOrNullAsync(long organizationId) =>
+            await _dataConnection.Organizations
                 .Select(o => new Organization
                 {
                     Id = o.Id,
@@ -46,16 +46,16 @@ namespace Vysotsky.Service.Impl
                 })
                 .SingleOrDefaultAsync(x => x.Id == organizationId);
 
-        public Task UpdateOrganization(Organization newOrganization) =>
-            _dataConnection.Organizations
+        public async Task UpdateOrganization(Organization newOrganization) =>
+            await _dataConnection.Organizations
                 .UpdateAsync(o => o.Id == newOrganization.Id, o =>
                     new OrganizationRecord
                     {
                         Name = newOrganization.Name
                     });
 
-        public Task<Organization[]> GetAllOrganizations() =>
-            _dataConnection.Organizations
+        public async Task<Organization[]> GetAllOrganizations() =>
+            await _dataConnection.Organizations
                 .OrderBy(o => o.CreatedAt)
                 .Select(o => new Organization
                 {

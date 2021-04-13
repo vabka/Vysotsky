@@ -55,8 +55,8 @@ namespace Vysotsky.Service.Impl
                 })
                 .SingleOrDefaultAsync();
 
-        public Task<Building[]> GetAllBuildingsAsync() =>
-            _dataConnection.Buildings
+        public async Task<Building[]> GetAllBuildingsAsync() =>
+            await _dataConnection.Buildings
                 .OrderBy(b => b.CreatedAt)
                 .Select(b => new Building
                 {
@@ -65,8 +65,8 @@ namespace Vysotsky.Service.Impl
                 })
                 .ToArrayAsync();
 
-        public Task<Floor[]> GetAllFloorsInBuildingAsync(Building building) =>
-            _dataConnection.Floors
+        public async Task<Floor[]> GetAllFloorsInBuildingAsync(Building building) =>
+            await _dataConnection.Floors
                 .OrderBy(b => b.CreatedAt)
                 .Where(f => f.BuildingId == building.Id)
                 .Select(f => new Floor
@@ -76,8 +76,8 @@ namespace Vysotsky.Service.Impl
                 })
                 .ToArrayAsync();
 
-        public Task<Room[]> GetAllRoomsOnFloorAsync(Floor floor) =>
-            _dataConnection.Rooms
+        public async Task<Room[]> GetAllRoomsOnFloorAsync(Floor floor) =>
+            await _dataConnection.Rooms
                 .OrderBy(b => b.CreatedAt)
                 .Where(r => r.FloorId == floor.Id)
                 .Select(r => new Room

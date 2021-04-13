@@ -70,20 +70,20 @@ namespace Vysotsky.Service.Impl
             };
         }
 
-        public Task<User?> GetUserByIdOrNull(long userId) =>
-            _dataConnection.Users
+        public async Task<User?> GetUserByIdOrNull(long userId) =>
+            await _dataConnection.Users
                 .Where(u => u.Id == userId)
                 .Select(MapToUser)
                 .SingleOrDefaultAsync();
 
-        public Task<User?> GetUserByUsernameOrNullAsync(string username) =>
-            _dataConnection.Users
-                .Where(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase))
+        public async Task<User?> GetUserByUsernameOrNullAsync(string username) =>
+            await _dataConnection.Users
+                .Where(u => u.Username == username)
                 .Select(MapToUser)
                 .SingleOrDefaultAsync();
 
-        public Task<User[]> GetAllOrganizationMembersAsync(Organization organization) =>
-            _dataConnection.Users
+        public async Task<User[]> GetAllOrganizationMembersAsync(Organization organization) =>
+            await _dataConnection.Users
                 .Where(u => u.OrganizationId == organization.Id && u.Role == UserRole.OrganizationMember)
                 .Select(MapToUser)
                 .ToArrayAsync();

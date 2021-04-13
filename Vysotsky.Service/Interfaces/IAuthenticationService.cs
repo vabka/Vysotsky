@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Vysotsky.Service.Types;
 
@@ -9,5 +10,9 @@ namespace Vysotsky.Service.Interfaces
             bool longLiving = false);
 
         Task RevokeTokenAsync(string token);
+
+        Task RevokeTokenByJtiAsync(Guid tokenIdentifier, DateTimeOffset expiration);
+        Task<DateTimeOffset?> TryGetLastPasswordChangeTimeAsync(string username);
+        Task<bool> CheckTokenRevokedAsync(Guid tokenIdentifier);
     }
 }
