@@ -5,8 +5,8 @@ namespace Vysotsky.Service.Interfaces
 {
     public interface IOrganizationService
     {
-        Task<Organization> CreateOrganization(User owner, string name);
-        Task<Organization?> GetOrganizationByIdOrNull(long organizationId);
+        Task<Organization> CreateOrganizationAsync(string name);
+        Task<Organization?> GetOrganizationByIdOrNullAsync(long organizationId);
         Task UpdateOrganization(Organization newOrganization);
         Task<Organization[]> GetAllOrganizations();
     }

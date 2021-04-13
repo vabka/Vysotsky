@@ -27,10 +27,10 @@ namespace Vysotsky.API.Controllers.Users
         public string Password { get; init; } = null!;
         public PersonName Name { get; init; } = null!;
         public UserContactDto[] Contacts { get; init; } = Array.Empty<UserContactDto>();
-        public UserRoleDto RoleDto { get; init; }
+        public UserRoleDto Role { get; init; }
 
         public string? Image { get; init; }
-        //public CustomerProps? Customer { get; init; }
+        public OrganizationDto? Organization { get; init; }
     }
 
     public enum UserRoleDto

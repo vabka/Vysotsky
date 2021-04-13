@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Vysotsky.Data.Entities;
+using Vysotsky.Service.Types;
 
 namespace Vysotsky.Service.Interfaces
 {
@@ -11,10 +12,12 @@ namespace Vysotsky.Service.Interfaces
             string lastName,
             string? patronymic,
             UserContact[] contacts,
-            UserRole role);
+            UserRole role,
+            Organization? organization);
 
         public Task<User?> GetUserByIdOrNull(long userId);
         public Task<User?> GetUserByUsernameOrNullAsync(string username);
+        public Task<User[]> GetAllOrganizationMembersAsync(Organization organization);
     }
 
     public class User

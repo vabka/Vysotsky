@@ -1,10 +1,12 @@
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using LinqToDB;
 using Vysotsky.Data;
 using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
+using Vysotsky.Service.Types;
 
 namespace Vysotsky.Service.Impl
 {
@@ -13,18 +15,35 @@ namespace Vysotsky.Service.Impl
         private readonly VysotskyDataConnection _dataConnection;
         private readonly IStringHasher _hasher;
 
+        private static readonly Expression<Func<UserRecord, User>> MapToUser = u => new User
+        {
+            Id = u.Id,
+            Username = u.Username,
+            Firstname = u.FirstName,
+            LastName = u.LastName,
+            Patronymic = u.Patronymic,
+            Role = u.Role,
+            Contacts = u.Contacts,
+            OrganizationId = u.OrganizationId
+        };
+
         public UserService(VysotskyDataConnection dataConnection, IStringHasher hasher)
         {
             _dataConnection = dataConnection;
             _hasher = hasher;
         }
 
-        public async Task<User> RegisterUserAsync(string username, string password, string firstName, string lastName,
+        public async Task<User> RegisterUserAsync(string username,
+            string password,
+            string firstName,
+            string lastName,
             string? patronymic,
             UserContact[] contacts,
-            UserRole role)
+            UserRole role,
+            Organization? organization)
         {
             var passwordHash = _hasher.Hash(password);
+            var organizationId = organization?.Id;
             var id = await _dataConnection.Users
                 .InsertWithInt64IdentityAsync(() => new UserRecord
                 {
@@ -36,6 +55,7 @@ namespace Vysotsky.Service.Impl
                     Role = role,
                     LastPasswordChange = DateTimeOffset.Now,
                     ImageId = null,
+                    OrganizationId = organizationId
                 });
             return new User
             {
@@ -46,40 +66,26 @@ namespace Vysotsky.Service.Impl
                 Username = username,
                 Contacts = contacts,
                 Role = role,
-                OrganizationId = null
+                OrganizationId = organizationId
             };
         }
 
         public Task<User?> GetUserByIdOrNull(long userId) =>
             _dataConnection.Users
                 .Where(u => u.Id == userId)
-                .Select(u => new User
-                {
-                    Id = u.Id,
-                    Username = u.Username,
-                    Firstname = u.FirstName,
-                    LastName = u.LastName,
-                    Patronymic = u.Patronymic,
-                    Role = u.Role,
-                    Contacts = u.Contacts,
-                    OrganizationId = u.OrganizationId
-                })
+                .Select(MapToUser)
                 .SingleOrDefaultAsync();
 
         public Task<User?> GetUserByUsernameOrNullAsync(string username) =>
             _dataConnection.Users
                 .Where(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase))
-                .Select(u => new User
-                {
-                    Id = u.Id,
-                    Username = u.Username,
-                    Firstname = u.FirstName,
-                    LastName = u.LastName,
-                    Patronymic = u.Patronymic,
-                    Role = u.Role,
-                    Contacts = u.Contacts,
-                    OrganizationId = u.OrganizationId
-                })
+                .Select(MapToUser)
                 .SingleOrDefaultAsync();
+
+        public Task<User[]> GetAllOrganizationMembersAsync(Organization organization) =>
+            _dataConnection.Users
+                .Where(u => u.OrganizationId == organization.Id && u.Role == UserRole.OrganizationMember)
+                .Select(MapToUser)
+                .ToArrayAsync();
     }
 }

@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Controllers.Common;
 using Vysotsky.API.Controllers.Organizations.Dto;
+using Vysotsky.API.Controllers.Users;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Service.Interfaces;
+using OrganizationDto = Vysotsky.API.Controllers.Organizations.Dto.OrganizationDto;
 
 namespace Vysotsky.API.Controllers.Organizations
 {
@@ -14,18 +16,22 @@ namespace Vysotsky.API.Controllers.Organizations
     {
         private readonly IOrganizationService _organizationService;
         private readonly IRoomService _roomService;
+        private readonly IUserService _userService;
 
-        public OrganizationsController(IOrganizationService organizationService, IRoomService roomService)
+        public OrganizationsController(IOrganizationService organizationService,
+            IRoomService roomService,
+            IUserService userService)
         {
             _organizationService = organizationService;
             _roomService = roomService;
+            _userService = userService;
         }
 
         [HttpGet("{organizationId:long}/rooms")]
         public async Task<ActionResult<ApiResponse<OrganizationBuildingDto[]>>> GetOrganizationRooms(
             long organizationId)
         {
-            var organization = await _organizationService.GetOrganizationByIdOrNull(organizationId);
+            var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization == null)
                 return OrganizationNotFound(organizationId);
             var buildings = await _roomService.GetOrganizationBuildings(organization);
@@ -46,11 +52,31 @@ namespace Vysotsky.API.Controllers.Organizations
             }).ToArray());
         }
 
+        [HttpGet("{organizationId:long}/representatives")]
+        public async Task<ActionResult<ApiResponse<RepresentativeDto>>> GetAllRepresentatives(long organizationId)
+        {
+            var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
+            if (organization == null)
+                return OrganizationNotFound(organizationId);
+            var users = await _userService.GetAllOrganizationMembersAsync(organization);
+            return Ok(users.Select(u => new RepresentativeDto
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Name = new PersonName
+                {
+                    FirstName = u.Firstname,
+                    LastName = u.LastName,
+                    Patronymic = u.Patronymic
+                }
+            }).ToArray());
+        }
+
         [HttpGet("{organizationId:long}")]
         public async Task<ActionResult<ApiResponse<PersistedOrganizationDto>>> GetOrganization(
             [FromRoute] long organizationId)
         {
-            var organization = await _organizationService.GetOrganizationByIdOrNull(organizationId);
+            var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization == null)
                 return OrganizationNotFound(organizationId);
             return Ok(new PersistedOrganizationDto
@@ -67,7 +93,7 @@ namespace Vysotsky.API.Controllers.Organizations
         public async Task<ActionResult<ApiResponse>> UpdateOrganization([FromRoute] long organizationId,
             [FromBody] OrganizationDto organizationDtoProperties)
         {
-            var organization = await _organizationService.GetOrganizationByIdOrNull(organizationId);
+            var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization == null)
                 return OrganizationNotFound(organizationId);
             var newOrganization = organization with {Name = organizationDtoProperties.Name};
@@ -85,6 +111,13 @@ namespace Vysotsky.API.Controllers.Organizations
                 Name = o.Name
             }));
         }
+    }
+
+    public class RepresentativeDto
+    {
+        public long Id { get; set; }
+        public string Username { get; init; } = null!;
+        public PersonName Name { get; init; } = null!;
     }
 
     public class OrganizationBuildingDto

@@ -17,7 +17,7 @@ namespace Vysotsky.Service.Impl
             _dataConnection = dataConnection;
         }
 
-        public async Task<Organization> CreateOrganization(User owner, string name)
+        public async Task<Organization> CreateOrganizationAsync(string name)
         {
             await using var transaction = await _dataConnection.BeginTransactionAsync();
             var organizationId = await _dataConnection.Organizations.InsertWithInt64IdentityAsync(() =>
@@ -37,7 +37,7 @@ namespace Vysotsky.Service.Impl
             };
         }
 
-        public Task<Organization?> GetOrganizationByIdOrNull(long organizationId) =>
+        public Task<Organization?> GetOrganizationByIdOrNullAsync(long organizationId) =>
             _dataConnection.Organizations
                 .Select(o => new Organization
                 {

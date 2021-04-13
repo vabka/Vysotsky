@@ -11,15 +11,14 @@ namespace Vysotsky.API.Controllers.Employees
     [Route(Resources.Employees)]
     public class EmployeesController : ApiController
     {
-        /// <summary>
-        /// Получить сотрудника УК по id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet("{id:int}")]
-        public ActionResult<ApiResponse> GetEmployee(int id)
+        [HttpGet]
+        public ActionResult<ApiResponse<EmployeeDto[]>> GetAllEmployees()
         {
             throw new NotImplementedException();
         }
+    }
+
+    public class EmployeeDto
+    {
     }
 }
