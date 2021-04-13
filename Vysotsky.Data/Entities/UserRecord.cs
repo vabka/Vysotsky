@@ -16,7 +16,8 @@ namespace Vysotsky.Data.Entities
         [Column("last_password_change")] public DateTimeOffset LastPasswordChange { get; init; }
         [Column("patronymic")] public string? Patronymic { get; init; }
 
-        [Column("contacts", DataType = DataType.BinaryJson)]
+        //TODO Пока скип, тк хрень какая-то
+        [Column("contacts", DataType = DataType.BinaryJson, SkipOnEntityFetch = true)]
         public UserContact[] Contacts { get; init; } = null!;
 
         [Column("role", DbType = "user_role")] public UserRole Role { get; init; }
@@ -31,7 +32,7 @@ namespace Vysotsky.Data.Entities
         [MapValue("OrganizationOwner")] OrganizationOwner,
         [MapValue("OrganizationMember")] OrganizationMember
     }
-
+    
     public record UserContact
     {
         public string Name { get; init; } = null!;

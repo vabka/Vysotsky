@@ -60,24 +60,25 @@ namespace Vysotsky.API
                         s.GetRequiredService<IConfiguration>().GetValue<string>("PG_CONNECTION_STRING");
                     var options = new LinqToDbConnectionOptionsBuilder()
                         .UsePostgreSQL(connectionString)
+                        .WithTraceLevel(TraceLevel.Info)
                         .WriteTraceWith((param1, param2, l) =>
                         {
                             switch (l)
                             {
                                 case TraceLevel.Off:
-                                    logger.LogCritical("{Param1}: {Param2}", param1, param2);
+                                    logger.LogCritical("{LinqToDBScope}: {LinqToDBText}", param2, param1);
                                     break;
                                 case TraceLevel.Error:
-                                    logger.LogError("{Param1}: {Param2}", param1, param2);
+                                    logger.LogError("{LinqToDBScope}: {LinqToDBText}", param2, param1);
                                     break;
                                 case TraceLevel.Warning:
-                                    logger.LogWarning("{Param1}: {Param2}", param1, param2);
+                                    logger.LogWarning("{LinqToDBScope}: {LinqToDBText}", param2, param1);
                                     break;
                                 case TraceLevel.Info:
-                                    logger.LogInformation("{Param1}: {Param2}", param1, param2);
+                                    logger.LogInformation("{LinqToDBScope}: {LinqToDBText}", param2, param1);
                                     break;
                                 case TraceLevel.Verbose:
-                                    logger.LogDebug("{Param1}: {Param2}", param1, param2);
+                                    logger.LogDebug("{LinqToDBScope}: {LinqToDBText}", param2, param1);
                                     break;
                                 default:
                                     throw new ArgumentOutOfRangeException(nameof(l), l, null);
@@ -105,7 +106,8 @@ namespace Vysotsky.API
                 });
             services.AddHttpContextAccessor();
             services.AddAuthorizationCore();
-            services.AddControllers()
+            services
+                .AddControllers()
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
@@ -170,7 +172,10 @@ namespace Vysotsky.API
                     endpoints.MapGet("/api/currentUser", async ctx =>
                     {
                         var currentUser = ctx.RequestServices.GetRequiredService<ICurrentUserProvider>().CurrentUser;
-                        await ctx.Response.WriteAsJsonAsync(currentUser);
+                        await ctx.Response.WriteAsJsonAsync(currentUser, new JsonSerializerOptions()
+                        {
+                            Converters = {new JsonStringEnumConverter()}
+                        });
                     });
                 }
             });

@@ -23,7 +23,7 @@ namespace Vysotsky.Service.Impl
             LastName = u.LastName,
             Patronymic = u.Patronymic,
             Role = u.Role,
-            Contacts = u.Contacts,
+            //TODO Contacts = u.Contacts,
             OrganizationId = u.OrganizationId
         };
 

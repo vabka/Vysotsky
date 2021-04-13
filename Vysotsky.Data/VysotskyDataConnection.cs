@@ -46,6 +46,7 @@ namespace Vysotsky.Data
 
         public VysotskyDataConnection(LinqToDbConnectionOptions<VysotskyDataConnection> options) : base(options)
         {
+            InlineParameters = true;
         }
 
         public ITable<UserRecord> Users => GetTable<UserRecord>();
