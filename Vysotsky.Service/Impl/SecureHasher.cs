@@ -20,9 +20,4 @@ namespace Vysotsky.Service.Impl
             return alg.ComputeHash(Encoding.UTF8.GetBytes(source));
         }
     }
-
-    public class SecureHasherOptions
-    {
-        public string Salt { get; init; } = null!;
-    }
 }

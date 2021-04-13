@@ -8,7 +8,10 @@ namespace Vysotsky.Data.Entities
         [Column("room_id")] public long RoomId { get; init; }
         [Column("area_id")] public long AreaId { get; init; }
         [Column("category_id")] public long? CategoryId { get; init; }
-        [Column("status")] public IssueStatus Status { get; init; }
+
+        [Column("status", DbType = "issue_status")]
+        public IssueStatus Status { get; init; }
+
         [Column("title")] public string Title { get; init; } = null!;
         [Column("description")] public string Description { get; init; } = "";
         [Column("author_id")] public long AuthorId { get; init; }

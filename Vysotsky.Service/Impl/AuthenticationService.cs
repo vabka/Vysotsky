@@ -105,9 +105,4 @@ namespace Vysotsky.Service.Impl
             [JsonProperty("iat")] public long Iat { get; init; }
         }
     }
-
-    public class AuthenticationServiceOptions
-    {
-        public string Secret { get; init; } = null!;
-    }
 }

@@ -19,7 +19,7 @@ namespace Vysotsky.Data.Entities
         [Column("contacts", DataType = DataType.BinaryJson)]
         public UserContact[] Contacts { get; init; } = null!;
 
-        [Column("role")] public UserRole Role { get; init; }
+        [Column("role", DbType = "user_role")] public UserRole Role { get; init; }
         [Column("organization_id")] public long? OrganizationId { get; init; }
     }
 

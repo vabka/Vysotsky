@@ -32,8 +32,8 @@ namespace Vysotsky.Service.Impl
             _dataConnection = dataConnection;
             _hasher = hasher;
         }
-
-        public async Task<User> RegisterUserAsync(string username,
+        
+        public async Task<User> CreateUserAsync(string username,
             string password,
             string firstName,
             string lastName,

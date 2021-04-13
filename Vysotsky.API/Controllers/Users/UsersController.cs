@@ -17,11 +17,16 @@ namespace Vysotsky.API.Controllers.Users
     {
         private readonly IOrganizationService _organizationService;
         private readonly IUserService _userService;
+        private readonly IAtomicService _atomicService;
 
-        public UsersController(IOrganizationService organizationService, IUserService userService)
+
+        public UsersController(IOrganizationService organizationService,
+            IUserService userService,
+            IAtomicService atomicService)
         {
             _organizationService = organizationService;
             _userService = userService;
+            _atomicService = atomicService;
         }
 
         [HttpPost("{username}/organization")]
@@ -53,6 +58,7 @@ namespace Vysotsky.API.Controllers.Users
             if (user.Role == UserRoleDto.CustomerRepresentative)
                 return BadRequest("Representative can be created only in organization",
                     "users.cannotCreateUnattachedRepresentative");
+            await using var transaction = await _atomicService.BeginAtomicOperationAsync();
             Organization? organization = null;
             if (user.Role == UserRoleDto.Customer)
             {
@@ -61,7 +67,7 @@ namespace Vysotsky.API.Controllers.Users
                 organization = await _organizationService.CreateOrganizationAsync(user.Organization.Name);
             }
 
-            var createdUser = await _userService.RegisterUserAsync(user.Username,
+            var createdUser = await _userService.CreateUserAsync(user.Username,
                 user.Password,
                 user.Name.FirstName,
                 user.Name.LastName,
@@ -76,6 +82,7 @@ namespace Vysotsky.API.Controllers.Users
                     .ToArray(),
                 ToModel(user.Role),
                 organization);
+            await transaction.CompleteAsync();
             return Created(Resources.Users.AppendPathSegment(createdUser.Username), new PersistedUserDto
             {
                 Id = createdUser.Id,
