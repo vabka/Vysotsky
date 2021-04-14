@@ -16,27 +16,22 @@ namespace Vysotsky.Data
 {
     public class VysotskyDataConnection : DataConnection
     {
+        private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+        {
+            Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+            Converters = {new JsonStringEnumConverter()},
+            PropertyNameCaseInsensitive = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+
         static VysotskyDataConnection()
         {
-            var jsonSerializerOptions = new JsonSerializerOptions
-            {
-                Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
-                Converters = {new JsonStringEnumConverter()}
-            };
             NpgsqlConnection.GlobalTypeMapper
                 .AddMapping(new NpgsqlTypeMappingBuilder
                 {
                     PgTypeName = "jsonb",
                     NpgsqlDbType = NpgsqlDbType.Jsonb,
-                    ClrTypes = null,
-                    TypeHandlerFactory = new JsonbHandlerFactory(jsonSerializerOptions)
-                }.Build())
-                .AddMapping(new NpgsqlTypeMappingBuilder
-                {
-                    PgTypeName = "json",
-                    NpgsqlDbType = NpgsqlDbType.Json,
-                    ClrTypes = null,
-                    TypeHandlerFactory = new JsonHandlerFactory(jsonSerializerOptions)
+                    TypeHandlerFactory = new JsonbHandlerFactory(JsonSerializerOptions)
                 }.Build())
                 .MapEnum<IssueEvent>("issue_event", new NpgsqlNullNameTranslator())
                 .MapEnum<UserRole>("user_role", new NpgsqlNullNameTranslator())
@@ -47,6 +42,8 @@ namespace Vysotsky.Data
         public VysotskyDataConnection(LinqToDbConnectionOptions<VysotskyDataConnection> options) : base(options)
         {
             InlineParameters = true;
+            MappingSchema.SetConverter<string, UserContact[]?>(json =>
+                JsonSerializer.Deserialize<UserContact[]>(json, JsonSerializerOptions));
         }
 
         public ITable<UserRecord> Users => GetTable<UserRecord>();
