@@ -6,5 +6,6 @@ namespace Vysotsky.Service.Types
     {
         public long Id { get; init; }
         public FullFloor[] Floors { get; init; } = Array.Empty<FullFloor>();
+        public string Name { get; init; }
     }
 }

@@ -176,6 +176,7 @@ namespace Vysotsky.Service.Impl
             return buildingsData.Select(x => new FullBuilding
                 {
                     Id = x.Id,
+                    Name = x.Name,
                     Floors = floors[x.Id]
                 })
                 .ToArray();

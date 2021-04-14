@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Flurl;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,18 @@ namespace Vysotsky.API.Controllers.Users
             _organizationService = organizationService;
             _userService = userService;
             _atomicService = atomicService;
+        }
+
+        [HttpGet("{username}")]
+        public async Task<ActionResult<ApiResponse<PersistedUserDto>>> GetUser(string username)
+        {
+            var user = await _userService.GetUserByUsernameOrNullAsync(username);
+            if (user == null)
+                return UserNotFound(username);
+            var organization = user.OrganizationId.HasValue
+                ? await _organizationService.GetOrganizationByIdOrNullAsync(user.OrganizationId.Value)
+                : null;
+            return Ok(ToDto(user, organization));
         }
 
         [HttpPost("{username}/organization")]
@@ -83,7 +96,11 @@ namespace Vysotsky.API.Controllers.Users
                 ToModel(user.Role),
                 organization);
             await transaction.CompleteAsync();
-            return Created(Resources.Users.AppendPathSegment(createdUser.Username), new PersistedUserDto
+            return Created(Resources.Users.AppendPathSegment(createdUser.Username), ToDto(createdUser, organization));
+        }
+
+        private PersistedUserDto ToDto(User createdUser, Organization? organization) =>
+            new PersistedUserDto
             {
                 Id = createdUser.Id,
                 Username = createdUser.Username,
@@ -110,8 +127,7 @@ namespace Vysotsky.API.Controllers.Users
                         Type = ToDto(c.Type)
                     })
                     .ToArray()
-            });
-        }
+            };
 
         private UserContactTypeDto ToDto(ContactType argType) => argType switch
         {
@@ -147,7 +163,8 @@ namespace Vysotsky.API.Controllers.Users
         public string Username { get; init; } = null!;
         public PersonName Name { get; init; } = null!;
         public UserContactDto[] Contacts { get; init; } = Array.Empty<UserContactDto>();
-        public PersistedOrganizationDto? Organization { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public PersistedOrganizationDto? Organization { get; init; }
     }
 
     public class OrganizationDto

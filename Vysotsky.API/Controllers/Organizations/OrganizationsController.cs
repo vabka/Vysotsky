@@ -38,6 +38,7 @@ namespace Vysotsky.API.Controllers.Organizations
             return Ok(buildings.Select(b => new OrganizationBuildingDto
             {
                 Id = b.Id,
+                Name = b.Name,
                 Floors = b.Floors.Select(f => new OrganizationFloorDto
                 {
                     Id = f.Id,
