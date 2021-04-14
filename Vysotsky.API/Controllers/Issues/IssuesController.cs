@@ -7,7 +7,7 @@ using Vysotsky.API.Infrastructure;
 
 namespace Vysotsky.API.Controllers.Issues
 {
-    [Microsoft.AspNetCore.Components.Route(Resources.Issues)]
+    [Route(Resources.Issues)]
     public class IssuesController : ApiController
     {
         [HttpPost]

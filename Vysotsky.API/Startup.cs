@@ -24,7 +24,7 @@ using Vysotsky.Service.Interfaces;
 
 namespace Vysotsky.API
 {
-    internal class Startup
+    public class Startup
     {
         public Startup(IConfiguration configuration)
         {
@@ -34,6 +34,11 @@ namespace Vysotsky.API
         public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
+        {
+            ConfigureServices(services, Configuration);
+        }
+
+        public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             services.AddHealthChecks();
             services
@@ -101,7 +106,7 @@ namespace Vysotsky.API
                         ValidateTokenReplay = false,
                         IssuerSigningKey =
                             new SymmetricSecurityKey(
-                                Encoding.UTF8.GetBytes(Configuration.GetValue<string>("SECRET"))),
+                                Encoding.UTF8.GetBytes(configuration.GetValue<string>("SECRET"))),
                     };
                 });
             services.AddHttpContextAccessor();
@@ -137,11 +142,14 @@ namespace Vysotsky.API
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // app.UseHsts();
-            // Add OpenAPI/Swagger middlewares
+            ConfigureWebApp(app, env);
+        }
+
+        public static void ConfigureWebApp(IApplicationBuilder app, IWebHostEnvironment env)
+        {
             app.UseHealthChecks("/api/health");
-            app.UseSwaggerUi3(); // Serves the Swagger UI 3 web ui to view the OpenAPI/Swagger documents by default on `/swagger`
-            app.UseOpenApi(); // Serves the registered OpenAPI/Swagger documents by default on `/swagger/{documentName}/swagger.json`
+            app.UseSwaggerUi3();
+            app.UseOpenApi();
             app.UseMiddleware<UnhandledExceptionMiddleware>();
             app.UseRouting();
             app.UseAuthentication();
