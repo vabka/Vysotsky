@@ -1,6 +1,6 @@
 using System;
 
-namespace Vysotsky.API.Controllers.Auth
+namespace Vysotsky.API.Dto.Auth
 {
     public record AccessTokenContainer(string Token, DateTimeOffset ExpiresAt);
 }

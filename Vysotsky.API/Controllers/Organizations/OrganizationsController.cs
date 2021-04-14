@@ -40,7 +40,7 @@ namespace Vysotsky.API.Controllers.Organizations
             if (!_currentUserProvider.CanReadOrganization(organizationId))
                 return NotAuthorized("Only organization member can read organization data",
                     "organization.read.notAuthorized");
-            var buildings = await _roomService.GetOrganizationBuildings(organization);
+            var buildings = await _roomService.GetOrganizationBuildingsAsync(organization);
             return Ok(buildings.Select(b => new OrganizationBuildingDto
             {
                 Id = b.Id,

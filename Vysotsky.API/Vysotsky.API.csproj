@@ -13,6 +13,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.5" />
         <PackageReference Include="Scrutor" Version="3.3.0" />
         <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="5.0.1" />
+        <PackageReference Include="InterpolatedLogging.Microsoft.Extensions.Logging" Version="5.0.1" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Vysotsky.Service\Vysotsky.Service.csproj" PrivateAssets="All" />

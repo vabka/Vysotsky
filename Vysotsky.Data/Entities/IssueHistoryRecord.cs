@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using LinqToDB;
 using LinqToDB.Mapping;
 
 namespace Vysotsky.Data.Entities
@@ -8,7 +9,7 @@ namespace Vysotsky.Data.Entities
     {
         [Column("issue_id")] public long IssueId { get; init; }
         [Column("event", DbType = "issue_event")] public IssueEvent Event { get; init; }
-        [Column("extension")] public Dictionary<string, string>? Extension { get; init; }
+        [Column("extension", DataType = DataType.BinaryJson)] public Dictionary<string, string>? Extension { get; init; }
     }
 
     public enum IssueEvent
@@ -17,6 +18,5 @@ namespace Vysotsky.Data.Entities
         [MapValue("SupervisorChanged")] SupervisorChanged,
         [MapValue("WorkerChanged")] WorkerChanged,
         [MapValue("DescriptionChanged")] DescriptionChanged,
-        [MapValue("CommentAdded")] CommentAdded
     }
 }

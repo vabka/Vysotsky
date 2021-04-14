@@ -1,4 +1,5 @@
-﻿using System.Text.Encodings.Web;
+﻿using System.Collections.Generic;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Unicode;
@@ -44,6 +45,8 @@ namespace Vysotsky.Data
             InlineParameters = true;
             MappingSchema.SetConverter<string, UserContact[]?>(json =>
                 JsonSerializer.Deserialize<UserContact[]>(json, JsonSerializerOptions));
+            MappingSchema.SetConverter<string, Dictionary<string, string>?>(json =>
+                JsonSerializer.Deserialize<Dictionary<string, string>?>(json, JsonSerializerOptions));
         }
 
         public ITable<UserRecord> Users => GetTable<UserRecord>();

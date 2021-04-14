@@ -7,9 +7,9 @@ namespace Vysotsky.Service.Interfaces
 {
     public interface IRoomService
     {
-        Task<IEnumerable<FullBuilding>> GetOrganizationBuildings(Organization organization);
-        Task<Floor> CreateFloor(Building building, string number);
-        Task<Room> CreateRoom(Floor floor, string? name, string? number, RoomStatus status);
+        Task<IEnumerable<FullBuilding>> GetOrganizationBuildingsAsync(Organization organization);
+        Task<Floor> CreateFloorAsync(Building building, string number);
+        Task<Room> CreateRoomAsync(Floor floor, string? name, string? number, RoomStatus status);
         Task<Building> CreateBuildingAsync(string name);
         Task<Building?> GetBuildingByIdOrNullAsync(long buildingId);
         Task<Floor?> GetFloorByIdOrNullAsync(long floorId);
@@ -18,5 +18,6 @@ namespace Vysotsky.Service.Interfaces
         Task<Room[]> GetAllRoomsOnFloorAsync(Floor floor);
         Task DeleteBuildingCascadeByIdAsync(long buildingId);
         Task<Room[]> GetRoomsAsync(long[] organizationRooms);
+        Task<Room?> GetRoomByIdOrNullAsync(long roomId);
     }
 }

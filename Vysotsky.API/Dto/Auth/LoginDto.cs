@@ -1,6 +1,6 @@
-namespace Vysotsky.API.Controllers.Auth
+namespace Vysotsky.API.Dto.Auth
 {
-    public class Credentials
+    public class LoginDto
     {
         public string Username { get; init; } = null!;
 

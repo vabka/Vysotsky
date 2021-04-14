@@ -49,7 +49,7 @@ namespace Vysotsky.API.Controllers.Buildings
             var building = await _roomService.GetBuildingByIdOrNullAsync(buildingId);
             if (building == null)
                 return BuildingNotFound(buildingId);
-            var floor = await _roomService.CreateFloor(building, floorToCreate.Number);
+            var floor = await _roomService.CreateFloorAsync(building, floorToCreate.Number);
             return Created(Resources.Buildings
                     .AppendPathSegment(buildingId)
                     .AppendPathSegment("floors")
@@ -73,7 +73,7 @@ namespace Vysotsky.API.Controllers.Buildings
             var floor = await _roomService.GetFloorByIdOrNullAsync(floorId);
             if (floor?.BuildingId != building.Id)
                 return FloorInBuildingNotFound(buildingId, floorId);
-            var room = await _roomService.CreateRoom(floor, roomToCreate.Name, roomToCreate.Number,
+            var room = await _roomService.CreateRoomAsync(floor, roomToCreate.Name, roomToCreate.Number,
                 ToModel(roomToCreate.Status));
             return Created(
                 Resources.Buildings

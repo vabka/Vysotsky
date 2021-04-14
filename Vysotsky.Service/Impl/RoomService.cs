@@ -126,7 +126,13 @@ namespace Vysotsky.Service.Impl
                 .Select(MapToRoomExpr)
                 .ToArrayAsync();
 
-        public async Task<Floor> CreateFloor(Building building, string number)
+        public async Task<Room?> GetRoomByIdOrNullAsync(long roomId) =>
+            await _dataConnection.Rooms
+                .Where(r => r.Id == roomId)
+                .Select(MapToRoomExpr)
+                .SingleOrDefaultAsync();
+
+        public async Task<Floor> CreateFloorAsync(Building building, string number)
         {
             var id = await _dataConnection.Floors.InsertWithInt64IdentityAsync(() => new FloorRecord
             {
@@ -140,7 +146,7 @@ namespace Vysotsky.Service.Impl
             };
         }
 
-        public async Task<Room> CreateRoom(Floor floor, string? name, string? number, RoomStatus status)
+        public async Task<Room> CreateRoomAsync(Floor floor, string? name, string? number, RoomStatus status)
         {
             var id = await _dataConnection.Rooms.InsertWithInt64IdentityAsync(() => new RoomRecord
             {
@@ -158,7 +164,7 @@ namespace Vysotsky.Service.Impl
             };
         }
 
-        public async Task<IEnumerable<FullBuilding>> GetOrganizationBuildings(Organization organization)
+        public async Task<IEnumerable<FullBuilding>> GetOrganizationBuildingsAsync(Organization organization)
         {
             var roomsQuery = _dataConnection.Rooms
                 .Where(x => x.OwnerId == organization.Id);
