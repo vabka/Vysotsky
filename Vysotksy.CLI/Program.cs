@@ -11,9 +11,10 @@ using Vysotsky.Service.Impl;
 
 var hasher = new SecureHasher(new SecureHasherOptions
 {
-    Salt = "ZWFzeVNhbHQ="
+    Salt = Environment.GetEnvironmentVariable("SALT") ?? "ZWFzeVNhbHQ="
 });
-var connectionString = Environment.GetEnvironmentVariable("PG_CONNECTION_STRING");
+var connectionString = Environment.GetEnvironmentVariable("PG_CONNECTION_STRING") ??
+                       throw new InvalidOperationException("PG_CONNECTION_STRING is not set");
 var options = new LinqToDbConnectionOptionsBuilder()
     .UsePostgreSQL(connectionString)
     .WithTraceLevel(TraceLevel.Info)
@@ -114,7 +115,7 @@ async Task Seed(VysotskyDataConnection dataConnection)
         LastPasswordChange = DateTimeOffset.Now,
         Contacts = Array.Empty<UserContact>()
     });
-    var supervisorId = await dataConnection.Users.InsertWithInt64IdentityAsync(() => new UserRecord
+    await dataConnection.Users.InsertWithInt64IdentityAsync(() => new UserRecord
     {
         Username = "supervisor",
         PasswordHash = hasher.Hash("supervisor"),
@@ -124,7 +125,7 @@ async Task Seed(VysotskyDataConnection dataConnection)
         LastPasswordChange = DateTimeOffset.Now,
         Contacts = Array.Empty<UserContact>()
     });
-    var workerId = await dataConnection.Users.InsertWithInt64IdentityAsync(() => new UserRecord
+    await dataConnection.Users.InsertWithInt64IdentityAsync(() => new UserRecord
     {
         Username = "worker",
         PasswordHash = hasher.Hash("worker"),
@@ -143,12 +144,12 @@ async Task Seed(VysotskyDataConnection dataConnection)
         Name = "Электрика",
         ImageId = electrical
     });
-    var category = await dataConnection.Categories.InsertWithInt64IdentityAsync(() => new CategoryRecord
+    await dataConnection.Categories.InsertWithInt64IdentityAsync(() => new CategoryRecord
     {
         Name = "Лампочку заменить",
         AreaId = area
     });
-    var issue = await dataConnection.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
+    await dataConnection.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
     {
         Status = IssueStatus.New,
         AreaId = area,

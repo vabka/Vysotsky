@@ -88,8 +88,7 @@ namespace Vysotsky.API.Controllers.Users
                         Name = c.Name,
                         Value = c.Value,
                         Type = ToModel(c.Type)
-                    })
-                    .ToArray(),
+                    }),
                 ToModel(user.Role),
                 organization);
             await transaction.CompleteAsync();
@@ -123,7 +122,7 @@ namespace Vysotsky.API.Controllers.Users
                         Value = c.Value,
                         Type = ToDto(c.Type)
                     })
-                    .ToArray()
+                    
             };
 
         private UserContactTypeDto ToDto(ContactType argType) => argType switch

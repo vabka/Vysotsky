@@ -122,7 +122,7 @@ namespace Vysotsky.API.Controllers.Buildings
                 Number = f.Number
             }));
         }
-        
+
         [HttpGet("{buildingId:long}/floors/{floorId:long}/rooms")]
         public async Task<ActionResult<ApiResponse<PersistedRoomDto[]>>> GetAllRoomsOnFloor([FromRoute] long buildingId,
             [FromRoute] long floorId)
@@ -143,7 +143,7 @@ namespace Vysotsky.API.Controllers.Buildings
                     Number = r.Number,
                     Status = ToDto(r.Status)
                 })
-                .ToArray());
+            );
         }
 
         private static RoomStatusDto ToDto(RoomStatus status) =>

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Vysotsky.API.Dto.Organizations
 {
@@ -6,6 +7,6 @@ namespace Vysotsky.API.Dto.Organizations
     {
         public long Id { get; init; }
         public string Name { get; init; } = null!;
-        public OrganizationFloorDto[] Floors { get; init; } = Array.Empty<OrganizationFloorDto>();
+        public IEnumerable<OrganizationFloorDto> Floors { get; init; } = Array.Empty<OrganizationFloorDto>();
     }
 }

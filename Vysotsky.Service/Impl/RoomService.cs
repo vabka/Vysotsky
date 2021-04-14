@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -157,7 +158,7 @@ namespace Vysotsky.Service.Impl
             };
         }
 
-        public async Task<FullBuilding[]> GetOrganizationBuildings(Organization organization)
+        public async Task<IEnumerable<FullBuilding>> GetOrganizationBuildings(Organization organization)
         {
             var roomsQuery = _dataConnection.Rooms
                 .Where(x => x.OwnerId == organization.Id);
@@ -166,7 +167,7 @@ namespace Vysotsky.Service.Impl
             if (roomsData.Length == 0)
                 return Array.Empty<FullBuilding>();
             var rooms = roomsData.GroupBy(x => x.FloorId, MapToRoom)
-                .ToDictionary(x => x.Key, x => x.ToArray());
+                .ToDictionary(x => x.Key, x => x);
 
             var floorsQuery = from room in roomsQuery
                 group room by room.FloorId
@@ -180,7 +181,7 @@ namespace Vysotsky.Service.Impl
                     Id = x.Id,
                     Number = x.Number,
                     Rooms = rooms[x.Id]
-                }).ToDictionary(x => x.Key, x => x.ToArray());
+                }).ToDictionary(x => x.Key, x => x);
 
             var buildingsQuery = from floor in floorsQuery
                 group floor by floor.BuildingId
@@ -194,7 +195,7 @@ namespace Vysotsky.Service.Impl
                     Name = x.Name,
                     Floors = floors[x.Id]
                 })
-                .ToArray();
+                ;
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vysotsky.Data.Entities;
 using Vysotsky.Service.Types;
@@ -6,7 +7,7 @@ namespace Vysotsky.Service.Interfaces
 {
     public interface IRoomService
     {
-        Task<FullBuilding[]> GetOrganizationBuildings(Organization organization);
+        Task<IEnumerable<FullBuilding>> GetOrganizationBuildings(Organization organization);
         Task<Floor> CreateFloor(Building building, string number);
         Task<Room> CreateRoom(Floor floor, string? name, string? number, RoomStatus status);
         Task<Building> CreateBuildingAsync(string name);

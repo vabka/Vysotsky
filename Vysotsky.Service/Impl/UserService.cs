@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -32,17 +33,18 @@ namespace Vysotsky.Service.Impl
             _dataConnection = dataConnection;
             _hasher = hasher;
         }
-        
+
         public async Task<User> CreateUserAsync(string username,
             string password,
             string firstName,
             string lastName,
             string? patronymic,
-            UserContact[] contacts,
+            IEnumerable<UserContact> contacts,
             UserRole role,
             Organization? organization)
         {
             var passwordHash = _hasher.Hash(password);
+            var contactsArray = contacts.ToArray();
             var organizationId = organization?.Id;
             var id = await _dataConnection.Users
                 .InsertWithInt64IdentityAsync(() => new UserRecord
@@ -55,7 +57,8 @@ namespace Vysotsky.Service.Impl
                     Role = role,
                     LastPasswordChange = DateTimeOffset.Now,
                     ImageId = null,
-                    OrganizationId = organizationId
+                    OrganizationId = organizationId,
+                    Contacts = contactsArray
                 });
             return new User
             {
@@ -64,7 +67,7 @@ namespace Vysotsky.Service.Impl
                 LastName = lastName,
                 Patronymic = patronymic,
                 Username = username,
-                Contacts = contacts,
+                Contacts = contactsArray,
                 Role = role,
                 OrganizationId = organizationId
             };
@@ -82,7 +85,7 @@ namespace Vysotsky.Service.Impl
                 .Select(MapToUser)
                 .SingleOrDefaultAsync();
 
-        public async Task<User[]> GetAllOrganizationMembersAsync(Organization organization) =>
+        public async Task<IEnumerable<User>> GetAllOrganizationMembersAsync(Organization organization) =>
             await _dataConnection.Users
                 .Where(u => u.OrganizationId == organization.Id && u.Role == UserRole.OrganizationMember)
                 .Select(MapToUser)

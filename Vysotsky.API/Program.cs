@@ -1,14 +1,35 @@
 using System;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Unicode;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.HostFiltering;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Vysotsky.API;
 
 Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration(_ => { })
+    .ConfigureLogging((ctx, builder) =>
+    {
+        builder.ClearProviders();
+        if (ctx.HostingEnvironment.IsProduction() || ctx.HostingEnvironment.IsStaging())
+            builder.AddJsonConsole(c =>
+            {
+                c.UseUtcTimestamp = true;
+                c.IncludeScopes = true;
+                c.JsonWriterOptions = new JsonWriterOptions
+                {
+                    Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+                    Indented = false
+                };
+            });
+        else
+            builder.AddConsole(c => c.FormatterName = "simple");
+    })
     .ConfigureWebHost(builder =>
     {
         builder

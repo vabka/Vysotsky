@@ -54,9 +54,9 @@ namespace Vysotsky.API.Controllers.Organizations
                         Id = r.Id,
                         Name = r.Name,
                         Number = r.Number
-                    }).ToArray()
-                }).ToArray()
-            }).ToArray());
+                    })
+                })
+            }));
         }
 
         [HttpGet("{organizationId:long}/representatives")]
@@ -85,7 +85,7 @@ namespace Vysotsky.API.Controllers.Organizations
                     LastName = u.LastName,
                     Patronymic = u.Patronymic
                 }
-            }).ToArray());
+            }));
         }
 
         [HttpGet("{organizationId:long}")]

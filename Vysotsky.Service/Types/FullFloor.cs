@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Vysotsky.Service.Types
 {
@@ -6,6 +7,6 @@ namespace Vysotsky.Service.Types
     {
         public long Id { get; init; }
         public string Number { get; set; } = null!;
-        public Room[] Rooms { get; set; } = Array.Empty<Room>();
+        public IEnumerable<Room> Rooms { get; set; } = Array.Empty<Room>();
     }
 }
