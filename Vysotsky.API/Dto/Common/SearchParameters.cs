@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Vysotsky.API.Controllers.Common
+namespace Vysotsky.API.Dto.Common
 {
     public class SearchParameters
     {

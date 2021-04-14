@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
-using Vysotsky.API.Controllers.Common;
+using Vysotsky.API.Dto.Common;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Service.Interfaces;
 

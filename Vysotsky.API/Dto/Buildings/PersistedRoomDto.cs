@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Vysotsky.API.Controllers.Buildings
+namespace Vysotsky.API.Dto.Buildings
 {
     public class PersistedRoomDto
     {

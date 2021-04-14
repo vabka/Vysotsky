@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Vysotsky.API.Controllers.Common;
+using Vysotsky.API.Dto.Common;
 
 
 namespace Vysotsky.API.Controllers

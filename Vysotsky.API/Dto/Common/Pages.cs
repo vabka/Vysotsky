@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Vysotsky.API.Controllers.Common
+namespace Vysotsky.API.Dto.Common
 {
     /// <summary>
     /// Набор возможных страниц для перехода

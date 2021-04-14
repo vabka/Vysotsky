@@ -1,4 +1,4 @@
-namespace Vysotsky.API.Controllers.Buildings
+namespace Vysotsky.API.Dto.Buildings
 {
     public class RoomDto
     {

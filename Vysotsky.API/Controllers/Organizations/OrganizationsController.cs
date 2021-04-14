@@ -1,14 +1,13 @@
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Vysotsky.API.Controllers.Common;
-using Vysotsky.API.Controllers.Organizations.Dto;
-using Vysotsky.API.Controllers.Users;
+using Vysotsky.API.Dto.Common;
+using Vysotsky.API.Dto.Organizations;
+using Vysotsky.API.Dto.Users;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
-using OrganizationDto = Vysotsky.API.Controllers.Organizations.Dto.OrganizationDto;
+using OrganizationDto = Vysotsky.API.Dto.Organizations.OrganizationDto;
 
 namespace Vysotsky.API.Controllers.Organizations
 {
@@ -134,33 +133,5 @@ namespace Vysotsky.API.Controllers.Organizations
                 Name = o.Name
             }));
         }
-    }
-
-    public class RepresentativeDto
-    {
-        public long Id { get; set; }
-        public string Username { get; init; } = null!;
-        public PersonName Name { get; init; } = null!;
-    }
-
-    public class OrganizationBuildingDto
-    {
-        public long Id { get; init; }
-        public string Name { get; init; } = null!;
-        public OrganizationFloorDto[] Floors { get; init; } = Array.Empty<OrganizationFloorDto>();
-    }
-
-    public class OrganizationFloorDto
-    {
-        public long Id { get; init; }
-        public string Number { get; init; } = null!;
-        public OrganizationRoomDto[] Rooms { get; init; } = Array.Empty<OrganizationRoomDto>();
-    }
-
-    public class OrganizationRoomDto
-    {
-        public long Id { get; init; }
-        public string? Name { get; init; }
-        public string? Number { get; init; }
     }
 }

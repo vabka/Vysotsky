@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Vysotsky.API.Controllers.Common;
+using Vysotsky.API.Dto.Common;
 
 namespace Vysotsky.API.Infrastructure
 {

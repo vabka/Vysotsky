@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Flurl;
 using Microsoft.AspNetCore.Mvc;
-using Vysotsky.API.Controllers.Common;
-using Vysotsky.API.Controllers.Organizations.Dto;
+using Vysotsky.API.Dto.Common;
+using Vysotsky.API.Dto.Organizations;
+using Vysotsky.API.Dto.Users;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
@@ -151,22 +151,5 @@ namespace Vysotsky.API.Controllers.Users
 
         private NotFoundObjectResult UserNotFound(string username) =>
             NotFound($"User by not found by id {username}", "users.userNotFound");
-    }
-
-    public class PersistedUserDto
-    {
-        public long Id { get; init; }
-        public string Username { get; init; } = null!;
-        public PersonName Name { get; init; } = null!;
-        public UserContactDto[] Contacts { get; init; } = Array.Empty<UserContactDto>();
-
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public PersistedOrganizationDto? Organization { get; init; }
-    }
-
-    public class OrganizationDto
-    {
-        public string Name { get; init; } = null!;
-        public long[] Rooms { get; init; } = Array.Empty<long>();
     }
 }

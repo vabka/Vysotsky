@@ -25,42 +25,4 @@ namespace Vysotsky.API.Infrastructure
             };
         }
     }
-
-    public class SecurityTokenInvalidException : SecurityTokenException
-    {
-        public SecurityTokenInvalidException(string message) : base(message)
-        {
-        }
-    }
-
-    public class SecurityTokenRevokedException : SecurityTokenException
-    {
-        public SecurityTokenRevokedException()
-        {
-        }
-
-        public SecurityTokenRevokedException(string message) : base(message)
-        {
-        }
-
-        public SecurityTokenRevokedException(string message, Exception innerException) : base(message, innerException)
-        {
-        }
-    }
-
-    public class SecurityTokenIsNotActualException : SecurityTokenException
-    {
-        public SecurityTokenIsNotActualException()
-        {
-        }
-
-        public SecurityTokenIsNotActualException(string message) : base(message)
-        {
-        }
-
-        public SecurityTokenIsNotActualException(string message, Exception innerException) : base(message,
-            innerException)
-        {
-        }
-    }
 }

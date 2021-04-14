@@ -1,7 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Vysotsky.API.Controllers.Common;
+using Vysotsky.API.Dto.Common;
+using Vysotsky.API.Dto.Issues;
 using Vysotsky.API.Infrastructure;
 
 namespace Vysotsky.API.Controllers.Issues
@@ -14,9 +15,5 @@ namespace Vysotsky.API.Controllers.Issues
         {
             throw new NotImplementedException();
         }
-    }
-
-    public class PersistedIssue
-    {
     }
 }
