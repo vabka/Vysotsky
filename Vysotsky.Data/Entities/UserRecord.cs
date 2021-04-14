@@ -1,11 +1,12 @@
 using System;
 using LinqToDB;
 using LinqToDB.Mapping;
+using Vysotsky.Data.Entities.Abstraction;
 
 namespace Vysotsky.Data.Entities
 {
     [Table("user")]
-    public class UserRecord : Entity
+    public class UserRecord : SortableEntity
     {
         [Column("username")] public string Username { get; init; } = null!;
         [Column("password_hash")] public byte[] PasswordHash { get; init; } = null!;
@@ -21,26 +22,5 @@ namespace Vysotsky.Data.Entities
 
         [Column("role", DbType = "user_role")] public UserRole Role { get; init; }
         [Column("organization_id")] public long? OrganizationId { get; init; }
-    }
-
-    public enum UserRole
-    {
-        [MapValue("SuperUser")] SuperUser,
-        [MapValue("Supervisor")] Supervisor,
-        [MapValue("Worker")] Worker,
-        [MapValue("OrganizationOwner")] OrganizationOwner,
-        [MapValue("OrganizationMember")] OrganizationMember
-    }
-
-    public record UserContact
-    {
-        public string Name { get; init; } = null!;
-        public string Value { get; init; } = null!;
-        public ContactType Type { get; init; }
-    }
-
-    public enum ContactType
-    {
-        Phone
     }
 }

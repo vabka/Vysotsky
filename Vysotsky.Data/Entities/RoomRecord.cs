@@ -1,9 +1,10 @@
 using LinqToDB.Mapping;
+using Vysotsky.Data.Entities.Abstraction;
 
 namespace Vysotsky.Data.Entities
 {
     [Table("room")]
-    public class RoomRecord : Entity
+    public class RoomRecord : SortableEntity
     {
         [Column("name")] public string? Name { get; init; }
         [Column("number")] public string? Number { get; init; }
@@ -12,13 +13,5 @@ namespace Vysotsky.Data.Entities
 
         [Column("status", DbType = "room_status")]
         public RoomStatus Status { get; init; }
-    }
-
-    public enum RoomStatus
-    {
-        [MapValue("Free")] Free,
-        [MapValue("Owned")] Owned,
-        [MapValue("Rented")] Rented,
-        [MapValue("Unavailable")] Unavailable
     }
 }

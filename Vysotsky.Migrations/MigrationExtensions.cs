@@ -21,6 +21,22 @@ namespace Vysotsky.Migrations
                 .AsDateTimeOffset()
                 .WithDefault(SystemMethods.CurrentUTCDateTime);
 
+        public static ICreateTableWithColumnSyntax VersionedEntity(this ICreateExpressionRoot create, string name) =>
+            create.Table(name)
+                .WithColumn("id")
+                .AsInt64()
+                .Identity()
+                .PrimaryKey()
+                .WithColumn("version")
+                .AsInt64()
+                .PrimaryKey()
+                .WithColumn("created_at")
+                .AsDateTimeOffset()
+                .WithDefault(SystemMethods.CurrentUTCDateTime)
+                .WithColumn("updated_at")
+                .AsDateTimeOffset()
+                .WithDefault(SystemMethods.CurrentUTCDateTime);
+
         public static void CreateEnum(this IExecuteExpressionRoot execute, string name, params string[] values) =>
             execute.Sql($"CREATE TYPE {name} as ENUM ({string.Join(", ", values.Select(v => $"'{v}'"))});");
 
@@ -31,7 +47,8 @@ namespace Vysotsky.Migrations
             this ICreateTableColumnAsTypeSyntax column, string primary) =>
             column.AsInt64().ForeignKey(primary, "id");
 
-        public static IAlterTableColumnOptionOrAddColumnOrAlterColumnOrForeignKeyCascadeSyntax References(this IAlterTableColumnAsTypeSyntax column, string primary) =>
+        public static IAlterTableColumnOptionOrAddColumnOrAlterColumnOrForeignKeyCascadeSyntax References(
+            this IAlterTableColumnAsTypeSyntax column, string primary) =>
             column.AsInt64().ForeignKey(primary, "id");
 
         public static TNext AsJsonb<TNext>(this IColumnTypeSyntax<TNext> column) where TNext : IFluentSyntax =>

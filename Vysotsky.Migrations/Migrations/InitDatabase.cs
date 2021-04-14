@@ -68,7 +68,7 @@ namespace Vysotsky.Migrations.Migrations
                 "Completed",
                 "Accepted",
                 "Closed");
-            Create.Entity("issue")
+            Create.VersionedEntity("issue")
                 .WithColumn("status").AsEnum("issue_status")
                 .WithColumn("title").AsString()
                 .WithColumn("description").AsString()
@@ -90,17 +90,6 @@ namespace Vysotsky.Migrations.Migrations
             Create.Table("issue_comment_image")
                 .WithColumn("issue_comment_id").References("issue_comment")
                 .WithColumn("image_id").References("image");
-
-            Execute.CreateEnum("issue_event",
-                "StatusChanged",
-                "SupervisorChanged",
-                "WorkerChanged",
-                "DescriptionChanged",
-                "CommentAdded");
-            Create.Entity("issue_history")
-                .WithColumn("issue_id").References("issue")
-                .WithColumn("event").AsEnum("issue_event")
-                .WithColumn("extension").AsJsonb();
         }
 
         public override void Down()
@@ -121,8 +110,6 @@ namespace Vysotsky.Migrations.Migrations
             Delete.Table("issue_image");
             Delete.Table("issue_comment");
             Delete.Table("issue_comment_image");
-            Delete.Table("issue_history");
-            Execute.DropEnum("issue_event");
         }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LinqToDB;
@@ -40,66 +39,68 @@ namespace Vysotsky.Service.Impl
                 Note = "",
                 Status = IssueStatus.New
             });
-            return new Issue
-            {
-                Id = id
-            };
+            return (await GetIssueByIdOrNullAsync(id))!;
         }
 
         public async Task<Issue?> GetIssueByIdOrNullAsync(long issueId) =>
-            await _vysotskyDataConnection.Issues.Where(x => x.Id == issueId)
+            await _vysotskyDataConnection.Issues
+                .Where(x => x.Id == issueId)
+                .OrderByDescending(x => x.Version)
                 .Select(i => new Issue
                 {
                     Id = i.Id,
-                    Status = i.Status
+                    Version = i.Version,
+                    Status = i.Status,
+                    Title = i.Title,
+                    Description = i.Description,
+                    Note = i.Note,
+                    AreaId = i.AreaId,
+                    CategoryId = i.CategoryId,
+                    CreatedAt = i.CreatedAt,
+                    UpdatedAt = i.UpdatedAt,
+                    RoomId = i.RoomId,
+                    SupervisorId = i.SupervisorId,
+                    WorkerId = i.WorkerId,
+                    AuthorId = i.AuthorId
                 })
+                .Take(1)
                 .SingleOrDefaultAsync();
 
         public async Task<Issue> MoveIssueToNeedInformation(Issue issue, User supervisor, string message)
         {
-            await using var transaction = await _vysotskyDataConnection.BeginTransactionAsync();
             switch (issue.Status)
             {
                 case IssueStatus.InProgress:
                 case IssueStatus.New:
-                    await _vysotskyDataConnection.Issues.UpdateAsync(i => i.Id == issue.Id,
-                        _ => new IssueRecord
-                        {
-                            Status = IssueStatus.NeedInfo,
-                            SupervisorId = supervisor.Id
-                        });
+                {
+                    await using var transaction = await _vysotskyDataConnection.BeginTransactionAsync();
+
                     await _vysotskyDataConnection.IssueComments.InsertAsync(() => new IssueCommentRecord
                     {
                         IssueId = issue.Id,
                         AuthorId = supervisor.Id,
                         Text = message
                     });
-                {
-                    var extension = new Dictionary<string, string>
-                    {
-                        {"NewSupervisor", supervisor.Username}
-                    };
-                    await _vysotskyDataConnection.IssueHistory.InsertAsync(() => new IssueHistoryRecord
-                    {
-                        IssueId = issue.Id,
-                        Event = IssueEvent.SupervisorChanged,
-                        Extension = extension
-                    });
-                }
-                {
-                    var extension = new Dictionary<string, string>
-                    {
-                        {"NewState", IssueStatus.NeedInfo.ToString()}
-                    };
-                    await _vysotskyDataConnection.IssueHistory.InsertAsync(() => new IssueHistoryRecord
-                    {
-                        IssueId = issue.Id,
-                        Event = IssueEvent.StatusChanged,
-                        Extension = extension
-                    });
+                    await _vysotskyDataConnection.Issues.InsertAsync(
+                        () => new IssueRecord
+                        {
+                            Id = issue.Id,
+                            Version = issue.Version + 1,
+                            Status = IssueStatus.NeedInfo,
+                            SupervisorId = supervisor.Id,
+                            Title = issue.Title,
+                            Description = issue.Description,
+                            Note = issue.Note,
+                            AuthorId = issue.AuthorId,
+                            AreaId = issue.AreaId,
+                            CategoryId = issue.CategoryId,
+                            RoomId = issue.RoomId,
+                            WorkerId = issue.WorkerId,
+                            CreatedAt = issue.CreatedAt
+                        });
+                    await transaction.CommitAsync();
                 }
                     issue = (await GetIssueByIdOrNullAsync(issue.Id))!;
-                    await transaction.CommitAsync();
                     break;
                 case IssueStatus.Completed:
                 case IssueStatus.Accepted:

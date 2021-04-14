@@ -1,9 +1,10 @@
 using LinqToDB.Mapping;
+using Vysotsky.Data.Entities.Abstraction;
 
 namespace Vysotsky.Data.Entities
 {
     [Table("issue")]
-    public class IssueRecord : Entity
+    public class IssueRecord : VersionedEntity
     {
         [Column("room_id")] public long RoomId { get; init; }
         [Column("area_id")] public long AreaId { get; init; }
@@ -18,17 +19,5 @@ namespace Vysotsky.Data.Entities
         [Column("supervisor_id")] public long? SupervisorId { get; init; }
         [Column("worker_id")] public long? WorkerId { get; init; }
         [Column("note")] public string Note { get; init; } = "";
-    }
-
-    public enum IssueStatus
-    {
-        [MapValue("New")] New,
-        [MapValue("Cancelled")] CancelledByCustomer,
-        [MapValue("NeedInfo")] NeedInfo,
-        [MapValue("Rejected")] Rejected,
-        [MapValue("InProgress")] InProgress,
-        [MapValue("Completed")] Completed,
-        [MapValue("Accepted")] Accepted,
-        [MapValue("Closed")] Closed
     }
 }

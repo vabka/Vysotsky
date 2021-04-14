@@ -34,7 +34,6 @@ namespace Vysotsky.Data
                     NpgsqlDbType = NpgsqlDbType.Jsonb,
                     TypeHandlerFactory = new JsonbHandlerFactory(JsonSerializerOptions)
                 }.Build())
-                .MapEnum<IssueEvent>("issue_event", new NpgsqlNullNameTranslator())
                 .MapEnum<UserRole>("user_role", new NpgsqlNullNameTranslator())
                 .MapEnum<IssueStatus>("issue_status", new NpgsqlNullNameTranslator())
                 .MapEnum<RoomStatus>("room_status", new NpgsqlNullNameTranslator());
@@ -62,6 +61,5 @@ namespace Vysotsky.Data
         public ITable<IssueCommentImageRelation> IssueCommentImages => GetTable<IssueCommentImageRelation>();
         public ITable<CategoryRecord> Categories => GetTable<CategoryRecord>();
         public ITable<AreaRecord> Areas => GetTable<AreaRecord>();
-        public ITable<IssueHistoryRecord> IssueHistory => GetTable<IssueHistoryRecord>();
     }
 }
