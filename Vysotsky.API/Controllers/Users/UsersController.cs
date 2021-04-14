@@ -19,47 +19,39 @@ namespace Vysotsky.API.Controllers.Users
         private readonly IOrganizationService _organizationService;
         private readonly IUserService _userService;
         private readonly IAtomicService _atomicService;
-
+        private readonly ICurrentUserProvider _currentUserProvider;
+        private readonly IRoomService _roomService;
 
         public UsersController(IOrganizationService organizationService,
             IUserService userService,
-            IAtomicService atomicService)
+            IAtomicService atomicService,
+            ICurrentUserProvider currentUserProvider,
+            IRoomService roomService)
         {
             _organizationService = organizationService;
             _userService = userService;
             _atomicService = atomicService;
+            _currentUserProvider = currentUserProvider;
+            _roomService = roomService;
         }
 
         [HttpGet("{username}")]
         public async Task<ActionResult<ApiResponse<PersistedUserDto>>> GetUser(string username)
         {
             var user = await _userService.GetUserByUsernameOrNullAsync(username);
-            if (user == null)
-                return UserNotFound(username);
+            switch (user)
+            {
+                case {OrganizationId: not null and var userOrganizationId}
+                    when !_currentUserProvider.CanReadOrganization(userOrganizationId.Value):
+                    return NotAuthorized("Customer cant access another customer", "users.notAuthorized");
+                case null:
+                    return UserNotFound(username);
+            }
+
             var organization = user.OrganizationId.HasValue
                 ? await _organizationService.GetOrganizationByIdOrNullAsync(user.OrganizationId.Value)
                 : null;
             return Ok(ToDto(user, organization));
-        }
-
-        [HttpPost("{username}/organization")]
-        public async Task<ActionResult<ApiResponse<PersistedOrganizationDto>>> CreateOrganization(string username,
-            [FromBody] OrganizationDto organizationDto)
-        {
-            var user = await _userService.GetUserByUsernameOrNullAsync(username);
-            if (user == null)
-                return UserNotFound(username);
-            if (user.OrganizationId != null)
-                return Error("Organization is readonly", "users.organization.readonly", 405);
-            if (user.Role != UserRole.OrganizationOwner)
-                return NotFound("This user cant own organization", "user.organization.invalidUser");
-            var createdOrganization = await _organizationService.CreateOrganizationAsync(organizationDto.Name);
-            return Created(Resources.Organizations.AppendPathSegment(createdOrganization.Id),
-                new PersistedOrganizationDto
-                {
-                    Id = createdOrganization.Id,
-                    Name = createdOrganization.Name
-                });
         }
 
         [HttpPost]
@@ -77,7 +69,12 @@ namespace Vysotsky.API.Controllers.Users
             {
                 if (user.Organization == null)
                     return BadRequest("Organization field in necessary", "users.necessaryFieldMissing");
-                organization = await _organizationService.CreateOrganizationAsync(user.Organization.Name);
+                var rooms = await _roomService.GetRoomsAsync(user.Organization.Rooms);
+                if (rooms.Any(room => room.OwnerId.HasValue))
+                    return BadRequest("Can't obtain room", "rooms.occupied");
+                if (rooms.Length != user.Organization.Rooms.Length)
+                    return BadRequest("Some rooms are not exist", "rooms.notFound");
+                organization = await _organizationService.CreateOrganizationAsync(user.Organization.Name, rooms);
             }
 
             var createdUser = await _userService.CreateUserAsync(user.Username,
@@ -152,7 +149,6 @@ namespace Vysotsky.API.Controllers.Users
                 _ => throw new ArgumentOutOfRangeException()
             };
 
-        [HttpGet]
         private NotFoundObjectResult UserNotFound(string username) =>
             NotFound($"User by not found by id {username}", "users.userNotFound");
     }
@@ -163,6 +159,7 @@ namespace Vysotsky.API.Controllers.Users
         public string Username { get; init; } = null!;
         public PersonName Name { get; init; } = null!;
         public UserContactDto[] Contacts { get; init; } = Array.Empty<UserContactDto>();
+
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public PersistedOrganizationDto? Organization { get; init; }
     }
@@ -170,5 +167,6 @@ namespace Vysotsky.API.Controllers.Users
     public class OrganizationDto
     {
         public string Name { get; init; } = null!;
+        public long[] Rooms { get; init; } = Array.Empty<long>();
     }
 }

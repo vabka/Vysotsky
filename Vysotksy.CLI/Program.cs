@@ -124,7 +124,7 @@ async Task Seed(VysotskyDataConnection dataConnection)
         LastPasswordChange = DateTimeOffset.Now,
         Contacts = Array.Empty<UserContact>()
     });
-    var workerId = await dataConnection.Users.InsertWithIdentityAsync(() => new UserRecord
+    var workerId = await dataConnection.Users.InsertWithInt64IdentityAsync(() => new UserRecord
     {
         Username = "worker",
         PasswordHash = hasher.Hash("worker"),

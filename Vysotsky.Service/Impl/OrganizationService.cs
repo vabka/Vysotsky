@@ -17,7 +17,7 @@ namespace Vysotsky.Service.Impl
             _dataConnection = dataConnection;
         }
 
-        public async Task<Organization> CreateOrganizationAsync(string name)
+        public async Task<Organization> CreateOrganizationAsync(string name, Room[] rooms)
         {
             await using var transaction = await _dataConnection.BeginTransactionAsync();
             var organizationId = await _dataConnection.Organizations.InsertWithInt64IdentityAsync(() =>

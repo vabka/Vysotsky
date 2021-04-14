@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using LinqToDB;
+using LinqToDB.Tools;
 using Vysotsky.Data;
 using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
@@ -12,6 +14,23 @@ namespace Vysotsky.Service.Impl
     public class RoomService : IRoomService
     {
         private readonly VysotskyDataConnection _dataConnection;
+
+        private static readonly Expression<Func<RoomRecord, Room>> MapToRoomExpr = x => new Room
+        {
+            Id = x.Id,
+            Name = x.Name,
+            Number = x.Number,
+            Status = x.Status,
+        };
+
+        private static Room MapToRoom(RoomRecord x) =>
+            new()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Number = x.Number,
+                Status = x.Status,
+            };
 
         public RoomService(VysotskyDataConnection dataConnection)
         {
@@ -80,13 +99,7 @@ namespace Vysotsky.Service.Impl
             await _dataConnection.Rooms
                 .OrderBy(b => b.CreatedAt)
                 .Where(r => r.FloorId == floor.Id)
-                .Select(r => new Room
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Number = r.Number,
-                    Status = r.Status
-                })
+                .Select(MapToRoomExpr)
                 .ToArrayAsync();
 
         public async Task DeleteBuildingCascadeByIdAsync(long buildingId)
@@ -105,6 +118,12 @@ namespace Vysotsky.Service.Impl
             await buildingToDelete.DeleteAsync();
             await transaction.CommitAsync();
         }
+
+        public async Task<Room[]> GetRoomsAsync(long[] organizationRooms) =>
+            await _dataConnection.Rooms
+                .Where(r => r.Id.In(organizationRooms))
+                .Select(MapToRoomExpr)
+                .ToArrayAsync();
 
         public async Task<Floor> CreateFloor(Building building, string number)
         {
@@ -146,13 +165,8 @@ namespace Vysotsky.Service.Impl
             var roomsData = await roomsQuery.ToArrayAsync();
             if (roomsData.Length == 0)
                 return Array.Empty<FullBuilding>();
-            var rooms = roomsData.GroupBy(x => x.FloorId, x => new Room
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Number = x.Number,
-                Status = x.Status,
-            }).ToDictionary(x => x.Key, x => x.ToArray());
+            var rooms = roomsData.GroupBy(x => x.FloorId, MapToRoom)
+                .ToDictionary(x => x.Key, x => x.ToArray());
 
             var floorsQuery = from room in roomsQuery
                 group room by room.FloorId
@@ -160,12 +174,13 @@ namespace Vysotsky.Service.Impl
                 join floor in _dataConnection.Floors on r.Key equals floor.Id
                 select floor;
             var floorsData = await floorsQuery.ToArrayAsync();
-            var floors = floorsData.GroupBy(x => x.BuildingId, x => new FullFloor
-            {
-                Id = x.Id,
-                Number = x.Number,
-                Rooms = rooms[x.Id]
-            }).ToDictionary(x => x.Key, x => x.ToArray());
+            var floors = floorsData
+                .GroupBy(x => x.BuildingId, x => new FullFloor
+                {
+                    Id = x.Id,
+                    Number = x.Number,
+                    Rooms = rooms[x.Id]
+                }).ToDictionary(x => x.Key, x => x.ToArray());
 
             var buildingsQuery = from floor in floorsQuery
                 group floor by floor.BuildingId

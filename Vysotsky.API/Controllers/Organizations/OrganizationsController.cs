@@ -6,6 +6,7 @@ using Vysotsky.API.Controllers.Common;
 using Vysotsky.API.Controllers.Organizations.Dto;
 using Vysotsky.API.Controllers.Users;
 using Vysotsky.API.Infrastructure;
+using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
 using OrganizationDto = Vysotsky.API.Controllers.Organizations.Dto.OrganizationDto;
 
@@ -17,14 +18,17 @@ namespace Vysotsky.API.Controllers.Organizations
         private readonly IOrganizationService _organizationService;
         private readonly IRoomService _roomService;
         private readonly IUserService _userService;
+        private readonly ICurrentUserProvider _currentUserProvider;
 
         public OrganizationsController(IOrganizationService organizationService,
             IRoomService roomService,
-            IUserService userService)
+            IUserService userService,
+            ICurrentUserProvider currentUserProvider)
         {
             _organizationService = organizationService;
             _roomService = roomService;
             _userService = userService;
+            _currentUserProvider = currentUserProvider;
         }
 
         [HttpGet("{organizationId:long}/rooms")]
@@ -34,6 +38,9 @@ namespace Vysotsky.API.Controllers.Organizations
             var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization == null)
                 return OrganizationNotFound(organizationId);
+            if (!_currentUserProvider.CanReadOrganization(organizationId))
+                return NotAuthorized("Only organization member can read organization data",
+                    "organization.read.notAuthorized");
             var buildings = await _roomService.GetOrganizationBuildings(organization);
             return Ok(buildings.Select(b => new OrganizationBuildingDto
             {
@@ -57,6 +64,15 @@ namespace Vysotsky.API.Controllers.Organizations
         public async Task<ActionResult<ApiResponse<RepresentativeDto>>> GetAllRepresentatives(long organizationId)
         {
             var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
+            if (organization != null)
+            {
+                var currentUser = _currentUserProvider.CurrentUser;
+                if (currentUser?.Role != UserRole.Supervisor
+                    || currentUser.Role != UserRole.SuperUser
+                    || currentUser.OrganizationId != organizationId)
+                    organization = null;
+            }
+
             if (organization == null)
                 return OrganizationNotFound(organizationId);
             var users = await _userService.GetAllOrganizationMembersAsync(organization);
@@ -80,6 +96,9 @@ namespace Vysotsky.API.Controllers.Organizations
             var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization == null)
                 return OrganizationNotFound(organizationId);
+            if (!_currentUserProvider.CanReadOrganization(organizationId))
+                return NotAuthorized("Only organization member can read organization data",
+                    "organization.read.notAuthorized");
             return Ok(new PersistedOrganizationDto
             {
                 Id = organization.Id,
@@ -97,6 +116,9 @@ namespace Vysotsky.API.Controllers.Organizations
             var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization == null)
                 return OrganizationNotFound(organizationId);
+            if (!_currentUserProvider.CanWriteOrganization(organizationId))
+                return NotAuthorized("Only organization owner can edit organization",
+                    "organizations.edit.notAuthorized");
             var newOrganization = organization with {Name = organizationDtoProperties.Name};
             await _organizationService.UpdateOrganization(newOrganization);
             return Ok();

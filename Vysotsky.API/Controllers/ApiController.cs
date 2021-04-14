@@ -12,19 +12,14 @@ namespace Vysotsky.API.Controllers
     [Authorize]
     public abstract class ApiController
     {
-        /// <summary>
-        /// Создать ответ с кодом 201
-        /// </summary>
-        /// <param name="location"></param>
-        /// <param name="result"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
         protected static ActionResult<ApiResponse<T>> Created<T>(string location, T result) =>
             new CreatedResult(location, CreateSuccess(result));
 
+        protected static ObjectResult NotAuthorized(string message, string code) => Error(message, code, 403);
+
         protected static ObjectResult Error(string message, string code, int status = 400)
         {
-            return new ObjectResult(new ApiResponse
+            return new(new ApiResponse
             {
                 Error = new ApiError
                 {
@@ -36,7 +31,7 @@ namespace Vysotsky.API.Controllers
             {
                 StatusCode = status
             };
-        } 
+        }
 
         /// <summary>
         /// Создать ответ с кодом 200
