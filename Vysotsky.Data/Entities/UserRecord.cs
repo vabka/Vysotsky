@@ -17,7 +17,7 @@ namespace Vysotsky.Data.Entities
         [Column("patronymic")] public string? Patronymic { get; init; }
 
         [Column("contacts", DataType = DataType.BinaryJson)]
-        public UserContact[] Contacts { get; init; } = null!;
+        public UserContact[] Contacts { get; init; } = Array.Empty<UserContact>();
 
         [Column("role", DbType = "user_role")] public UserRole Role { get; init; }
         [Column("organization_id")] public long? OrganizationId { get; init; }
@@ -31,7 +31,7 @@ namespace Vysotsky.Data.Entities
         [MapValue("OrganizationOwner")] OrganizationOwner,
         [MapValue("OrganizationMember")] OrganizationMember
     }
-    
+
     public record UserContact
     {
         public string Name { get; init; } = null!;

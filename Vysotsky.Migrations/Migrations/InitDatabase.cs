@@ -17,7 +17,8 @@ namespace Vysotsky.Migrations.Migrations
                 .WithColumn("name").AsString()
                 .WithColumn("image_id").References("image");
             Create.Entity("category")
-                .WithColumn("area_id").References("area");
+                .WithColumn("area_id").References("area")
+                .WithColumn("name").AsString();
 
             Create.Entity("building")
                 .WithColumn("name").AsString();
@@ -75,8 +76,8 @@ namespace Vysotsky.Migrations.Migrations
                 .WithColumn("area_id").References("area")
                 .WithColumn("category_id").References("category").Nullable()
                 .WithColumn("author_id").References("user")
-                .WithColumn("supervisor_id").References("user")
-                .WithColumn("worker_id").References("user")
+                .WithColumn("supervisor_id").References("user").Nullable()
+                .WithColumn("worker_id").References("user").Nullable()
                 .WithColumn("room_id").References("room");
             Create.Table("issue_image")
                 .WithColumn("issue_id").References("issue").PrimaryKey()
