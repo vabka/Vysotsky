@@ -165,6 +165,6 @@ async Task CreateManyRooms(long building, int floorNumber, VysotskyDataConnectio
         BuildingId = building,
         Number = floorNumber.ToString(CultureInfo.InvariantCulture),
     });
-    await dataConnection.Rooms.BulkCopyAsync(new BulkCopyOptions(), Enumerable.Range(0, 100).Select(i =>
+      await dataConnection.Rooms.BulkCopyAsync(new BulkCopyOptions(), Enumerable.Range(0, 100).Select(i =>
         new RoomRecord { FloorId = floor, Number = ((floorNumber * 100) + i).ToString(CultureInfo.InvariantCulture), Status = RoomStatus.Free }));
 }

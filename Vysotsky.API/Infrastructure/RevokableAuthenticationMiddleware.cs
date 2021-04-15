@@ -23,7 +23,7 @@ namespace Vysotsky.API.Infrastructure
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            if (context.User.Identity is ClaimsIdentity {IsAuthenticated: true} identity)
+            if (context.User.Identity is ClaimsIdentity { IsAuthenticated: true } identity)
             {
                 var claims = identity.Claims.ToDictionary(x => x.Type, x => x.Value);
                 var jti = Guid.Parse(claims["jti"]);
