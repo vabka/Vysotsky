@@ -44,7 +44,7 @@ Host.CreateDefaultBuilder(args)
             {
                 services.PostConfigure<HostFilteringOptions>(options =>
                 {
-                      if (options.AllowedHosts is null or { Count: 0 })
+                    if (options.AllowedHosts is null or { Count: 0 })
                     {
                         var hosts = hostingContext
                             .Configuration["AllowedHosts"]

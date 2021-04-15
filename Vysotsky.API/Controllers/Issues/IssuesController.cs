@@ -12,11 +12,11 @@ namespace Vysotsky.API.Controllers.Issues
     [Route(Resources.Issues)]
     public class IssuesController : ApiController
     {
-        private readonly ICurrentUserProvider _currentUserProvider;
-        private readonly IIssueService _issueService;
-        private readonly IRoomService _roomService;
-        private readonly IWorkerService _workerService;
-        private readonly ICategoriesService _categoriesService;
+        private readonly ICurrentUserProvider currentUserProvider;
+        private readonly IIssueService issueService;
+        private readonly IRoomService roomService;
+        private readonly IWorkerService workerService;
+        private readonly ICategoriesService categoriesService;
 
         public IssuesController(ICurrentUserProvider currentUserProvider,
             IIssueService issueService,
@@ -24,24 +24,24 @@ namespace Vysotsky.API.Controllers.Issues
             IWorkerService workerService,
             ICategoriesService categoriesService)
         {
-            _currentUserProvider = currentUserProvider;
-            _issueService = issueService;
-            _roomService = roomService;
-            _workerService = workerService;
-            _categoriesService = categoriesService;
+            this.currentUserProvider = currentUserProvider;
+            this.issueService = issueService;
+            this.roomService = roomService;
+            this.workerService = workerService;
+            this.categoriesService = categoriesService;
         }
 
         [HttpPost]
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> CreateIssue([FromBody] IssueDto newIssue)
         {
-            var currentUser = _currentUserProvider.CurrentUser;
+            var currentUser = this.currentUserProvider.CurrentUser;
             if (currentUser!.Role == UserRole.Worker)
             {
                 return NotAuthorized("Worker is not authorized to create issues", "issues.notAthorized");
             }
 
-            var areaTask = _issueService.GetAreaByIdOrNull(newIssue.AreaId);
-            var roomTask = _roomService.GetRoomByIdOrNullAsync(newIssue.RoomId);
+            var areaTask = this.issueService.GetAreaByIdOrNull(newIssue.AreaId);
+            var roomTask = this.roomService.GetRoomByIdOrNullAsync(newIssue.RoomId);
             var area = await areaTask;
             if (area == null)
             {
@@ -55,7 +55,7 @@ namespace Vysotsky.API.Controllers.Issues
             }
 
             var createdIssue =
-                await _issueService.CreateIssueAsync(newIssue.Title, newIssue.Description, area, room, currentUser);
+                await this.issueService.CreateIssueAsync(newIssue.Title, newIssue.Description, area, room, currentUser);
             return Ok(createdIssue.ToDto());
         }
 
@@ -64,19 +64,19 @@ namespace Vysotsky.API.Controllers.Issues
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToNeedInfo([FromRoute] long issueId,
             [FromBody] MoveIssueToNeedInfoDto data)
         {
-            var issue = await _issueService.GetIssueByIdOrNullAsync(issueId);
+            var issue = await this.issueService.GetIssueByIdOrNullAsync(issueId);
             if (issue == null)
             {
                 return this.IssueNotFound();
             }
 
-            if (!_currentUserProvider.IsSupervisor())
+            if (!this.currentUserProvider.IsSupervisor())
             {
                 return NotAuthorized("Only supervisor can move task to NeedInfo state", "issues.notAuthorized");
             }
 
             var newState =
-                await _issueService.MoveIssueToNeedInformationAsync(issue, _currentUserProvider.CurrentUser!,
+                await this.issueService.MoveIssueToNeedInformationAsync(issue, this.currentUserProvider.CurrentUser!,
                     data.Message);
             return Ok(newState.ToDto());
         }
@@ -88,8 +88,8 @@ namespace Vysotsky.API.Controllers.Issues
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToInProgress([FromRoute] long issueId,
             [FromBody] MoveIssueToInPgoressDto data)
         {
-            var issue = await _issueService.GetIssueByIdOrNullAsync(issueId);
-            if (!_currentUserProvider.IsSupervisor())
+            var issue = await this.issueService.GetIssueByIdOrNullAsync(issueId);
+            if (!this.currentUserProvider.IsSupervisor())
             {
                 return NotAuthorized("Only supervisor can move task to InProgress state", "issues.notAuthorized");
             }
@@ -99,21 +99,21 @@ namespace Vysotsky.API.Controllers.Issues
                 return this.IssueNotFound();
             }
 
-            var currentUser = _currentUserProvider.CurrentUser!;
-            var worker = await _workerService.GetWorkerByIdOrNullAsync(data.WorkerId);
+            var currentUser = this.currentUserProvider.CurrentUser!;
+            var worker = await this.workerService.GetWorkerByIdOrNullAsync(data.WorkerId);
             if (worker == null)
             {
                 return this.WorkerNotFound();
             }
 
-            var category = await _categoriesService.GetCategoryByIdOrNullAsync(data.CategoryId);
+            var category = await this.categoriesService.GetCategoryByIdOrNullAsync(data.CategoryId);
             if (category == null)
             {
                 return this.CategoryNotFound();
             }
 
             var newState =
-                await _issueService.TakeToWorkAsync(issue, currentUser, worker, category);
+                await this.issueService.TakeToWorkAsync(issue, currentUser, worker, category);
             return Ok(newState.ToDto());
         }
 

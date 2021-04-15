@@ -15,49 +15,49 @@ namespace Vysotsky.API.Controllers.Organizations
     [Route(Resources.Organizations)]
     public class OrganizationsController : ApiController
     {
-        private readonly IOrganizationService _organizationService;
-        private readonly IRoomService _roomService;
-        private readonly IUserService _userService;
-        private readonly ICurrentUserProvider _currentUserProvider;
+        private readonly IOrganizationService organizationService;
+        private readonly IRoomService roomService;
+        private readonly IUserService userService;
+        private readonly ICurrentUserProvider currentUserProvider;
 
         public OrganizationsController(IOrganizationService organizationService,
             IRoomService roomService,
             IUserService userService,
             ICurrentUserProvider currentUserProvider)
         {
-            _organizationService = organizationService;
-            _roomService = roomService;
-            _userService = userService;
-            _currentUserProvider = currentUserProvider;
+            this.organizationService = organizationService;
+            this.roomService = roomService;
+            this.userService = userService;
+            this.currentUserProvider = currentUserProvider;
         }
 
         [HttpGet("{organizationId:long}/rooms")]
         public async Task<ActionResult<ApiResponse<OrganizationBuildingDto[]>>> GetOrganizationRooms(
             long organizationId)
         {
-            var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
+            var organization = await this.organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization == null)
             {
                 return this.OrganizationNotFound(organizationId);
             }
 
-            if (!_currentUserProvider.CanReadOrganization(organizationId))
+            if (!this.currentUserProvider.CanReadOrganization(organizationId))
             {
                 return NotAuthorized("Only organization member can read organization data",
                     "organization.read.notAuthorized");
             }
 
-            var buildings = await _roomService.GetOrganizationBuildingsAsync(organization);
+            var buildings = await this.roomService.GetOrganizationBuildingsAsync(organization);
             return Ok(buildings.Select(b => b.ToDto()));
         }
 
         [HttpGet("{organizationId:long}/representatives")]
         public async Task<ActionResult<ApiResponse<PersistedUserDto>>> GetAllRepresentatives(long organizationId)
         {
-            var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
+            var organization = await this.organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization != null)
             {
-                var currentUser = _currentUserProvider.CurrentUser;
+                var currentUser = this.currentUserProvider.CurrentUser;
                 if (currentUser?.Role != UserRole.Supervisor
                     || currentUser.Role != UserRole.SuperUser
                     || currentUser.OrganizationId != organizationId)
@@ -71,7 +71,7 @@ namespace Vysotsky.API.Controllers.Organizations
                 return this.OrganizationNotFound(organizationId);
             }
 
-            var users = await _userService.GetAllOrganizationMembersAsync(organization);
+            var users = await this.userService.GetAllOrganizationMembersAsync(organization);
             return Ok(users.Select(u => u.ToDto()));
         }
 
@@ -79,13 +79,13 @@ namespace Vysotsky.API.Controllers.Organizations
         public async Task<ActionResult<ApiResponse<PersistedOrganizationDto>>> GetOrganization(
             [FromRoute] long organizationId)
         {
-            var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
+            var organization = await this.organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization == null)
             {
                 return this.OrganizationNotFound(organizationId);
             }
 
-            if (!_currentUserProvider.CanReadOrganization(organizationId))
+            if (!this.currentUserProvider.CanReadOrganization(organizationId))
             {
                 return NotAuthorized("Only organization member can read organization data",
                     "organization.read.notAuthorized");
@@ -101,27 +101,27 @@ namespace Vysotsky.API.Controllers.Organizations
         public async Task<ActionResult<ApiResponse>> UpdateOrganization([FromRoute] long organizationId,
             [FromBody] OrganizationDto organizationDtoProperties)
         {
-            var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
+            var organization = await this.organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization == null)
             {
                 return this.OrganizationNotFound(organizationId);
             }
 
-            if (!_currentUserProvider.CanWriteOrganization(organizationId))
+            if (!this.currentUserProvider.CanWriteOrganization(organizationId))
             {
                 return NotAuthorized("Only organization owner can edit organization",
                     "organizations.edit.notAuthorized");
             }
 
             var newOrganization = organization with { Name = organizationDtoProperties.Name };
-            await _organizationService.UpdateOrganization(newOrganization);
+            await this.organizationService.UpdateOrganization(newOrganization);
             return Ok();
         }
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PersistedOrganizationDto[]>>> GetAllOrganizations()
         {
-            var organizations = await _organizationService.GetAllOrganizations();
+            var organizations = await this.organizationService.GetAllOrganizations();
             return Ok(organizations.Select(o => o.ToDto()));
         }
     }

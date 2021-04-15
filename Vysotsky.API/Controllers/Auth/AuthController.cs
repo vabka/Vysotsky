@@ -13,11 +13,11 @@ namespace Vysotsky.API.Controllers.Auth
     [Route(Resources.Auth)]
     public class AuthController : ApiController
     {
-        private readonly IAuthenticationService _authenticationService;
+        private readonly IAuthenticationService authenticationService;
 
         public AuthController(IAuthenticationService authenticationService)
         {
-            _authenticationService = authenticationService;
+            this.authenticationService = authenticationService;
         }
 
         [AllowAnonymous]
@@ -25,7 +25,7 @@ namespace Vysotsky.API.Controllers.Auth
         public async Task<ActionResult<ApiResponse<AccessTokenContainer>>> Authenticate(
             [FromBody] LoginDto loginDto)
         {
-            var token = await _authenticationService.TryIssueTokenByUserCredentialsAsync(loginDto.Username,
+            var token = await this.authenticationService.TryIssueTokenByUserCredentialsAsync(loginDto.Username,
                 loginDto.Password);
             return token switch
             {
@@ -41,7 +41,7 @@ namespace Vysotsky.API.Controllers.Auth
             if (authorizationHeaderValue.HasValue)
             {
                 var tokenText = authorizationHeaderValue.Value.ToString().Substring("Bearer ".Length);
-                await _authenticationService.RevokeTokenAsync(tokenText);
+                await this.authenticationService.RevokeTokenAsync(tokenText);
             }
 
             return Ok();

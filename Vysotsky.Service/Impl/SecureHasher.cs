@@ -6,16 +6,16 @@ namespace Vysotsky.Service.Impl
 {
     public class SecureHasher : IStringHasher
     {
-        private readonly SecureHasherOptions _options;
+        private readonly SecureHasherOptions options;
 
         public SecureHasher(SecureHasherOptions options)
         {
-            _options = options;
+            this.options = options;
         }
 
         public byte[] Hash(string source)
         {
-            var key = Encoding.UTF8.GetBytes(_options.Salt);
+            var key = Encoding.UTF8.GetBytes(this.options.Salt);
             using var alg = new HMACSHA512(key);
             return alg.ComputeHash(Encoding.UTF8.GetBytes(source));
         }

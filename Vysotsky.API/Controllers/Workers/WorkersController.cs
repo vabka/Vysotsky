@@ -14,17 +14,17 @@ namespace Vysotsky.API.Controllers.Workers
     [Route(Resources.Workers)]
     public class WorkersController : ApiController
     {
-        private readonly IUserService _userService;
+        private readonly IUserService userService;
 
         public WorkersController(IUserService userService)
         {
-            _userService = userService;
+            this.userService = userService;
         }
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<PersistedUserDto>>>> GetAllWorkers()
         {
-            var workers = await _userService.GetAllUsersWithRoleAsync(UserRole.Worker);
+            var workers = await this.userService.GetAllUsersWithRoleAsync(UserRole.Worker);
             return Ok(workers.Select(w => w.ToDto()));
         }
     }

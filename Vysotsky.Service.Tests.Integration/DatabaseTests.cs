@@ -9,7 +9,7 @@ namespace Vysotsky.Service.Tests.Integration
 {
     public abstract class DatabaseTests : IDisposable
     {
-        protected readonly VysotskyDataConnection Database;
+        protected readonly VysotskyDataConnection ____RULE_VIOLATION____Database____RULE_VIOLATION____;
 
         protected DatabaseTests()
         {
@@ -24,38 +24,38 @@ namespace Vysotsky.Service.Tests.Integration
             var options = new LinqToDbConnectionOptionsBuilder()
                 .UsePostgreSQL(connectionString)
                 .Build<VysotskyDataConnection>();
-            Database = new VysotskyDataConnection(options);
+            this.____RULE_VIOLATION____Database____RULE_VIOLATION____ = new VysotskyDataConnection(options);
             DropDatabase();
         }
 
-        private bool _disposed;
-        private readonly object _disposeLock = new();
+        private bool disposed;
+        private readonly object disposeLock = new();
 
         public void Dispose()
         {
-            if (_disposed)
+            if (this.disposed)
             {
                 return;
             }
 
-            lock (_disposeLock)
+            lock (this.disposeLock)
             {
-                if (_disposed)
+                if (this.disposed)
                 {
                     return;
                 }
 
                 DropDatabase();
-                Database.Dispose();
-                _disposed = true;
+                this.____RULE_VIOLATION____Database____RULE_VIOLATION____.Dispose();
+                this.disposed = true;
             }
         }
 
         private void DropDatabase()
         {
-            Database.Buildings.Delete();
-            Database.Users.Delete();
-            Database.BlockedTokens.Delete();
+            this.____RULE_VIOLATION____Database____RULE_VIOLATION____.Buildings.Delete();
+            this.____RULE_VIOLATION____Database____RULE_VIOLATION____.Users.Delete();
+            this.____RULE_VIOLATION____Database____RULE_VIOLATION____.BlockedTokens.Delete();
         }
     }
 }

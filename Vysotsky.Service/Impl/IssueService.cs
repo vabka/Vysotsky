@@ -30,15 +30,15 @@ namespace Vysotsky.Service.Impl
             AuthorId = i.AuthorId
         };
 
-        private readonly VysotskyDataConnection _vysotskyDataConnection;
+        private readonly VysotskyDataConnection vysotskyDataConnection;
 
         public IssueService(VysotskyDataConnection vysotskyDataConnection)
         {
-            _vysotskyDataConnection = vysotskyDataConnection;
+            this.vysotskyDataConnection = vysotskyDataConnection;
         }
 
         public async Task<Area?> GetAreaByIdOrNull(long id) =>
-            await _vysotskyDataConnection.Areas
+            await this.vysotskyDataConnection.Areas
                 .Where(x => x.Id == id)
                 .Select(x => new Area
                 {
@@ -48,7 +48,7 @@ namespace Vysotsky.Service.Impl
 
         public async Task<Issue> CreateIssueAsync(string title, string description, Area area, Room room, User author)
         {
-            var id = await _vysotskyDataConnection.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
+            var id = await this.vysotskyDataConnection.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
             {
                 Title = title,
                 Description = description,
@@ -62,12 +62,12 @@ namespace Vysotsky.Service.Impl
         }
 
         private async Task<Issue> GetIssueByIdWithSpecificVersion(long issueId, long version) =>
-            await _vysotskyDataConnection.Issues
+            await this.vysotskyDataConnection.Issues
                 .Select(MapToIssue)
                 .SingleAsync(i => i.Id == issueId && i.Version == version);
 
         public async Task<Issue?> GetIssueByIdOrNullAsync(long issueId) =>
-            await _vysotskyDataConnection.Issues
+            await this.vysotskyDataConnection.Issues
                 .Where(x => x.Id == issueId)
                 .OrderByDescending(x => x.Version)
                 .Select(MapToIssue)
@@ -80,18 +80,18 @@ namespace Vysotsky.Service.Impl
             {
                 case IssueStatus.New:
                 {
-                    await using var transaction = await _vysotskyDataConnection.BeginTransactionAsync();
-                    await _vysotskyDataConnection.IssueComments
+                    await using var transaction = await this.vysotskyDataConnection.BeginTransactionAsync();
+                    await this.vysotskyDataConnection.IssueComments
                         .InsertAsync(() => new IssueCommentRecord
                         {
                             IssueId = issue.Id,
                             AuthorId = supervisor.Id,
                             Text = message
                         });
-                    await _vysotskyDataConnection.Issues
+                    await this.vysotskyDataConnection.Issues
                         .Where(i => i.Id == issue.Id && i.Version == issue.Version)
                         .Take(1)
-                        .InsertAsync(_vysotskyDataConnection.Issues,
+                        .InsertAsync(this.vysotskyDataConnection.Issues,
                             i => new IssueRecord
                             {
                                 Id = i.Id,
@@ -134,10 +134,10 @@ namespace Vysotsky.Service.Impl
                 case IssueStatus.New:
                 case IssueStatus.NeedInfo:
                 {
-                    await _vysotskyDataConnection.Issues
+                    await this.vysotskyDataConnection.Issues
                         .Where(i => i.Id == issue.Id && i.Version == issue.Version)
                         .Take(1)
-                        .InsertAsync(_vysotskyDataConnection.Issues, i => new IssueRecord
+                        .InsertAsync(this.vysotskyDataConnection.Issues, i => new IssueRecord
                         {
                             Id = i.Id,
                             Version = i.Version + 1,
