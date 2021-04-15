@@ -90,5 +90,11 @@ namespace Vysotsky.Service.Impl
                 .Where(u => u.OrganizationId == organization.Id && u.Role == UserRole.OrganizationMember)
                 .Select(MapToUser)
                 .ToArrayAsync();
+
+        public async Task<IEnumerable<User>> GetAllUsersWithRoleAsync(UserRole role) =>
+            await _dataConnection.Users
+                .Where(u => u.Role == role)
+                .Select(MapToUser)
+                .ToArrayAsync();
     }
 }

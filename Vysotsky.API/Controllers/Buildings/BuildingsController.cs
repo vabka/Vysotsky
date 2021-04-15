@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Flurl;
 using Microsoft.AspNetCore.Mvc;
+using Vysotsky.API.Dto;
 using Vysotsky.API.Dto.Buildings;
 using Vysotsky.API.Dto.Common;
 using Vysotsky.API.Infrastructure;
@@ -26,12 +27,8 @@ namespace Vysotsky.API.Controllers.Buildings
         public async Task<ActionResult<ApiResponse<PersistedBuildingDto>>> CreateBuilding(
             [FromBody] BuildingDto buildingToCreate)
         {
-            var result = await _roomService.CreateBuildingAsync(buildingToCreate.Name);
-            return Created(Resources.Buildings.AppendPathSegment(result.Id), new PersistedBuildingDto
-            {
-                Id = result.Id,
-                Name = result.Name
-            });
+            var building = await _roomService.CreateBuildingAsync(buildingToCreate.Name);
+            return Created(Resources.Buildings.AppendPathSegment(building.Id), building.ToDto());
         }
 
         [HttpDelete("{buildingId:long}")]
@@ -50,15 +47,9 @@ namespace Vysotsky.API.Controllers.Buildings
             if (building == null)
                 return BuildingNotFound(buildingId);
             var floor = await _roomService.CreateFloorAsync(building, floorToCreate.Number);
-            return Created(Resources.Buildings
-                    .AppendPathSegment(buildingId)
-                    .AppendPathSegment("floors")
-                    .AppendPathSegment(floor.Id),
-                new PersistedFloorDto
-                {
-                    Id = floor.Id,
-                    Number = floor.Number
-                });
+            return Created(Resources.Buildings.AppendPathSegments(buildingId, "floors", floor.Id),
+                floor.ToDto()
+            );
         }
 
         [HttpPost("{buildingId:long}/floors/{floorId:long}/rooms")]
@@ -76,18 +67,8 @@ namespace Vysotsky.API.Controllers.Buildings
             var room = await _roomService.CreateRoomAsync(floor, roomToCreate.Name, roomToCreate.Number,
                 ToModel(roomToCreate.Status));
             return Created(
-                Resources.Buildings
-                    .AppendPathSegment(buildingId)
-                    .AppendPathSegment("floors")
-                    .AppendPathSegment(floorId)
-                    .AppendPathSegment("rooms")
-                    .AppendPathSegment(room.Id),
-                new PersistedRoomDto
-                {
-                    Id = room.Id,
-                    Name = room.Name,
-                    Number = room.Number
-                });
+                Resources.Buildings.AppendPathSegments(buildingId, "floors", floorId, "rooms", room.Id),
+                room.ToDto());
         }
 
         private NotFoundObjectResult FloorInBuildingNotFound(long buildingId, long floorId) =>
@@ -101,11 +82,7 @@ namespace Vysotsky.API.Controllers.Buildings
         public async Task<ActionResult<ApiResponse<PersistedBuildingDto[]>>> GetAllBuildings()
         {
             var data = await _roomService.GetAllBuildingsAsync();
-            return Ok(data.Select(b => new PersistedBuildingDto
-            {
-                Id = b.Id,
-                Name = b.Name
-            }));
+            return Ok(data.Select(b => b.ToDto()));
         }
 
         [HttpGet("{buildingId:long}/floors")]
@@ -116,11 +93,7 @@ namespace Vysotsky.API.Controllers.Buildings
             if (building == null)
                 return BuildingNotFound(buildingId);
             var data = await _roomService.GetAllFloorsInBuildingAsync(building);
-            return Ok(data.Select(f => new PersistedFloorDto
-            {
-                Id = f.Id,
-                Number = f.Number
-            }));
+            return Ok(data.Select(f => f.ToDto()));
         }
 
         [HttpGet("{buildingId:long}/floors/{floorId:long}/rooms")]
@@ -136,25 +109,9 @@ namespace Vysotsky.API.Controllers.Buildings
 
             var rooms = await _roomService.GetAllRoomsOnFloorAsync(floor);
             return Ok(rooms
-                .Select(r => new PersistedRoomDto
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Number = r.Number,
-                    Status = ToDto(r.Status)
-                })
+                .Select(r => r.ToDto())
             );
         }
-
-        private static RoomStatusDto ToDto(RoomStatus status) =>
-            status switch
-            {
-                RoomStatus.Free => RoomStatusDto.Free,
-                RoomStatus.Owned => RoomStatusDto.Owned,
-                RoomStatus.Rented => RoomStatusDto.Rented,
-                RoomStatus.Unavailable => RoomStatusDto.Unavalable,
-                _ => throw new ArgumentOutOfRangeException()
-            };
 
         private static RoomStatus ToModel(RoomStatusDto statusDto) =>
             statusDto switch

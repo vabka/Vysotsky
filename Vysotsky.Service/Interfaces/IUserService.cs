@@ -7,7 +7,7 @@ namespace Vysotsky.Service.Interfaces
 {
     public interface IUserService
     {
-        public Task<User> CreateUserAsync(string username,
+        Task<User> CreateUserAsync(string username,
             string password,
             string firstName,
             string lastName,
@@ -16,8 +16,9 @@ namespace Vysotsky.Service.Interfaces
             UserRole role,
             Organization? organization);
 
-        public Task<User?> GetUserByIdOrNull(long userId);
-        public Task<User?> GetUserByUsernameOrNullAsync(string username);
-        public Task<IEnumerable<User>> GetAllOrganizationMembersAsync(Organization organization);
+        Task<User?> GetUserByIdOrNull(long userId);
+        Task<User?> GetUserByUsernameOrNullAsync(string username);
+        Task<IEnumerable<User>> GetAllOrganizationMembersAsync(Organization organization);
+        Task<IEnumerable<User>> GetAllUsersWithRoleAsync(UserRole role);
     }
 }

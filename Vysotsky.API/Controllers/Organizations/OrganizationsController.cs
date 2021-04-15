@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Vysotsky.API.Dto;
 using Vysotsky.API.Dto.Common;
 using Vysotsky.API.Dto.Organizations;
 using Vysotsky.API.Dto.Users;
@@ -41,26 +42,11 @@ namespace Vysotsky.API.Controllers.Organizations
                 return NotAuthorized("Only organization member can read organization data",
                     "organization.read.notAuthorized");
             var buildings = await _roomService.GetOrganizationBuildingsAsync(organization);
-            return Ok(buildings.Select(b => new OrganizationBuildingDto
-            {
-                Id = b.Id,
-                Name = b.Name,
-                Floors = b.Floors.Select(f => new OrganizationFloorDto
-                {
-                    Id = f.Id,
-                    Number = f.Number,
-                    Rooms = f.Rooms.Select(r => new OrganizationRoomDto
-                    {
-                        Id = r.Id,
-                        Name = r.Name,
-                        Number = r.Number
-                    })
-                })
-            }));
+            return Ok(buildings.Select(b=>b.ToDto()));
         }
 
         [HttpGet("{organizationId:long}/representatives")]
-        public async Task<ActionResult<ApiResponse<RepresentativeDto>>> GetAllRepresentatives(long organizationId)
+        public async Task<ActionResult<ApiResponse<PersistedUserDto>>> GetAllRepresentatives(long organizationId)
         {
             var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization != null)
@@ -75,17 +61,7 @@ namespace Vysotsky.API.Controllers.Organizations
             if (organization == null)
                 return OrganizationNotFound(organizationId);
             var users = await _userService.GetAllOrganizationMembersAsync(organization);
-            return Ok(users.Select(u => new RepresentativeDto
-            {
-                Id = u.Id,
-                Username = u.Username,
-                Name = new PersonName
-                {
-                    FirstName = u.Firstname,
-                    LastName = u.LastName,
-                    Patronymic = u.Patronymic
-                }
-            }));
+            return Ok(users.Select(u => u.ToDto()));
         }
 
         [HttpGet("{organizationId:long}")]
@@ -98,11 +74,7 @@ namespace Vysotsky.API.Controllers.Organizations
             if (!_currentUserProvider.CanReadOrganization(organizationId))
                 return NotAuthorized("Only organization member can read organization data",
                     "organization.read.notAuthorized");
-            return Ok(new PersistedOrganizationDto
-            {
-                Id = organization.Id,
-                Name = organization.Name
-            });
+            return Ok(organization.ToDto());
         }
 
         private NotFoundObjectResult OrganizationNotFound(long organizationId) =>
@@ -127,11 +99,7 @@ namespace Vysotsky.API.Controllers.Organizations
         public async Task<ActionResult<ApiResponse<PersistedOrganizationDto[]>>> GetAllOrganizations()
         {
             var organizations = await _organizationService.GetAllOrganizations();
-            return Ok(organizations.Select(o => new PersistedOrganizationDto
-            {
-                Id = o.Id,
-                Name = o.Name
-            }));
+            return Ok(organizations.Select(o => o.ToDto()));
         }
     }
 }

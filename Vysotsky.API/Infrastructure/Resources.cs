@@ -9,5 +9,6 @@
         public const string Buildings = "/api/buildings";
         public const string Issues = "/api/issues";
         public const string Areas = "/api/areas";
+        public const string Workers = "/api/workers";
     }
 }

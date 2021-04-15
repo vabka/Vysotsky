@@ -99,15 +99,4 @@ namespace Vysotsky.API.Controllers.Categories
 
         private NotFoundObjectResult AreaNotFound() => NotFound("Area not found", "categories.areaNotFound");
     }
-
-    public class CategoryDto
-    {
-        public string Name { get; init; }
-    }
-
-    public class PersistedCategoryDto
-    {
-        public long Id { get; init; }
-        public string Name { get; init; }
-    }
 }

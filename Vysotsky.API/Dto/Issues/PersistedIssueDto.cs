@@ -9,9 +9,4 @@ namespace Vysotsky.API.Dto.Issues
         public long AreaId { get; init; }
         public long RoomId { get; init; }
     }
-
-    public enum IssueStatusDto
-    {
-        New,
-    }
 }

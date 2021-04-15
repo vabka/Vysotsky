@@ -3,8 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Flurl;
 using Microsoft.AspNetCore.Mvc;
+using Vysotsky.API.Dto;
 using Vysotsky.API.Dto.Common;
-using Vysotsky.API.Dto.Organizations;
 using Vysotsky.API.Dto.Users;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Data.Entities;
@@ -39,19 +39,14 @@ namespace Vysotsky.API.Controllers.Users
         public async Task<ActionResult<ApiResponse<PersistedUserDto>>> GetUser(string username)
         {
             var user = await _userService.GetUserByUsernameOrNullAsync(username);
-            switch (user)
+            return user switch
             {
-                case {OrganizationId: not null and var userOrganizationId}
-                    when !_currentUserProvider.CanReadOrganization(userOrganizationId.Value):
-                    return NotAuthorized("Customer cant access another customer", "users.notAuthorized");
-                case null:
-                    return UserNotFound(username);
-            }
-
-            var organization = user.OrganizationId.HasValue
-                ? await _organizationService.GetOrganizationByIdOrNullAsync(user.OrganizationId.Value)
-                : null;
-            return Ok(ToDto(user, organization));
+                null => UserNotFound(username),
+                {OrganizationId: not null and var userOrganizationId}
+                    when !_currentUserProvider.CanReadOrganization(userOrganizationId.Value) =>
+                    NotAuthorized("Customer cant access another customer", "users.notAuthorized"),
+                _ => Ok(user.ToDto())
+            };
         }
 
         [HttpPost]
@@ -92,44 +87,8 @@ namespace Vysotsky.API.Controllers.Users
                 ToModel(user.Role),
                 organization);
             await transaction.CompleteAsync();
-            return Created(Resources.Users.AppendPathSegment(createdUser.Username), ToDto(createdUser, organization));
+            return Created(Resources.Users.AppendPathSegment(createdUser.Username), createdUser.ToDto());
         }
-
-        private PersistedUserDto ToDto(User createdUser, Organization? organization) =>
-            new PersistedUserDto
-            {
-                Id = createdUser.Id,
-                Username = createdUser.Username,
-                Name = new PersonName
-                {
-                    FirstName = createdUser.Firstname,
-                    LastName = createdUser.LastName,
-                    Patronymic = createdUser.Patronymic
-                },
-                Organization = organization switch
-                {
-                    {Id: var id, Name: var name} => new PersistedOrganizationDto
-                    {
-                        Id = id,
-                        Name = name
-                    },
-                    null => null,
-                },
-                Contacts = createdUser.Contacts
-                    .Select(c => new UserContactDto
-                    {
-                        Name = c.Name,
-                        Value = c.Value,
-                        Type = ToDto(c.Type)
-                    })
-                    
-            };
-
-        private UserContactTypeDto ToDto(ContactType argType) => argType switch
-        {
-            ContactType.Phone => UserContactTypeDto.Phone,
-            _ => throw new ArgumentOutOfRangeException(nameof(argType), argType, null)
-        };
 
         private static ContactType ToModel(UserContactTypeDto c) =>
             c switch

@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Vysotsky.API.Dto;
 using Vysotsky.API.Dto.Common;
 using Vysotsky.API.Dto.Issues;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
-using Vysotsky.Service.Types;
 
 namespace Vysotsky.API.Controllers.Issues
 {
@@ -41,14 +41,9 @@ namespace Vysotsky.API.Controllers.Issues
                 return BadRequest("Room not found", "rooms.roomNotFound");
             var createdIssue =
                 await _issueService.CreateIssueAsync(newIssue.Title, newIssue.Description, area, room, currentUser);
-            return Ok(ToDto(createdIssue));
+            return Ok(createdIssue.ToDto());
         }
 
-        private static PersistedIssueDto ToDto(Issue issue) =>
-            new()
-            {
-                Id = issue.Id
-            };
 
         [HttpPost("{issueId:long}/needInfo")]
         public async Task<ActionResult<ApiResponse>> MoveIssueToNeedInfo(long issueId, MoveIssueToNeedInfoDto data)
@@ -60,12 +55,7 @@ namespace Vysotsky.API.Controllers.Issues
                 return NotAuthorized("Only supervisor can move task to NeedInfo state", "issues.notAuthorized");
             var newState =
                 await _issueService.MoveIssueToNeedInformation(issue, _currentUserProvider.CurrentUser!, data.Message);
-            return Ok(ToDto(newState));
+            return Ok(newState.ToDto());
         }
-    }
-
-    public class MoveIssueToNeedInfoDto
-    {
-        public string Message { get; init; } = "";
     }
 }
