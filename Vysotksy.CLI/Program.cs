@@ -142,7 +142,7 @@ async Task Seed(VysotskyDataConnection dataConnection)
     });
     await dataConnection.Categories.InsertWithInt64IdentityAsync(() => new CategoryRecord
     {
-             Name = "Лампочку заменить",
+        Name = "Лампочку заменить",
         AreaId = area
     });
     await dataConnection.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord

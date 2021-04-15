@@ -24,8 +24,7 @@ Host.CreateDefaultBuilder(args)
                 c.IncludeScopes = true;
                 c.JsonWriterOptions = new JsonWriterOptions
                 {
-                    Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
-                    Indented = false
+                    Encoder = JavaScriptEncoder.Create(UnicodeRanges.All), Indented = false
                 };
             });
         }
@@ -44,15 +43,15 @@ Host.CreateDefaultBuilder(args)
             {
                 services.PostConfigure<HostFilteringOptions>(options =>
                 {
-                    if (options.AllowedHosts is null or { Count: 0 })
+                                 if (options.AllowedHosts is null or {Count: 0})
                     {
                         var hosts = hostingContext
                             .Configuration["AllowedHosts"]
-                            ?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                            ?.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
                         options.AllowedHosts = hosts switch
                         {
-                            { Length: > 0 } => hosts,
-                            _ => new[] { "*" }
+                            {Length: > 0} => hosts,
+                            _ => new[] {"*"}
                         };
                     }
                 });
