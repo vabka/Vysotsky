@@ -37,7 +37,7 @@ namespace Vysotsky.Service.Impl
 
         public async Task<Building> CreateBuildingAsync(string name)
         {
-            var id = await this.dataConnection.Buildings
+            var id = await dataConnection.Buildings
                 .InsertWithInt64IdentityAsync(() => new BuildingRecord
                 {
                     Name = name
@@ -51,7 +51,7 @@ namespace Vysotsky.Service.Impl
 
         public async Task<Building?> GetBuildingByIdOrNullAsync(long buildingId)
         {
-            var result = await this.dataConnection.Buildings
+            var result = await dataConnection.Buildings
                 .Select(b => new Building
                 {
                     Id = b.Id,
@@ -62,7 +62,7 @@ namespace Vysotsky.Service.Impl
         }
 
         public async Task<Floor?> GetFloorByIdOrNullAsync(long floorId) =>
-            await this.dataConnection.Floors
+            await dataConnection.Floors
                 .Where(floor => floor.Id == floorId)
                 .Select(floor => new Floor
                 {
@@ -73,7 +73,7 @@ namespace Vysotsky.Service.Impl
                 .SingleOrDefaultAsync();
 
         public async Task<Building[]> GetAllBuildingsAsync() =>
-            await this.dataConnection.Buildings
+            await dataConnection.Buildings
                 .OrderBy(b => b.CreatedAt)
                 .Select(b => new Building
                 {
@@ -83,7 +83,7 @@ namespace Vysotsky.Service.Impl
                 .ToArrayAsync();
 
         public async Task<Floor[]> GetAllFloorsInBuildingAsync(Building building) =>
-            await this.dataConnection.Floors
+            await dataConnection.Floors
                 .OrderBy(b => b.CreatedAt)
                 .Where(f => f.BuildingId == building.Id)
                 .Select(f => new Floor
@@ -94,7 +94,7 @@ namespace Vysotsky.Service.Impl
                 .ToArrayAsync();
 
         public async Task<Room[]> GetAllRoomsOnFloorAsync(Floor floor) =>
-            await this.dataConnection.Rooms
+            await dataConnection.Rooms
                 .OrderBy(b => b.CreatedAt)
                 .Where(r => r.FloorId == floor.Id)
                 .Select(MapToRoomExpr)
@@ -102,15 +102,15 @@ namespace Vysotsky.Service.Impl
 
         public async Task DeleteBuildingCascadeByIdAsync(long buildingId)
         {
-            var buildingToDelete = this.dataConnection.Buildings.Where(building => building.Id == buildingId);
-            var allFloors = this.dataConnection.Floors.Where(floor => floor.BuildingId == buildingId);
-            var allRoomsInBuilding = from room in this.dataConnection.Rooms
-                                     join floor in this.dataConnection.Floors on room.FloorId equals floor.Id
+            var buildingToDelete = dataConnection.Buildings.Where(building => building.Id == buildingId);
+            var allFloors = dataConnection.Floors.Where(floor => floor.BuildingId == buildingId);
+            var allRoomsInBuilding = from room in dataConnection.Rooms
+                                     join floor in dataConnection.Floors on room.FloorId equals floor.Id
                                      where floor.BuildingId == buildingId
                                      select room;
 
 
-            await using var transaction = await this.dataConnection.BeginTransactionAsync();
+            await using var transaction = await dataConnection.BeginTransactionAsync();
             await allRoomsInBuilding.DeleteAsync();
             await allFloors.DeleteAsync();
             await buildingToDelete.DeleteAsync();
@@ -118,20 +118,20 @@ namespace Vysotsky.Service.Impl
         }
 
         public async Task<Room[]> GetRoomsAsync(long[] organizationRooms) =>
-            await this.dataConnection.Rooms
+            await dataConnection.Rooms
                 .Where(r => r.Id.In(organizationRooms))
                 .Select(MapToRoomExpr)
                 .ToArrayAsync();
 
         public async Task<Room?> GetRoomByIdOrNullAsync(long roomId) =>
-            await this.dataConnection.Rooms
+            await dataConnection.Rooms
                 .Where(r => r.Id == roomId)
                 .Select(MapToRoomExpr)
                 .SingleOrDefaultAsync();
 
         public async Task<Floor> CreateFloorAsync(Building building, string number)
         {
-            var id = await this.dataConnection.Floors.InsertWithInt64IdentityAsync(() => new FloorRecord
+            var id = await dataConnection.Floors.InsertWithInt64IdentityAsync(() => new FloorRecord
             {
                 Number = number,
                 BuildingId = building.Id,
@@ -145,7 +145,7 @@ namespace Vysotsky.Service.Impl
 
         public async Task<Room> CreateRoomAsync(Floor floor, string? name, string? number, RoomStatus status)
         {
-            var id = await this.dataConnection.Rooms.InsertWithInt64IdentityAsync(() => new RoomRecord
+            var id = await dataConnection.Rooms.InsertWithInt64IdentityAsync(() => new RoomRecord
             {
                 Number = number,
                 Name = name,
@@ -163,7 +163,7 @@ namespace Vysotsky.Service.Impl
 
         public async Task<IEnumerable<FullBuilding>> GetOrganizationBuildingsAsync(Organization organization)
         {
-            var roomsQuery = this.dataConnection.Rooms
+            var roomsQuery = dataConnection.Rooms
                 .Where(x => x.OwnerId == organization.Id);
 
             var roomsData = await roomsQuery.ToArrayAsync();
@@ -178,7 +178,7 @@ namespace Vysotsky.Service.Impl
             var floorsQuery = from room in roomsQuery
                               group room by room.FloorId
                 into r
-                              join floor in this.dataConnection.Floors on r.Key equals floor.Id
+                              join floor in dataConnection.Floors on r.Key equals floor.Id
                               select floor;
             var floorsData = await floorsQuery.ToArrayAsync();
             var floors = floorsData
@@ -192,7 +192,7 @@ namespace Vysotsky.Service.Impl
             var buildingsQuery = from floor in floorsQuery
                                  group floor by floor.BuildingId
                 into f
-                                 join building in this.dataConnection.Buildings on f.Key equals building.Id
+                                 join building in dataConnection.Buildings on f.Key equals building.Id
                                  select building;
             var buildingsData = await buildingsQuery.ToArrayAsync();
             return buildingsData.Select(x => new FullBuilding

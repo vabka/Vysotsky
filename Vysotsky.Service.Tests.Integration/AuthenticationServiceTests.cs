@@ -19,11 +19,11 @@ namespace Vysotsky.Service.Tests.Integration
 
         public AuthenticationServiceTests()
         {
-            this.hasher = new SecureHasher(new SecureHasherOptions
+            hasher = new SecureHasher(new SecureHasherOptions
             {
                 Salt = "0"
             });
-            this.authenticationService = new AuthenticationService(this.DataConnection, this.hasher, new AuthenticationServiceOptions
+            authenticationService = new AuthenticationService(DataConnection, hasher, new AuthenticationServiceOptions
             {
                 Secret = "secret"
             });
@@ -34,9 +34,9 @@ namespace Vysotsky.Service.Tests.Integration
         [Fact]
         public async Task SuccessfullyIssueTokenWithCorrectCredentials()
         {
-            await this.CreateAdminAsync();
+            await CreateAdminAsync();
 
-            var container = await this.authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
+            var container = await authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
 
             container.Should().NotBeNull();
 
@@ -55,10 +55,10 @@ namespace Vysotsky.Service.Tests.Integration
                 .Decode<Dictionary<string, object>>(token);
 
         private Task<long> CreateAdminAsync() =>
-            this.DataConnection.Users.InsertWithInt64IdentityAsync(() => new UserRecord
+            DataConnection.Users.InsertWithInt64IdentityAsync(() => new UserRecord
             {
                 Username = "admin",
-                PasswordHash = this.hasher.Hash("1234"),
+                PasswordHash = hasher.Hash("1234"),
                 Role = UserRole.SuperUser,
                 OrganizationId = null,
                 FirstName = "Иван",
@@ -72,19 +72,19 @@ namespace Vysotsky.Service.Tests.Integration
         [Fact]
         public async Task SuccessfullyValidateIssuedToken()
         {
-            await this.CreateAdminAsync();
-            var container = await this.authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
-            (await this.authenticationService.ValidateTokenAsync(container!.Token)).Should().BeTrue();
+            await CreateAdminAsync();
+            var container = await authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
+            (await authenticationService.ValidateTokenAsync(container!.Token)).Should().BeTrue();
         }
 
         [Fact]
         public async Task SuccessfullyRevokeIssuedToken()
         {
-            await this.CreateAdminAsync();
+            await CreateAdminAsync();
 
-            var container = await this.authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
-            await this.authenticationService.RevokeTokenAsync(container!.Token);
-            (await this.authenticationService.ValidateTokenAsync(container!.Token)).Should().BeFalse();
+            var container = await authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
+            await authenticationService.RevokeTokenAsync(container!.Token);
+            (await authenticationService.ValidateTokenAsync(container!.Token)).Should().BeFalse();
         }
     }
 }

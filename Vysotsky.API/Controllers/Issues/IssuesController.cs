@@ -34,14 +34,14 @@ namespace Vysotsky.API.Controllers.Issues
         [HttpPost]
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> CreateIssue([FromBody] IssueDto newIssue)
         {
-            var currentUser = this.currentUserProvider.CurrentUser;
+            var currentUser = currentUserProvider.CurrentUser;
             if (currentUser!.Role == UserRole.Worker)
             {
                 return NotAuthorized("Worker is not authorized to create issues", "issues.notAthorized");
             }
 
-            var areaTask = this.issueService.GetAreaByIdOrNull(newIssue.AreaId);
-            var roomTask = this.roomService.GetRoomByIdOrNullAsync(newIssue.RoomId);
+            var areaTask = issueService.GetAreaByIdOrNull(newIssue.AreaId);
+            var roomTask = roomService.GetRoomByIdOrNullAsync(newIssue.RoomId);
             var area = await areaTask;
             if (area == null)
             {
@@ -55,7 +55,7 @@ namespace Vysotsky.API.Controllers.Issues
             }
 
             var createdIssue =
-                await this.issueService.CreateIssueAsync(newIssue.Title, newIssue.Description, area, room, currentUser);
+                await issueService.CreateIssueAsync(newIssue.Title, newIssue.Description, area, room, currentUser);
             return Ok(createdIssue.ToDto());
         }
 
@@ -64,60 +64,60 @@ namespace Vysotsky.API.Controllers.Issues
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToNeedInfo([FromRoute] long issueId,
             [FromBody] MoveIssueToNeedInfoDto data)
         {
-            var issue = await this.issueService.GetIssueByIdOrNullAsync(issueId);
+            var issue = await issueService.GetIssueByIdOrNullAsync(issueId);
             if (issue == null)
             {
-                return this.IssueNotFound();
+                return IssueNotFound();
             }
 
-            if (!this.currentUserProvider.IsSupervisor())
+            if (!currentUserProvider.IsSupervisor())
             {
                 return NotAuthorized("Only supervisor can move task to NeedInfo state", "issues.notAuthorized");
             }
 
             var newState =
-                await this.issueService.MoveIssueToNeedInformationAsync(issue, this.currentUserProvider.CurrentUser!,
+                await issueService.MoveIssueToNeedInformationAsync(issue, currentUserProvider.CurrentUser!,
                     data.Message);
             return Ok(newState.ToDto());
         }
 
-        private ActionResult IssueNotFound() => this.NotFound("Issue not found", "issue.notFound");
+        private ActionResult IssueNotFound() => NotFound("Issue not found", "issue.notFound");
 
         [HttpPost("{issueId:long}/inProgress")]
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToInProgress([FromRoute] long issueId,
             [FromBody] MoveIssueToInPgoressDto data)
         {
-            var issue = await this.issueService.GetIssueByIdOrNullAsync(issueId);
-            if (!this.currentUserProvider.IsSupervisor())
+            var issue = await issueService.GetIssueByIdOrNullAsync(issueId);
+            if (!currentUserProvider.IsSupervisor())
             {
                 return NotAuthorized("Only supervisor can move task to InProgress state", "issues.notAuthorized");
             }
 
             if (issue == null)
             {
-                return this.IssueNotFound();
+                return IssueNotFound();
             }
 
-            var currentUser = this.currentUserProvider.CurrentUser!;
-            var worker = await this.workerService.GetWorkerByIdOrNullAsync(data.WorkerId);
+            var currentUser = currentUserProvider.CurrentUser!;
+            var worker = await workerService.GetWorkerByIdOrNullAsync(data.WorkerId);
             if (worker == null)
             {
-                return this.WorkerNotFound();
+                return WorkerNotFound();
             }
 
-            var category = await this.categoriesService.GetCategoryByIdOrNullAsync(data.CategoryId);
+            var category = await categoriesService.GetCategoryByIdOrNullAsync(data.CategoryId);
             if (category == null)
             {
-                return this.CategoryNotFound();
+                return CategoryNotFound();
             }
 
             var newState =
-                await this.issueService.TakeToWorkAsync(issue, currentUser, worker, category);
+                await issueService.TakeToWorkAsync(issue, currentUser, worker, category);
             return Ok(newState.ToDto());
         }
 
         private ActionResult<ApiResponse<PersistedIssueDto>> CategoryNotFound() => throw new System.NotImplementedException();
 
-        private ActionResult<ApiResponse<PersistedIssueDto>> WorkerNotFound() => this.NotFound("Worker not found", "workers.notFound");
+        private ActionResult<ApiResponse<PersistedIssueDto>> WorkerNotFound() => NotFound("Worker not found", "workers.notFound");
     }
 }

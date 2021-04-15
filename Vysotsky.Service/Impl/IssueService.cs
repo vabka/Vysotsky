@@ -35,7 +35,7 @@ namespace Vysotsky.Service.Impl
         public IssueService(VysotskyDataConnection vysotskyDataConnection) => this.vysotskyDataConnection = vysotskyDataConnection;
 
         public async Task<Area?> GetAreaByIdOrNull(long id) =>
-            await this.vysotskyDataConnection.Areas
+            await vysotskyDataConnection.Areas
                 .Where(x => x.Id == id)
                 .Select(x => new Area
                 {
@@ -45,7 +45,7 @@ namespace Vysotsky.Service.Impl
 
         public async Task<Issue> CreateIssueAsync(string title, string description, Area area, Room room, User author)
         {
-            var id = await this.vysotskyDataConnection.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
+            var id = await vysotskyDataConnection.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
             {
                 Title = title,
                 Description = description,
@@ -55,16 +55,16 @@ namespace Vysotsky.Service.Impl
                 Note = "",
                 Status = IssueStatus.New
             });
-            return (await this.GetIssueByIdOrNullAsync(id))!;
+            return (await GetIssueByIdOrNullAsync(id))!;
         }
 
         private async Task<Issue> GetIssueByIdWithSpecificVersion(long issueId, long version) =>
-            await this.vysotskyDataConnection.Issues
+            await vysotskyDataConnection.Issues
                 .Select(MapToIssue)
                 .SingleAsync(i => i.Id == issueId && i.Version == version);
 
         public async Task<Issue?> GetIssueByIdOrNullAsync(long issueId) =>
-            await this.vysotskyDataConnection.Issues
+            await vysotskyDataConnection.Issues
                 .Where(x => x.Id == issueId)
                 .OrderByDescending(x => x.Version)
                 .Select(MapToIssue)
@@ -77,18 +77,18 @@ namespace Vysotsky.Service.Impl
             {
                 case IssueStatus.New:
                 {
-                    await using var transaction = await this.vysotskyDataConnection.BeginTransactionAsync();
-                    await this.vysotskyDataConnection.IssueComments
+                    await using var transaction = await vysotskyDataConnection.BeginTransactionAsync();
+                    await vysotskyDataConnection.IssueComments
                         .InsertAsync(() => new IssueCommentRecord
                         {
                             IssueId = issue.Id,
                             AuthorId = supervisor.Id,
                             Text = message
                         });
-                    await this.vysotskyDataConnection.Issues
+                    await vysotskyDataConnection.Issues
                         .Where(i => i.Id == issue.Id && i.Version == issue.Version)
                         .Take(1)
-                        .InsertAsync(this.vysotskyDataConnection.Issues,
+                        .InsertAsync(vysotskyDataConnection.Issues,
                             i => new IssueRecord
                             {
                                 Id = i.Id,
@@ -107,7 +107,7 @@ namespace Vysotsky.Service.Impl
                                 UpdatedAt = DateTimeOffset.Now
                             });
                     await transaction.CommitAsync();
-                    return await this.GetIssueByIdWithSpecificVersion(issue.Id, issue.Version + 1);
+                    return await GetIssueByIdWithSpecificVersion(issue.Id, issue.Version + 1);
                 }
                 case IssueStatus.InProgress:
                 case IssueStatus.Completed:
@@ -131,10 +131,10 @@ namespace Vysotsky.Service.Impl
                 case IssueStatus.New:
                 case IssueStatus.NeedInfo:
                 {
-                    await this.vysotskyDataConnection.Issues
+                    await vysotskyDataConnection.Issues
                         .Where(i => i.Id == issue.Id && i.Version == issue.Version)
                         .Take(1)
-                        .InsertAsync(this.vysotskyDataConnection.Issues, i => new IssueRecord
+                        .InsertAsync(vysotskyDataConnection.Issues, i => new IssueRecord
                         {
                             Id = i.Id,
                             Version = i.Version + 1,
@@ -151,7 +151,7 @@ namespace Vysotsky.Service.Impl
                             UpdatedAt = DateTimeOffset.Now,
                             RoomId = i.RoomId
                         });
-                    return await this.GetIssueByIdWithSpecificVersion(issue.Id, issue.Version + 1);
+                    return await GetIssueByIdWithSpecificVersion(issue.Id, issue.Version + 1);
                 }
                 case IssueStatus.Accepted:
                 case IssueStatus.InProgress:
@@ -166,6 +166,6 @@ namespace Vysotsky.Service.Impl
             }
         }
 
-        private static InvalidOperationException CannotMoveFromTerminalState() => new InvalidOperationException("Cannot move from terminal state");
+        private static InvalidOperationException CannotMoveFromTerminalState() => new("Cannot move from terminal state");
     }
 }

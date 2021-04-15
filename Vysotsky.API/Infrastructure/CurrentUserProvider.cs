@@ -9,6 +9,6 @@ namespace Vysotsky.API.Infrastructure
 
         public CurrentUserProvider(IHttpContextAccessor httpContextAccessor) => this.httpContextAccessor = httpContextAccessor;
 
-        public User? CurrentUser => this.httpContextAccessor.HttpContext?.Items["CurrentUser"] as User;
+        public User? CurrentUser => httpContextAccessor.HttpContext?.Items["CurrentUser"] as User;
     }
 }

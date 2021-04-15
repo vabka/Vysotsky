@@ -11,13 +11,13 @@ namespace Vysotsky.Service.Tests.Integration
     {
         private readonly RoomService roomService;
 
-        public RoomServiceTests() => this.roomService = new RoomService(this.DataConnection);
+        public RoomServiceTests() => roomService = new RoomService(DataConnection);
 
         [Fact]
         public async Task CreateBuildingSuccessfully()
         {
-            var building = await this.roomService.CreateBuildingAsync("Высоцкий");
-            var buildings = await this.DataConnection.Buildings.ToArrayAsync();
+            var building = await roomService.CreateBuildingAsync("Высоцкий");
+            var buildings = await DataConnection.Buildings.ToArrayAsync();
 
             buildings.Length.Should().Be(1);
             var vysotsky = buildings[0];
@@ -29,8 +29,8 @@ namespace Vysotsky.Service.Tests.Integration
         [Fact]
         public async Task GetSingleBuildingSuccessfully()
         {
-            var id = await this.CreateBuilding("A");
-            var buildings = await this.roomService.GetAllBuildingsAsync();
+            var id = await CreateBuilding("A");
+            var buildings = await roomService.GetAllBuildingsAsync();
             buildings.Length.Should().Be(1);
             buildings[0].Id.Should().Be(id);
             buildings[0].Name.Should().Be("A");
@@ -39,16 +39,16 @@ namespace Vysotsky.Service.Tests.Integration
         [Fact]
         public async Task GetNoBuildingsSuccessfully()
         {
-            var buildings = await this.roomService.GetAllBuildingsAsync();
+            var buildings = await roomService.GetAllBuildingsAsync();
             buildings.Length.Should().Be(0);
         }
 
         [Fact]
         public async Task GetManyBuildingssuccessfully()
         {
-            var id1 = await this.CreateBuilding("A");
-            var id2 = await this.CreateBuilding("B");
-            var buildings = await this.roomService.GetAllBuildingsAsync();
+            var id1 = await CreateBuilding("A");
+            var id2 = await CreateBuilding("B");
+            var buildings = await roomService.GetAllBuildingsAsync();
             buildings.Length.Should().Be(2);
 
             buildings[0].Id.Should().Be(id1);
@@ -59,7 +59,7 @@ namespace Vysotsky.Service.Tests.Integration
 
         private async Task<long> CreateBuilding(string name)
         {
-            var id = await this.DataConnection.Buildings.InsertWithInt64IdentityAsync(() => new BuildingRecord
+            var id = await DataConnection.Buildings.InsertWithInt64IdentityAsync(() => new BuildingRecord
             {
                 Name = name
             });

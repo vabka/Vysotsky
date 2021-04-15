@@ -23,6 +23,8 @@ namespace Vysotsky.API.Infrastructure
                 UserRole.SuperUser => true,
                 UserRole.Supervisor => true,
                 UserRole.OrganizationOwner => true,
+                UserRole.Worker => throw new System.NotImplementedException(),
+                UserRole.OrganizationMember => throw new System.NotImplementedException(),
                 _ => false
             };
 
@@ -32,6 +34,9 @@ namespace Vysotsky.API.Infrastructure
             {
                 UserRole.Supervisor => true,
                 UserRole.SuperUser => true,
+                UserRole.Worker => throw new System.NotImplementedException(),
+                UserRole.OrganizationOwner => throw new System.NotImplementedException(),
+                UserRole.OrganizationMember => throw new System.NotImplementedException(),
                 _ => false
             };
 
@@ -40,6 +45,9 @@ namespace Vysotsky.API.Infrastructure
             {
                 UserRole.Supervisor => true,
                 UserRole.SuperUser => true,
+                UserRole.Worker => throw new System.NotImplementedException(),
+                UserRole.OrganizationOwner => throw new System.NotImplementedException(),
+                UserRole.OrganizationMember => throw new System.NotImplementedException(),
                 _ => false
             };
     }

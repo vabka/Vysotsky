@@ -22,7 +22,7 @@ namespace Vysotsky.API.Controllers.Auth
         public async Task<ActionResult<ApiResponse<AccessTokenContainer>>> Authenticate(
             [FromBody] LoginDto loginDto)
         {
-            var token = await this.authenticationService.TryIssueTokenByUserCredentialsAsync(loginDto.Username,
+            var token = await authenticationService.TryIssueTokenByUserCredentialsAsync(loginDto.Username,
                 loginDto.Password);
             return token switch
             {
@@ -37,8 +37,8 @@ namespace Vysotsky.API.Controllers.Auth
             var authorizationHeaderValue = httpContextAccessor.HttpContext?.Request.Headers[HeaderNames.Authorization];
             if (authorizationHeaderValue.HasValue)
             {
-                var tokenText = authorizationHeaderValue.Value.ToString().Substring("Bearer ".Length);
-                await this.authenticationService.RevokeTokenAsync(tokenText);
+                var tokenText = authorizationHeaderValue.Value.ToString()["Bearer ".Length..];
+                await authenticationService.RevokeTokenAsync(tokenText);
             }
 
             return Ok();

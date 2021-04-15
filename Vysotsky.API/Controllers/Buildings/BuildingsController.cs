@@ -24,14 +24,14 @@ namespace Vysotsky.API.Controllers.Buildings
         public async Task<ActionResult<ApiResponse<PersistedBuildingDto>>> CreateBuilding(
             [FromBody] BuildingDto buildingToCreate)
         {
-            var building = await this.roomService.CreateBuildingAsync(buildingToCreate.Name);
+            var building = await roomService.CreateBuildingAsync(buildingToCreate.Name);
             return Created(Resources.Buildings.AppendPathSegment(building.Id), building.ToDto());
         }
 
         [HttpDelete("{buildingId:long}")]
         public async Task<ActionResult<ApiResponse>> DeleteBuilding(long buildingId)
         {
-            await this.roomService.DeleteBuildingCascadeByIdAsync(buildingId);
+            await roomService.DeleteBuildingCascadeByIdAsync(buildingId);
             return Ok();
         }
 
@@ -40,13 +40,13 @@ namespace Vysotsky.API.Controllers.Buildings
         public async Task<ActionResult<ApiResponse<PersistedFloorDto>>> CreateFloor([FromRoute] long buildingId,
             [FromBody] FloorDto floorToCreate)
         {
-            var building = await this.roomService.GetBuildingByIdOrNullAsync(buildingId);
+            var building = await roomService.GetBuildingByIdOrNullAsync(buildingId);
             if (building == null)
             {
-                return this.BuildingNotFound(buildingId);
+                return BuildingNotFound(buildingId);
             }
 
-            var floor = await this.roomService.CreateFloorAsync(building, floorToCreate.Number);
+            var floor = await roomService.CreateFloorAsync(building, floorToCreate.Number);
             return Created(Resources.Buildings.AppendPathSegments(buildingId, "floors", floor.Id),
                 floor.ToDto()
             );
@@ -58,19 +58,19 @@ namespace Vysotsky.API.Controllers.Buildings
             [FromRoute] long floorId,
             [FromBody] RoomDto roomToCreate)
         {
-            var building = await this.roomService.GetBuildingByIdOrNullAsync(buildingId);
+            var building = await roomService.GetBuildingByIdOrNullAsync(buildingId);
             if (building == null)
             {
-                return this.BuildingNotFound(buildingId);
+                return BuildingNotFound(buildingId);
             }
 
-            var floor = await this.roomService.GetFloorByIdOrNullAsync(floorId);
+            var floor = await roomService.GetFloorByIdOrNullAsync(floorId);
             if (floor?.BuildingId != building.Id)
             {
-                return this.FloorInBuildingNotFound(buildingId, floorId);
+                return FloorInBuildingNotFound(buildingId, floorId);
             }
 
-            var room = await this.roomService.CreateRoomAsync(floor, roomToCreate.Name, roomToCreate.Number,
+            var room = await roomService.CreateRoomAsync(floor, roomToCreate.Name, roomToCreate.Number,
                 ToModel(roomToCreate.Status));
             return Created(
                 Resources.Buildings.AppendPathSegments(buildingId, "floors", floorId, "rooms", room.Id),
@@ -78,15 +78,15 @@ namespace Vysotsky.API.Controllers.Buildings
         }
 
         private NotFoundObjectResult FloorInBuildingNotFound(long buildingId, long floorId) =>
-            this.NotFound($"Floor with id {floorId} not found in building with id {buildingId}",
+            NotFound($"Floor with id {floorId} not found in building with id {buildingId}",
                 "buildings.floorInBuildingNotFound");
 
-        private NotFoundObjectResult BuildingNotFound(long buildingId) => this.NotFound($"Building with id {buildingId} not found", "buildings.notFound");
+        private NotFoundObjectResult BuildingNotFound(long buildingId) => NotFound($"Building with id {buildingId} not found", "buildings.notFound");
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PersistedBuildingDto[]>>> GetAllBuildings()
         {
-            var data = await this.roomService.GetAllBuildingsAsync();
+            var data = await roomService.GetAllBuildingsAsync();
             return Ok(data.Select(b => b.ToDto()));
         }
 
@@ -94,13 +94,13 @@ namespace Vysotsky.API.Controllers.Buildings
         public async Task<ActionResult<ApiResponse<PersistedFloorDto[]>>> GetAllFloorsInBuilding(
             [FromRoute] long buildingId)
         {
-            var building = await this.roomService.GetBuildingByIdOrNullAsync(buildingId);
+            var building = await roomService.GetBuildingByIdOrNullAsync(buildingId);
             if (building == null)
             {
-                return this.BuildingNotFound(buildingId);
+                return BuildingNotFound(buildingId);
             }
 
-            var data = await this.roomService.GetAllFloorsInBuildingAsync(building);
+            var data = await roomService.GetAllFloorsInBuildingAsync(building);
             return Ok(data.Select(f => f.ToDto()));
         }
 
@@ -108,19 +108,19 @@ namespace Vysotsky.API.Controllers.Buildings
         public async Task<ActionResult<ApiResponse<PersistedRoomDto[]>>> GetAllRoomsOnFloor([FromRoute] long buildingId,
             [FromRoute] long floorId)
         {
-            var building = await this.roomService.GetBuildingByIdOrNullAsync(buildingId);
+            var building = await roomService.GetBuildingByIdOrNullAsync(buildingId);
             if (building == null)
             {
-                return this.BuildingNotFound(buildingId);
+                return BuildingNotFound(buildingId);
             }
 
-            var floor = await this.roomService.GetFloorByIdOrNullAsync(floorId);
+            var floor = await roomService.GetFloorByIdOrNullAsync(floorId);
             if (floor?.BuildingId != building.Id)
             {
-                return this.FloorInBuildingNotFound(buildingId, floorId);
+                return FloorInBuildingNotFound(buildingId, floorId);
             }
 
-            var rooms = await this.roomService.GetAllRoomsOnFloorAsync(floor);
+            var rooms = await roomService.GetAllRoomsOnFloorAsync(floor);
             return Ok(rooms
                 .Select(r => r.ToDto())
             );

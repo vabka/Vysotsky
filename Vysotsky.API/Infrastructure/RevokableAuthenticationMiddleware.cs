@@ -4,11 +4,10 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Vysotsky.Service.Interfaces;
+using System.Globalization;
 
 namespace Vysotsky.API.Infrastructure
 {
-    using System.Globalization;
-
     public class RevokableAuthenticationMiddleware : IMiddleware
     {
         private readonly IAuthenticationService authenticationService;
@@ -30,20 +29,20 @@ namespace Vysotsky.API.Infrastructure
                 var iat = long.Parse(claims["iat"], CultureInfo.InvariantCulture);
                 // Должен быть sub, но asp net почему-то ставит это.
                 var sub = claims["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
-                if (await this.authenticationService.CheckTokenRevokedAsync(jti))
+                if (await authenticationService.CheckTokenRevokedAsync(jti))
                 {
                     throw new SecurityTokenRevokedException();
                 }
 
-                var lastPasswordChange = await this.authenticationService.TryGetLastPasswordChangeTimeAsync(sub);
+                var lastPasswordChange = await authenticationService.TryGetLastPasswordChangeTimeAsync(sub);
                 if (lastPasswordChange == null || lastPasswordChange.Value.ToUnixTimeSeconds() >= iat)
                 {
-                    await this.authenticationService.RevokeTokenByJtiAsync(jti,
+                    await authenticationService.RevokeTokenByJtiAsync(jti,
                         DateTimeOffset.FromUnixTimeSeconds(iat));
                     throw new SecurityTokenIsNotActualException();
                 }
 
-                var user = await this.userService.GetUserByUsernameOrNullAsync(sub);
+                var user = await userService.GetUserByUsernameOrNullAsync(sub);
                 context.Items.Add("CurrentUser", user);
             }
 

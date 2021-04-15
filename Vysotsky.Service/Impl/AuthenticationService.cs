@@ -30,7 +30,7 @@ namespace Vysotsky.Service.Impl
             bool longLiving = false)
         {
             var now = DateTimeOffset.UtcNow;
-            var user = await this.vysotskyDataConnection.Users
+            var user = await vysotskyDataConnection.Users
                 .Where(x => x.Username == username)
                 .Select(x => new
                 {
@@ -43,12 +43,12 @@ namespace Vysotsky.Service.Impl
                 .SingleOrDefaultAsync();
             if (user != null)
             {
-                var passwordHash = this.hasher.Hash(password);
+                var passwordHash = hasher.Hash(password);
                 if (user.PasswordHash.SequenceEqual(passwordHash))
                 {
                     var exp = now.AddDays(longLiving ? 180 : 1);
                     var iat = now;
-                    var token = this.EncodeToken(new TokenPayload
+                    var token = EncodeToken(new TokenPayload
                     {
                         Sub = user.Username,
                         Exp = exp.ToUnixTimeSeconds(),
@@ -64,19 +64,19 @@ namespace Vysotsky.Service.Impl
 
         public async Task<bool> ValidateTokenAsync(string token)
         {
-            var payload = this.DecodeToken(token);
-            return await this.vysotskyDataConnection.BlockedTokens.AllAsync(x => x.Jti != payload.Jti);
+            var payload = DecodeToken(token);
+            return await vysotskyDataConnection.BlockedTokens.AllAsync(x => x.Jti != payload.Jti);
         }
 
         public async Task RevokeTokenAsync(string token)
         {
-            var payload = this.DecodeToken(token);
+            var payload = DecodeToken(token);
             var exp = DateTimeOffset.FromUnixTimeSeconds(payload.Exp);
-            await this.RevokeTokenByJtiAsync(payload.Jti, exp);
+            await RevokeTokenByJtiAsync(payload.Jti, exp);
         }
 
         public Task RevokeTokenByJtiAsync(Guid tokenIdentifier, DateTimeOffset expiration) =>
-            this.vysotskyDataConnection.BlockedTokens
+            vysotskyDataConnection.BlockedTokens
                 .InsertAsync(() => new BlockedTokenRecord
                 {
                     ExpirationTime = expiration,
@@ -84,19 +84,19 @@ namespace Vysotsky.Service.Impl
                 });
 
         public Task<DateTimeOffset?> TryGetLastPasswordChangeTimeAsync(string username) =>
-            this.vysotskyDataConnection.Users
+            vysotskyDataConnection.Users
                 .Where(u => u.Username == username)
                 .Select(u => u.LastPasswordChange)
                 .Cast<DateTimeOffset?>()
                 .SingleOrDefaultAsync();
 
         public Task<bool> CheckTokenRevokedAsync(Guid tokenIdentifier) =>
-            this.vysotskyDataConnection.BlockedTokens.AnyAsync(x => x.Jti == tokenIdentifier);
+            vysotskyDataConnection.BlockedTokens.AnyAsync(x => x.Jti == tokenIdentifier);
 
         private string EncodeToken(TokenPayload payload) =>
             JwtBuilder.Create()
                 .WithAlgorithm(new HMACSHA256Algorithm())
-                .WithSecret(this.options.Secret)
+                .WithSecret(options.Secret)
                 .AddClaim("exp", payload.Exp)
                 .AddClaim("iat", payload.Iat)
                 .AddClaim("sub", payload.Sub)
@@ -106,7 +106,7 @@ namespace Vysotsky.Service.Impl
         private TokenPayload DecodeToken(string token) =>
             JwtBuilder.Create()
                 .WithAlgorithm(new HMACSHA256Algorithm())
-                .WithSecret(this.options.Secret)
+                .WithSecret(options.Secret)
                 .MustVerifySignature()
                 .Decode<TokenPayload>(token);
 

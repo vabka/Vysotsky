@@ -24,8 +24,8 @@ namespace Vysotsky.Service.Tests.Integration
             var options = new LinqToDbConnectionOptionsBuilder()
                 .UsePostgreSQL(connectionString)
                 .Build<VysotskyDataConnection>();
-            this.DataConnection = new VysotskyDataConnection(options);
-            this.DropDatabase();
+            DataConnection = new VysotskyDataConnection(options);
+            DropDatabase();
         }
 
         private bool disposed;
@@ -33,30 +33,30 @@ namespace Vysotsky.Service.Tests.Integration
 
         public void Dispose()
         {
-            if (this.disposed)
+            if (disposed)
             {
                 return;
             }
 
-            lock (this.disposeLock)
+            lock (disposeLock)
             {
-                if (this.disposed)
+                if (disposed)
                 {
                     return;
                 }
 
-                this.DropDatabase();
-                this.DataConnection.Dispose();
+                DropDatabase();
+                DataConnection.Dispose();
                 GC.SuppressFinalize(this);
-                this.disposed = true;
+                disposed = true;
             }
         }
 
         private void DropDatabase()
         {
-            this.DataConnection.Buildings.Delete();
-            this.DataConnection.Users.Delete();
-            this.DataConnection.BlockedTokens.Delete();
+            DataConnection.Buildings.Delete();
+            DataConnection.Users.Delete();
+            DataConnection.BlockedTokens.Delete();
         }
     }
 }

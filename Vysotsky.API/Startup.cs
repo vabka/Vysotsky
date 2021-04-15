@@ -27,11 +27,11 @@ namespace Vysotsky.API
     public class Startup
     {
         public Startup(IConfiguration configuration) =>
-            this.Configuration = configuration;
+            Configuration = configuration;
 
         public IConfiguration Configuration { get; }
 
-        public void ConfigureServices(IServiceCollection services) => ConfigureServices(services, this.Configuration);
+        public void ConfigureServices(IServiceCollection services) => ConfigureServices(services, Configuration);
 
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {

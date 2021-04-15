@@ -21,7 +21,7 @@ namespace Vysotsky.API.Controllers.Workers
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<PersistedUserDto>>>> GetAllWorkers()
         {
-            var workers = await this.userService.GetAllUsersWithRoleAsync(UserRole.Worker);
+            var workers = await userService.GetAllUsersWithRoleAsync(UserRole.Worker);
             return Ok(workers.Select(w => w.ToDto()));
         }
     }

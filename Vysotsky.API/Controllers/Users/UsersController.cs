@@ -38,12 +38,12 @@ namespace Vysotsky.API.Controllers.Users
         [HttpGet("{username}")]
         public async Task<ActionResult<ApiResponse<PersistedUserDto>>> GetUser(string username)
         {
-            var user = await this.userService.GetUserByUsernameOrNullAsync(username);
+            var user = await userService.GetUserByUsernameOrNullAsync(username);
             return user switch
             {
-                null => this.UserNotFound(username),
+                null => UserNotFound(username),
                 { OrganizationId: not null and var userOrganizationId }
-                    when !this.currentUserProvider.CanReadOrganization(userOrganizationId.Value) =>
+                    when !currentUserProvider.CanReadOrganization(userOrganizationId.Value) =>
                     NotAuthorized("Customer cant access another customer", "users.notAuthorized"),
                 _ => Ok(user.ToDto())
             };
@@ -52,7 +52,7 @@ namespace Vysotsky.API.Controllers.Users
         [HttpPost]
         public async Task<ActionResult<ApiResponse<PersistedUserDto>>> RegisterUser(UserDto user)
         {
-            var alreadyCreatedUser = await this.userService.GetUserByUsernameOrNullAsync(user.Username);
+            var alreadyCreatedUser = await userService.GetUserByUsernameOrNullAsync(user.Username);
             if (alreadyCreatedUser != null)
             {
                 return BadRequest("User with same username exists", "users.usernameExists");
@@ -64,7 +64,7 @@ namespace Vysotsky.API.Controllers.Users
                     "users.cannotCreateUnattachedRepresentative");
             }
 
-            await using var transaction = await this.atomicService.BeginAtomicOperationAsync();
+            await using var transaction = await atomicService.BeginAtomicOperationAsync();
             Organization? organization = null;
             if (user.Role == UserRoleDto.Customer)
             {
@@ -73,7 +73,7 @@ namespace Vysotsky.API.Controllers.Users
                     return BadRequest("Organization field in necessary", "users.necessaryFieldMissing");
                 }
 
-                var rooms = await this.roomService.GetRoomsAsync(user.Organization.Rooms);
+                var rooms = await roomService.GetRoomsAsync(user.Organization.Rooms);
                 if (rooms.Any(room => room.OwnerId.HasValue))
                 {
                     return BadRequest("Can't obtain room", "rooms.occupied");
@@ -84,10 +84,10 @@ namespace Vysotsky.API.Controllers.Users
                     return BadRequest("Some rooms are not exist", "rooms.notFound");
                 }
 
-                organization = await this.organizationService.CreateOrganizationAsync(user.Organization.Name, rooms);
+                organization = await organizationService.CreateOrganizationAsync(user.Organization.Name, rooms);
             }
 
-            var createdUser = await this.userService.CreateUserAsync(user.Username,
+            var createdUser = await userService.CreateUserAsync(user.Username,
                 user.Password,
                 user.Name.FirstName,
                 user.Name.LastName,
@@ -122,6 +122,6 @@ namespace Vysotsky.API.Controllers.Users
                 _ => throw new InvalidOperationException()
             };
 
-        private NotFoundObjectResult UserNotFound(string username) => this.NotFound($"User by not found by id {username}", "users.userNotFound");
+        private NotFoundObjectResult UserNotFound(string username) => NotFound($"User by not found by id {username}", "users.userNotFound");
     }
 }

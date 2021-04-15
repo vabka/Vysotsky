@@ -29,18 +29,18 @@ namespace Vysotsky.API.Controllers.Categories
         [HttpPost]
         public async Task<ActionResult<ApiResponse<PersistedAreaDto>>> CreateArea([FromBody] AreaDto areaDto)
         {
-            if (!this.currentUserProvider.CanEditCategories())
+            if (!currentUserProvider.CanEditCategories())
             {
                 return NotAuthorizedToEdit();
             }
 
-            var image = await this.imagesService.GetImageByIdOrNullAsync(areaDto.ImageId);
+            var image = await imagesService.GetImageByIdOrNullAsync(areaDto.ImageId);
             if (image == null)
             {
                 return BadRequest("Image not found", "images.notFound");
             }
 
-            var area = await this.categoriesService.CreateAreaAsync(areaDto.Name, image);
+            var area = await categoriesService.CreateAreaAsync(areaDto.Name, image);
             return Created(Resources.Areas.AppendPathSegment(area.Id), area.ToDto());
         }
 
@@ -51,25 +51,25 @@ namespace Vysotsky.API.Controllers.Categories
         public async Task<ActionResult<ApiResponse<PersistedCategoryDto>>> CreateCategory([FromRoute] long areaId,
             [FromBody] CategoryDto categoryDto)
         {
-            if (!this.currentUserProvider.CanEditCategories())
+            if (!currentUserProvider.CanEditCategories())
             {
                 return NotAuthorizedToEdit();
             }
 
-            var area = await this.categoriesService.GetAreaByIdOrNullAsync(areaId);
+            var area = await categoriesService.GetAreaByIdOrNullAsync(areaId);
             if (area == null)
             {
-                return this.AreaNotFound();
+                return AreaNotFound();
             }
 
-            var category = await this.categoriesService.CreateCategoryInAreaAsync(area, categoryDto.Name);
+            var category = await categoriesService.CreateCategoryInAreaAsync(area, categoryDto.Name);
             return Created(Resources.Areas.AppendPathSegments(areaId, "categories", category.Id), category.ToDto());
         }
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<PersistedAreaDto>>>> GetAllAreas()
         {
-            var areas = await this.categoriesService.GetAllAreasAsync();
+            var areas = await categoriesService.GetAllAreasAsync();
             return Ok(areas.Select(area => area.ToDto()));
         }
 
@@ -77,16 +77,16 @@ namespace Vysotsky.API.Controllers.Categories
         public async Task<ActionResult<ApiResponse<IEnumerable<PersistedCategoryDto>>>> GetAllCategoriesInArea(
             long areaId)
         {
-            var area = await this.categoriesService.GetAreaByIdOrNullAsync(areaId);
+            var area = await categoriesService.GetAreaByIdOrNullAsync(areaId);
             if (area == null)
             {
-                return this.AreaNotFound();
+                return AreaNotFound();
             }
 
-            var categories = await this.categoriesService.GetAllCategoriesInAreaAsync(area);
+            var categories = await categoriesService.GetAllCategoriesInAreaAsync(area);
             return Ok(categories.Select(c => c.ToDto()));
         }
 
-        private NotFoundObjectResult AreaNotFound() => this.NotFound("Area not found", "categories.areaNotFound");
+        private NotFoundObjectResult AreaNotFound() => NotFound("Area not found", "categories.areaNotFound");
     }
 }

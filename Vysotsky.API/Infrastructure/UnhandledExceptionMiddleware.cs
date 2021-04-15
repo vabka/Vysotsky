@@ -36,7 +36,7 @@ namespace Vysotsky.API.Infrastructure
                         Code = "auth.invalidAccessToken"
                     }
                 });
-                this.logger.LogInformation(invalidTokenException, "Invalid token");
+                logger.LogInformation(invalidTokenException, "Invalid token");
             }
             catch (Exception exception)
             {
@@ -54,7 +54,7 @@ namespace Vysotsky.API.Infrastructure
                         Code = "internalError"
                     }
                 });
-                this.logger.LogError(exception, "Unhandled exception");
+                logger.LogError(exception, "Unhandled exception");
             }
         }
     }

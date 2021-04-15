@@ -7,42 +7,42 @@ namespace Vysotsky.Migrations.Migrations
     {
         public override void Up()
         {
-            this.Create.Entity("user");
-            this.Create.Entity("organization")
+            Create.Entity("user");
+            Create.Entity("organization")
                 .WithColumn("name").AsString();
-            this.Create.Entity("image")
+            Create.Entity("image")
                 .WithColumn("external_id").AsString();
 
-            this.Create.Entity("area")
+            Create.Entity("area")
                 .WithColumn("name").AsString()
                 .WithColumn("image_id").References("image");
-            this.Create.Entity("category")
+            Create.Entity("category")
                 .WithColumn("area_id").References("area")
                 .WithColumn("name").AsString();
 
-            this.Create.Entity("building")
+            Create.Entity("building")
                 .WithColumn("name").AsString();
-            this.Create.Entity("floor")
+            Create.Entity("floor")
                 .WithColumn("number").AsString()
                 .WithColumn("building_id").References("building");
 
-            this.Execute.CreateEnum("room_status", "Free", "Owned", "Rented", "Unavailable");
-            this.Create.Entity("room")
+            Execute.CreateEnum("room_status", "Free", "Owned", "Rented", "Unavailable");
+            Create.Entity("room")
                 .WithColumn("floor_id").References("floor")
                 .WithColumn("owner_id").References("organization").Nullable()
                 .WithColumn("status").AsEnum("room_status")
                 .WithColumn("name").AsString().Nullable()
                 .WithColumn("number").AsString().Nullable();
-            this.Create.Index()
+            Create.Index()
                 .OnTable("room")
                 .OnColumn("owner_id");
-            this.Execute.CreateEnum("user_role",
+            Execute.CreateEnum("user_role",
                 "SuperUser",
                 "Supervisor",
                 "Worker",
                 "OrganizationOwner",
                 "OrganizationMember");
-            this.Alter.Table("user").AddColumn("username").AsString().Unique()
+            Alter.Table("user").AddColumn("username").AsString().Unique()
                 .AddColumn("password_hash")
                 .AsBinary(512 / 8)
                 .AddColumn("image_id").References("image").Nullable()
@@ -54,12 +54,12 @@ namespace Vysotsky.Migrations.Migrations
                 .AddColumn("last_password_change").AsDateTimeOffset()
                 .AddColumn("organization_id").References("organization").Nullable();
 
-            this.Create.Table("blocked_token")
+            Create.Table("blocked_token")
                 .WithColumn("jti").AsGuid().PrimaryKey()
                 .WithColumn("expiration_time").AsDateTime();
 
 
-            this.Execute.CreateEnum("issue_status",
+            Execute.CreateEnum("issue_status",
                 "New",
                 "Cancelled",
                 "NeedInfo",
@@ -68,7 +68,7 @@ namespace Vysotsky.Migrations.Migrations
                 "Completed",
                 "Accepted",
                 "Closed");
-            this.Create.VersionedEntity("issue")
+            Create.VersionedEntity("issue")
                 .WithColumn("status").AsEnum("issue_status")
                 .WithColumn("title").AsString()
                 .WithColumn("description").AsString()
@@ -79,37 +79,37 @@ namespace Vysotsky.Migrations.Migrations
                 .WithColumn("supervisor_id").References("user").Nullable()
                 .WithColumn("worker_id").References("user").Nullable()
                 .WithColumn("room_id").References("room");
-            this.Create.Table("issue_image")
+            Create.Table("issue_image")
                 .WithColumn("issue_id").References("issue").PrimaryKey()
                 .WithColumn("image_id").References("image").PrimaryKey();
 
-            this.Create.Entity("issue_comment")
+            Create.Entity("issue_comment")
                 .WithColumn("issue_id").References("issue")
                 .WithColumn("author_id").References("user")
                 .WithColumn("text").AsString();
-            this.Create.Table("issue_comment_image")
+            Create.Table("issue_comment_image")
                 .WithColumn("issue_comment_id").References("issue_comment")
                 .WithColumn("image_id").References("image");
         }
 
         public override void Down()
         {
-            this.Delete.Table("image");
-            this.Delete.Table("area");
-            this.Delete.Table("category");
-            this.Delete.Table("building");
-            this.Delete.Table("floor");
-            this.Delete.Table("room");
-            this.Execute.DropEnum("room_status");
-            this.Delete.Table("user");
-            this.Execute.DropEnum("user_role");
-            this.Delete.Table("blocked_token");
-            this.Delete.Table("organization");
-            this.Delete.Table("issue");
-            this.Execute.DropEnum("issue_status");
-            this.Delete.Table("issue_image");
-            this.Delete.Table("issue_comment");
-            this.Delete.Table("issue_comment_image");
+            Delete.Table("image");
+            Delete.Table("area");
+            Delete.Table("category");
+            Delete.Table("building");
+            Delete.Table("floor");
+            Delete.Table("room");
+            Execute.DropEnum("room_status");
+            Delete.Table("user");
+            Execute.DropEnum("user_role");
+            Delete.Table("blocked_token");
+            Delete.Table("organization");
+            Delete.Table("issue");
+            Execute.DropEnum("issue_status");
+            Delete.Table("issue_image");
+            Delete.Table("issue_comment");
+            Delete.Table("issue_comment_image");
         }
     }
 }

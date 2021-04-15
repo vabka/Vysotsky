@@ -12,7 +12,7 @@ namespace Vysotsky.Service.Impl
 
         public byte[] Hash(string source)
         {
-            var key = Encoding.UTF8.GetBytes(this.options.Salt);
+            var key = Encoding.UTF8.GetBytes(options.Salt);
             using var alg = new HMACSHA512(key);
             return alg.ComputeHash(Encoding.UTF8.GetBytes(source));
         }

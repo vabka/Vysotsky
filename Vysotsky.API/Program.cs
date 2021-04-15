@@ -34,9 +34,7 @@ Host.CreateDefaultBuilder(args)
             builder.AddConsole(c => c.FormatterName = "simple");
         }
     })
-    .ConfigureWebHost(builder =>
-    {
-        builder
+    .ConfigureWebHost(builder => builder
             // Defaults
             .UseKestrel((builderContext, options) =>
                 options.Configure(builderContext.Configuration.GetSection("Kestrel"), true))
@@ -62,7 +60,6 @@ Host.CreateDefaultBuilder(args)
             })
             .ConfigureServices((ctx, services) => Startup.ConfigureServices(services, ctx.Configuration))
             .Configure((_, app) => app.UseHostFiltering())
-            .Configure((ctx, app) => Startup.ConfigureWebApp(app, ctx.HostingEnvironment));
-    })
+            .Configure((ctx, app) => Startup.ConfigureWebApp(app, ctx.HostingEnvironment)))
     .Build()
     .Run();

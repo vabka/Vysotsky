@@ -43,10 +43,10 @@ namespace Vysotsky.Service.Impl
             UserRole role,
             Organization? organization)
         {
-            var passwordHash = this.hasher.Hash(password);
+            var passwordHash = hasher.Hash(password);
             var contactsArray = contacts.ToArray();
             var organizationId = organization?.Id;
-            var id = await this.dataConnection.Users
+            var id = await dataConnection.Users
                 .InsertWithInt64IdentityAsync(() => new UserRecord
                 {
                     Username = username,
@@ -74,25 +74,25 @@ namespace Vysotsky.Service.Impl
         }
 
         public async Task<User?> GetUserByIdOrNull(long userId) =>
-            await this.dataConnection.Users
+            await dataConnection.Users
                 .Where(u => u.Id == userId)
                 .Select(MapToUser)
                 .SingleOrDefaultAsync();
 
         public async Task<User?> GetUserByUsernameOrNullAsync(string username) =>
-            await this.dataConnection.Users
+            await dataConnection.Users
                 .Where(u => u.Username == username)
                 .Select(MapToUser)
                 .SingleOrDefaultAsync();
 
         public async Task<IEnumerable<User>> GetAllOrganizationMembersAsync(Organization organization) =>
-            await this.dataConnection.Users
+            await dataConnection.Users
                 .Where(u => u.OrganizationId == organization.Id && u.Role == UserRole.OrganizationMember)
                 .Select(MapToUser)
                 .ToArrayAsync();
 
         public async Task<IEnumerable<User>> GetAllUsersWithRoleAsync(UserRole role) =>
-            await this.dataConnection.Users
+            await dataConnection.Users
                 .Where(u => u.Role == role)
                 .Select(MapToUser)
                 .ToArrayAsync();
