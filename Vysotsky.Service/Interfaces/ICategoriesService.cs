@@ -11,5 +11,6 @@ namespace Vysotsky.Service.Interfaces
         Task<Category> CreateCategoryInAreaAsync(Area area, string categoryDtoName);
         Task<IEnumerable<Area>> GetAllAreasAsync();
         Task<IEnumerable<Category>> GetAllCategoriesInAreaAsync(Area area);
+        Task<Category?> GetCategoryByIdOrNullAsync(long dataCategoryId);
     }
 }

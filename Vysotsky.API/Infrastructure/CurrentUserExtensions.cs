@@ -26,7 +26,8 @@ namespace Vysotsky.API.Infrastructure
                 _ => false
             };
 
-        public static bool CanMoveIssueToNeedInfo(this ICurrentUserProvider currentUserProvider) =>
+        
+        public static bool IsSupervisor(this ICurrentUserProvider currentUserProvider) =>
             currentUserProvider.CurrentUser?.Role switch
             {
                 UserRole.Supervisor => true,

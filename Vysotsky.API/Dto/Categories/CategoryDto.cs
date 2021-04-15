@@ -1,4 +1,4 @@
-namespace Vysotsky.API.Controllers.Categories
+namespace Vysotsky.API.Dto.Categories
 {
     public class CategoryDto
     {

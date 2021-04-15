@@ -1,11 +1,9 @@
-using Vysotsky.Service.Types;
-
-namespace Vysotsky.Service.Interfaces
+namespace Vysotsky.Service.Types
 {
     public class Category
     {
         public long Id { get; init; }
-        public Area Area { get; init; }
+        public long AreaId { get; init; }
         public string Name { get; init; }
     }
 }
