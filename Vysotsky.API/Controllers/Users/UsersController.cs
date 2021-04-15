@@ -41,7 +41,7 @@ namespace Vysotsky.API.Controllers.Users
             var user = await this.userService.GetUserByUsernameOrNullAsync(username);
             return user switch
             {
-                null => UserNotFound(username),
+                null => this.UserNotFound(username),
                 { OrganizationId: not null and var userOrganizationId }
                     when !this.currentUserProvider.CanReadOrganization(userOrganizationId.Value) =>
                     NotAuthorized("Customer cant access another customer", "users.notAuthorized"),
@@ -122,7 +122,6 @@ namespace Vysotsky.API.Controllers.Users
                 _ => throw new InvalidOperationException()
             };
 
-        private NotFoundObjectResult UserNotFound(string username) =>
-            NotFound($"User by not found by id {username}", "users.userNotFound");
+        private NotFoundObjectResult UserNotFound(string username) => this.NotFound($"User by not found by id {username}", "users.userNotFound");
     }
 }

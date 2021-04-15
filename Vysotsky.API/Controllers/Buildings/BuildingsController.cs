@@ -17,10 +17,7 @@ namespace Vysotsky.API.Controllers.Buildings
     {
         private readonly IRoomService roomService;
 
-        public BuildingsController(IRoomService roomService)
-        {
-            this.roomService = roomService;
-        }
+        public BuildingsController(IRoomService roomService) => this.roomService = roomService;
 
         [HttpPost]
         [ProducesResponseType(201)]
@@ -81,11 +78,10 @@ namespace Vysotsky.API.Controllers.Buildings
         }
 
         private NotFoundObjectResult FloorInBuildingNotFound(long buildingId, long floorId) =>
-            NotFound($"Floor with id {floorId} not found in building with id {buildingId}",
+            this.NotFound($"Floor with id {floorId} not found in building with id {buildingId}",
                 "buildings.floorInBuildingNotFound");
 
-        private NotFoundObjectResult BuildingNotFound(long buildingId) =>
-            NotFound($"Building with id {buildingId} not found", "buildings.notFound");
+        private NotFoundObjectResult BuildingNotFound(long buildingId) => this.NotFound($"Building with id {buildingId} not found", "buildings.notFound");
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PersistedBuildingDto[]>>> GetAllBuildings()

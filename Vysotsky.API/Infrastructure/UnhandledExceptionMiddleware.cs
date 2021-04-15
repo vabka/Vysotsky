@@ -11,10 +11,8 @@ namespace Vysotsky.API.Infrastructure
     {
         private readonly ILogger<UnhandledExceptionMiddleware> logger;
 
-        public UnhandledExceptionMiddleware(ILogger<UnhandledExceptionMiddleware> logger)
-        {
+        public UnhandledExceptionMiddleware(ILogger<UnhandledExceptionMiddleware> logger) =>
             this.logger = logger;
-        }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {

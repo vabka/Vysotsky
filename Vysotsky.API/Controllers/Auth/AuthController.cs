@@ -15,10 +15,7 @@ namespace Vysotsky.API.Controllers.Auth
     {
         private readonly IAuthenticationService authenticationService;
 
-        public AuthController(IAuthenticationService authenticationService)
-        {
-            this.authenticationService = authenticationService;
-        }
+        public AuthController(IAuthenticationService authenticationService) => this.authenticationService = authenticationService;
 
         [AllowAnonymous]
         [HttpPost("authenticate")]

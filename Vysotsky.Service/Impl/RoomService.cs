@@ -33,10 +33,7 @@ namespace Vysotsky.Service.Impl
                 Status = x.Status,
             };
 
-        public RoomService(VysotskyDataConnection dataConnection)
-        {
-            this.dataConnection = dataConnection;
-        }
+        public RoomService(VysotskyDataConnection dataConnection) => this.dataConnection = dataConnection;
 
         public async Task<Building> CreateBuildingAsync(string name)
         {

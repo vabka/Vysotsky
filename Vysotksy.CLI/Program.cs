@@ -37,28 +37,22 @@ async Task Seed(VysotskyDataConnection dataConnection)
         {
             new UserContact
             {
-                Name = "Телефон, чтобы ночью звонить",
-                Value = "88005553535",
-                Type = ContactType.Phone
+                Name = "Телефон, чтобы ночью звонить", Value = "88005553535", Type = ContactType.Phone
             }
         }
     });
-    var buildingId = await dataConnection.Buildings.InsertWithInt64IdentityAsync(() => new BuildingRecord
-    {
-        Name = "БЦ Высоцкий"
-    });
+    var buildingId =
+        await dataConnection.Buildings.InsertWithInt64IdentityAsync(() => new BuildingRecord {Name = "БЦ Высоцкий"});
     await CreateManyRooms(buildingId, 1, dataConnection);
     await CreateManyRooms(buildingId, 2, dataConnection);
     await CreateManyRooms(buildingId, 3, dataConnection);
     var floor4 = await dataConnection.Floors.InsertWithInt64IdentityAsync(() => new FloorRecord
     {
-        Number = "4",
-        BuildingId = buildingId
+        Number = "4", BuildingId = buildingId
     });
     var floor5 = await dataConnection.Floors.InsertWithInt64IdentityAsync(() => new FloorRecord
     {
-        Number = "5",
-        BuildingId = buildingId
+        Number = "5", BuildingId = buildingId
     });
     await CreateManyRooms(buildingId, 6, dataConnection);
     await CreateManyRooms(buildingId, 7, dataConnection);
@@ -87,10 +81,7 @@ async Task Seed(VysotskyDataConnection dataConnection)
     });
     await dataConnection.Rooms.InsertAsync(() => new RoomRecord
     {
-        Status = RoomStatus.Free,
-        Name = "Bad Request",
-        Number = "400",
-        FloorId = floor4
+        Status = RoomStatus.Free, Name = "Bad Request", Number = "400", FloorId = floor4
     });
 
     await dataConnection.Users.InsertAsync(() => new UserRecord
@@ -141,13 +132,11 @@ async Task Seed(VysotskyDataConnection dataConnection)
     });
     var area = await dataConnection.Areas.InsertWithInt64IdentityAsync(() => new AreaRecord
     {
-        Name = "Электрика",
-        ImageId = electrical
+        Name = "Электрика", ImageId = electrical
     });
     await dataConnection.Categories.InsertWithInt64IdentityAsync(() => new CategoryRecord
     {
-        Name = "Лампочку заменить",
-        AreaId = area
+        Name = "Лампочку заменить", AreaId = area
     });
     await dataConnection.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
     {
@@ -165,14 +154,8 @@ async Task CreateManyRooms(long building, int floorNumber, VysotskyDataConnectio
 {
     var floor = await dataConnection.Floors.InsertWithInt64IdentityAsync(() => new FloorRecord
     {
-        BuildingId = building,
-        Number = floorNumber.ToString(),
+        BuildingId = building, Number = floorNumber.ToString(),
     });
     await dataConnection.Rooms.BulkCopyAsync(new BulkCopyOptions(), Enumerable.Range(0, 100).Select(i =>
-        new RoomRecord
-        {
-            FloorId = floor,
-            Number = (floorNumber * 100 + i).ToString(),
-            Status = RoomStatus.Free
-        }));
+        new RoomRecord {FloorId = floor, Number = ((floorNumber * 100) + i).ToString(), Status = RoomStatus.Free}));
 }

@@ -11,10 +11,6 @@
 # This file is the top-most EditorConfig file
 root = true
 
-#Disable resharper formatter
-[*.cs]
-disable_formatter = true
-
 # All Files
 [*]
 charset = utf-8

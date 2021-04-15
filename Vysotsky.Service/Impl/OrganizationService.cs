@@ -12,10 +12,7 @@ namespace Vysotsky.Service.Impl
     {
         private readonly VysotskyDataConnection dataConnection;
 
-        public OrganizationService(VysotskyDataConnection dataConnection)
-        {
-            this.dataConnection = dataConnection;
-        }
+        public OrganizationService(VysotskyDataConnection dataConnection) => this.dataConnection = dataConnection;
 
         public async Task<Organization> CreateOrganizationAsync(string name, Room[] rooms)
         {

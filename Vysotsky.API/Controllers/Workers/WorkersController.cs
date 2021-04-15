@@ -16,10 +16,7 @@ namespace Vysotsky.API.Controllers.Workers
     {
         private readonly IUserService userService;
 
-        public WorkersController(IUserService userService)
-        {
-            this.userService = userService;
-        }
+        public WorkersController(IUserService userService) => this.userService = userService;
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<PersistedUserDto>>>> GetAllWorkers()

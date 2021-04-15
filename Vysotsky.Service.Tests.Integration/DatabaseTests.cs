@@ -9,7 +9,7 @@ namespace Vysotsky.Service.Tests.Integration
 {
     public abstract class DatabaseTests : IDisposable
     {
-        protected readonly VysotskyDataConnection ____RULE_VIOLATION____Database____RULE_VIOLATION____;
+        protected VysotskyDataConnection DataConnection { get; }
 
         protected DatabaseTests()
         {
@@ -24,8 +24,8 @@ namespace Vysotsky.Service.Tests.Integration
             var options = new LinqToDbConnectionOptionsBuilder()
                 .UsePostgreSQL(connectionString)
                 .Build<VysotskyDataConnection>();
-            this.____RULE_VIOLATION____Database____RULE_VIOLATION____ = new VysotskyDataConnection(options);
-            DropDatabase();
+            this.DataConnection = new VysotskyDataConnection(options);
+            this.DropDatabase();
         }
 
         private bool disposed;
@@ -45,17 +45,17 @@ namespace Vysotsky.Service.Tests.Integration
                     return;
                 }
 
-                DropDatabase();
-                this.____RULE_VIOLATION____Database____RULE_VIOLATION____.Dispose();
+                this.DropDatabase();
+                this.DataConnection.Dispose();
                 this.disposed = true;
             }
         }
 
         private void DropDatabase()
         {
-            this.____RULE_VIOLATION____Database____RULE_VIOLATION____.Buildings.Delete();
-            this.____RULE_VIOLATION____Database____RULE_VIOLATION____.Users.Delete();
-            this.____RULE_VIOLATION____Database____RULE_VIOLATION____.BlockedTokens.Delete();
+            this.DataConnection.Buildings.Delete();
+            this.DataConnection.Users.Delete();
+            this.DataConnection.BlockedTokens.Delete();
         }
     }
 }

@@ -26,17 +26,12 @@ namespace Vysotsky.API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public Startup(IConfiguration configuration) =>
+            this.Configuration = configuration;
 
         public IConfiguration Configuration { get; }
 
-        public void ConfigureServices(IServiceCollection services)
-        {
-            ConfigureServices(services, Configuration);
-        }
+        public void ConfigureServices(IServiceCollection services) => ConfigureServices(services, this.Configuration);
 
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
@@ -140,10 +135,8 @@ namespace Vysotsky.API
             });
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env) =>
             ConfigureWebApp(app, env);
-        }
 
         public static void ConfigureWebApp(IApplicationBuilder app, IWebHostEnvironment env)
         {

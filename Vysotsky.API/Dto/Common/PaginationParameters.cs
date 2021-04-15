@@ -23,7 +23,7 @@ namespace Vysotsky.API.Dto.Common
         [FromQuery(Name = "pageNumber")]
         public int PageNumber { get; init; } = 1;
 
-        public int ToSkip() => (PageNumber - 1) * PageSize;
-        public int ToTake() => PageSize;
+        public int ToSkip() => (this.PageNumber - 1) * this.PageSize;
+        public int ToTake() => this.PageSize;
     }
 }

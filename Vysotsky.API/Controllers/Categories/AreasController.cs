@@ -87,6 +87,6 @@ namespace Vysotsky.API.Controllers.Categories
             return Ok(categories.Select(c => c.ToDto()));
         }
 
-        private NotFoundObjectResult AreaNotFound() => NotFound("Area not found", "categories.areaNotFound");
+        private NotFoundObjectResult AreaNotFound() => this.NotFound("Area not found", "categories.areaNotFound");
     }
 }

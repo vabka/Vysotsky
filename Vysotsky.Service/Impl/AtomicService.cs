@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using LinqToDB.Data;
 using Vysotsky.Data;
 using Vysotsky.Service.Interfaces;
@@ -9,10 +9,7 @@ namespace Vysotsky.Service.Impl
     {
         private readonly VysotskyDataConnection dataConnection;
 
-        public AtomicService(VysotskyDataConnection dataConnection)
-        {
-            this.dataConnection = dataConnection;
-        }
+        public AtomicService(VysotskyDataConnection dataConnection) => this.dataConnection = dataConnection;
 
         public async Task<IAtomicOperation> BeginAtomicOperationAsync() =>
             new AtomicOperation(await this.dataConnection.BeginTransactionAsync());

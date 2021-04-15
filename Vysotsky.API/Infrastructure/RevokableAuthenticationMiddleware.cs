@@ -4,7 +4,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Vysotsky.Service.Interfaces;
-using IAuthenticationService = Vysotsky.Service.Interfaces.IAuthenticationService;
 
 namespace Vysotsky.API.Infrastructure
 {
@@ -13,7 +12,8 @@ namespace Vysotsky.API.Infrastructure
         private readonly IAuthenticationService authenticationService;
         private readonly IUserService userService;
 
-        public RevokableAuthenticationMiddleware(IAuthenticationService authenticationService, IUserService userService)
+        public RevokableAuthenticationMiddleware(IAuthenticationService authenticationService,
+            IUserService userService)
         {
             this.authenticationService = authenticationService;
             this.userService = userService;
@@ -36,7 +36,8 @@ namespace Vysotsky.API.Infrastructure
                 var lastPasswordChange = await this.authenticationService.TryGetLastPasswordChangeTimeAsync(sub);
                 if (lastPasswordChange == null || lastPasswordChange.Value.ToUnixTimeSeconds() >= iat)
                 {
-                    await this.authenticationService.RevokeTokenByJtiAsync(jti, DateTimeOffset.FromUnixTimeSeconds(iat));
+                    await this.authenticationService.RevokeTokenByJtiAsync(jti,
+                        DateTimeOffset.FromUnixTimeSeconds(iat));
                     throw new SecurityTokenIsNotActualException();
                 }
 

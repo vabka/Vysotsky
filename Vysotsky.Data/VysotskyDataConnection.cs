@@ -25,8 +25,7 @@ namespace Vysotsky.Data
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        static VysotskyDataConnection()
-        {
+        static VysotskyDataConnection() =>
             NpgsqlConnection.GlobalTypeMapper
                 .AddMapping(new NpgsqlTypeMappingBuilder
                 {
@@ -37,29 +36,28 @@ namespace Vysotsky.Data
                 .MapEnum<UserRole>("user_role", new NpgsqlNullNameTranslator())
                 .MapEnum<IssueStatus>("issue_status", new NpgsqlNullNameTranslator())
                 .MapEnum<RoomStatus>("room_status", new NpgsqlNullNameTranslator());
-        }
 
         public VysotskyDataConnection(LinqToDbConnectionOptions<VysotskyDataConnection> options) : base(options)
         {
-            InlineParameters = true;
-            MappingSchema.SetConverter<string, UserContact[]?>(json =>
+            this.InlineParameters = true;
+            this.MappingSchema.SetConverter<string, UserContact[]?>(json =>
                 JsonSerializer.Deserialize<UserContact[]>(json, JsonSerializerOptions));
-            MappingSchema.SetConverter<string, Dictionary<string, string>?>(json =>
+            this.MappingSchema.SetConverter<string, Dictionary<string, string>?>(json =>
                 JsonSerializer.Deserialize<Dictionary<string, string>?>(json, JsonSerializerOptions));
         }
 
-        public ITable<UserRecord> Users => GetTable<UserRecord>();
-        public ITable<BlockedTokenRecord> BlockedTokens => GetTable<BlockedTokenRecord>();
-        public ITable<OrganizationRecord> Organizations => GetTable<OrganizationRecord>();
-        public ITable<BuildingRecord> Buildings => GetTable<BuildingRecord>();
-        public ITable<FloorRecord> Floors => GetTable<FloorRecord>();
-        public ITable<RoomRecord> Rooms => GetTable<RoomRecord>();
-        public ITable<ImageRecord> Images => GetTable<ImageRecord>();
-        public ITable<IssueRecord> Issues => GetTable<IssueRecord>();
-        public ITable<IssueImageRelation> IssueImages => GetTable<IssueImageRelation>();
-        public ITable<IssueCommentRecord> IssueComments => GetTable<IssueCommentRecord>();
-        public ITable<IssueCommentImageRelation> IssueCommentImages => GetTable<IssueCommentImageRelation>();
-        public ITable<CategoryRecord> Categories => GetTable<CategoryRecord>();
-        public ITable<AreaRecord> Areas => GetTable<AreaRecord>();
+        public ITable<UserRecord> Users => this.GetTable<UserRecord>();
+        public ITable<BlockedTokenRecord> BlockedTokens => this.GetTable<BlockedTokenRecord>();
+        public ITable<OrganizationRecord> Organizations => this.GetTable<OrganizationRecord>();
+        public ITable<BuildingRecord> Buildings => this.GetTable<BuildingRecord>();
+        public ITable<FloorRecord> Floors => this.GetTable<FloorRecord>();
+        public ITable<RoomRecord> Rooms => this.GetTable<RoomRecord>();
+        public ITable<ImageRecord> Images => this.GetTable<ImageRecord>();
+        public ITable<IssueRecord> Issues => this.GetTable<IssueRecord>();
+        public ITable<IssueImageRelation> IssueImages => this.GetTable<IssueImageRelation>();
+        public ITable<IssueCommentRecord> IssueComments => this.GetTable<IssueCommentRecord>();
+        public ITable<IssueCommentImageRelation> IssueCommentImages => this.GetTable<IssueCommentImageRelation>();
+        public ITable<CategoryRecord> Categories => this.GetTable<CategoryRecord>();
+        public ITable<AreaRecord> Areas => this.GetTable<AreaRecord>();
     }
 }

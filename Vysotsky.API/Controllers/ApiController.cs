@@ -17,9 +17,8 @@ namespace Vysotsky.API.Controllers
 
         protected static ObjectResult NotAuthorized(string message, string code) => Error(message, code, 403);
 
-        protected static ObjectResult Error(string message, string code, int status = 400)
-        {
-            return new(new ApiResponse
+        protected static ObjectResult Error(string message, string code, int status = 400) =>
+            new(new ApiResponse
             {
                 Error = new ApiError
                 {
@@ -31,7 +30,6 @@ namespace Vysotsky.API.Controllers
             {
                 StatusCode = status
             };
-        }
 
         /// <summary>
         /// Создать ответ с кодом 200

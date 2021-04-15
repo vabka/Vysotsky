@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Vysotsky.Service.Interfaces;
 
 namespace Vysotsky.API.Infrastructure
@@ -7,10 +7,7 @@ namespace Vysotsky.API.Infrastructure
     {
         private readonly IHttpContextAccessor httpContextAccessor;
 
-        public CurrentUserProvider(IHttpContextAccessor httpContextAccessor)
-        {
-            this.httpContextAccessor = httpContextAccessor;
-        }
+        public CurrentUserProvider(IHttpContextAccessor httpContextAccessor) => this.httpContextAccessor = httpContextAccessor;
 
         public User? CurrentUser => this.httpContextAccessor.HttpContext?.Items["CurrentUser"] as User;
     }

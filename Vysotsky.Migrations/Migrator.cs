@@ -13,9 +13,8 @@ namespace Vysotsky.Migrations
 {
     public static class Migrator
     {
-        public static IServiceProvider CreateServices(string connectionString)
-        {
-            return new ServiceCollection()
+        public static IServiceProvider CreateServices(string connectionString) =>
+            new ServiceCollection()
                 .AddFluentMigratorCore()
                 .ConfigureRunner(rb => rb
                     .AddPostgres()
@@ -23,7 +22,6 @@ namespace Vysotsky.Migrations
                     .ScanIn(typeof(InitDatabase).Assembly).For.Migrations())
                 .AddLogging(lb => lb.AddFluentMigratorConsole())
                 .BuildServiceProvider(false);
-        }
 
         public static void UpdateDatabase(IServiceProvider serviceProvider)
         {

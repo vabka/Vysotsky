@@ -94,8 +94,7 @@ namespace Vysotsky.API.Controllers.Organizations
             return Ok(organization.ToDto());
         }
 
-        private NotFoundObjectResult OrganizationNotFound(long organizationId) =>
-            NotFound($"Organization by id {organizationId} not found", "organizations.organizationNotFound");
+        private NotFoundObjectResult OrganizationNotFound(long organizationId) => this.NotFound($"Organization by id {organizationId} not found", "organizations.organizationNotFound");
 
         [HttpPut("{organizationId:long}")]
         public async Task<ActionResult<ApiResponse>> UpdateOrganization([FromRoute] long organizationId,

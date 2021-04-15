@@ -81,8 +81,7 @@ namespace Vysotsky.API.Controllers.Issues
             return Ok(newState.ToDto());
         }
 
-        private ActionResult IssueNotFound() =>
-            NotFound("Issue not found", "issue.notFound");
+        private ActionResult IssueNotFound() => this.NotFound("Issue not found", "issue.notFound");
 
         [HttpPost("{issueId:long}/inProgress")]
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToInProgress([FromRoute] long issueId,
@@ -117,14 +116,8 @@ namespace Vysotsky.API.Controllers.Issues
             return Ok(newState.ToDto());
         }
 
-        private ActionResult<ApiResponse<PersistedIssueDto>> CategoryNotFound()
-        {
-            throw new System.NotImplementedException();
-        }
+        private ActionResult<ApiResponse<PersistedIssueDto>> CategoryNotFound() => throw new System.NotImplementedException();
 
-        private ActionResult<ApiResponse<PersistedIssueDto>> WorkerNotFound()
-        {
-            return NotFound("Worker not found", "workers.notFound");
-        }
+        private ActionResult<ApiResponse<PersistedIssueDto>> WorkerNotFound() => this.NotFound("Worker not found", "workers.notFound");
     }
 }

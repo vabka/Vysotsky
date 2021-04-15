@@ -8,10 +8,7 @@ namespace Vysotsky.Service.Impl
     {
         private readonly SecureHasherOptions options;
 
-        public SecureHasher(SecureHasherOptions options)
-        {
-            this.options = options;
-        }
+        public SecureHasher(SecureHasherOptions options) => this.options = options;
 
         public byte[] Hash(string source)
         {

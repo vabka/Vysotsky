@@ -23,7 +23,7 @@ namespace Vysotsky.Service.Tests.Integration
             {
                 Salt = "0"
             });
-            this.authenticationService = new AuthenticationService(this.____RULE_VIOLATION____Database____RULE_VIOLATION____, this.hasher, new AuthenticationServiceOptions
+            this.authenticationService = new AuthenticationService(this.DataConnection, this.hasher, new AuthenticationServiceOptions
             {
                 Secret = "secret"
             });
@@ -34,7 +34,7 @@ namespace Vysotsky.Service.Tests.Integration
         [Fact]
         public async Task SuccessfullyIssueTokenWithCorrectCredentials()
         {
-            await CreateAdminAsync();
+            await this.CreateAdminAsync();
 
             var container = await this.authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
 
@@ -48,16 +48,14 @@ namespace Vysotsky.Service.Tests.Integration
             payload.ContainsKey("jti").Should().BeTrue();
         }
 
-        private static Dictionary<string, object> DecodeToken(string? token)
-        {
-            return JwtBuilder.Create()
+        private static Dictionary<string, object> DecodeToken(string? token) =>
+            JwtBuilder.Create()
                 .WithAlgorithm(new HMACSHA256Algorithm())
                 .WithSecret("secret")
                 .Decode<Dictionary<string, object>>(token);
-        }
 
         private Task<long> CreateAdminAsync() =>
-            this.____RULE_VIOLATION____Database____RULE_VIOLATION____.Users.InsertWithInt64IdentityAsync(() => new UserRecord
+            this.DataConnection.Users.InsertWithInt64IdentityAsync(() => new UserRecord
             {
                 Username = "admin",
                 PasswordHash = this.hasher.Hash("1234"),
@@ -74,7 +72,7 @@ namespace Vysotsky.Service.Tests.Integration
         [Fact]
         public async Task SuccessfullyValidateIssuedToken()
         {
-            await CreateAdminAsync();
+            await this.CreateAdminAsync();
             var container = await this.authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
             (await this.authenticationService.ValidateTokenAsync(container!.Token)).Should().BeTrue();
         }
@@ -82,7 +80,7 @@ namespace Vysotsky.Service.Tests.Integration
         [Fact]
         public async Task SuccessfullyRevokeIssuedToken()
         {
-            await CreateAdminAsync();
+            await this.CreateAdminAsync();
 
             var container = await this.authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
             await this.authenticationService.RevokeTokenAsync(container!.Token);

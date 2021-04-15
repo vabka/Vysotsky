@@ -32,10 +32,7 @@ namespace Vysotsky.Service.Impl
 
         private readonly VysotskyDataConnection vysotskyDataConnection;
 
-        public IssueService(VysotskyDataConnection vysotskyDataConnection)
-        {
-            this.vysotskyDataConnection = vysotskyDataConnection;
-        }
+        public IssueService(VysotskyDataConnection vysotskyDataConnection) => this.vysotskyDataConnection = vysotskyDataConnection;
 
         public async Task<Area?> GetAreaByIdOrNull(long id) =>
             await this.vysotskyDataConnection.Areas
@@ -58,7 +55,7 @@ namespace Vysotsky.Service.Impl
                 Note = "",
                 Status = IssueStatus.New
             });
-            return (await GetIssueByIdOrNullAsync(id))!;
+            return (await this.GetIssueByIdOrNullAsync(id))!;
         }
 
         private async Task<Issue> GetIssueByIdWithSpecificVersion(long issueId, long version) =>
@@ -110,7 +107,7 @@ namespace Vysotsky.Service.Impl
                                 UpdatedAt = DateTimeOffset.Now
                             });
                     await transaction.CommitAsync();
-                    return await GetIssueByIdWithSpecificVersion(issue.Id, issue.Version + 1);
+                    return await this.GetIssueByIdWithSpecificVersion(issue.Id, issue.Version + 1);
                 }
                 case IssueStatus.InProgress:
                 case IssueStatus.Completed:
@@ -154,7 +151,7 @@ namespace Vysotsky.Service.Impl
                             UpdatedAt = DateTimeOffset.Now,
                             RoomId = i.RoomId
                         });
-                    return await GetIssueByIdWithSpecificVersion(issue.Id, issue.Version + 1);
+                    return await this.GetIssueByIdWithSpecificVersion(issue.Id, issue.Version + 1);
                 }
                 case IssueStatus.Accepted:
                 case IssueStatus.InProgress:
@@ -169,9 +166,6 @@ namespace Vysotsky.Service.Impl
             }
         }
 
-        private static InvalidOperationException CannotMoveFromTerminalState()
-        {
-            return new InvalidOperationException("Cannot move from terminal state");
-        }
+        private static InvalidOperationException CannotMoveFromTerminalState() => new InvalidOperationException("Cannot move from terminal state");
     }
 }

@@ -48,7 +48,7 @@ namespace Vysotsky.Service.Impl
                 {
                     var exp = now.AddDays(longLiving ? 180 : 1);
                     var iat = now;
-                    var token = EncodeToken(new TokenPayload
+                    var token = this.EncodeToken(new TokenPayload
                     {
                         Sub = user.Username,
                         Exp = exp.ToUnixTimeSeconds(),
@@ -64,15 +64,15 @@ namespace Vysotsky.Service.Impl
 
         public async Task<bool> ValidateTokenAsync(string token)
         {
-            var payload = DecodeToken(token);
+            var payload = this.DecodeToken(token);
             return await this.vysotskyDataConnection.BlockedTokens.AllAsync(x => x.Jti != payload.Jti);
         }
 
         public async Task RevokeTokenAsync(string token)
         {
-            var payload = DecodeToken(token);
+            var payload = this.DecodeToken(token);
             var exp = DateTimeOffset.FromUnixTimeSeconds(payload.Exp);
-            await RevokeTokenByJtiAsync(payload.Jti, exp);
+            await this.RevokeTokenByJtiAsync(payload.Jti, exp);
         }
 
         public Task RevokeTokenByJtiAsync(Guid tokenIdentifier, DateTimeOffset expiration) =>
