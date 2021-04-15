@@ -7,5 +7,13 @@ namespace Vysotsky.API.Infrastructure
         public SecurityTokenInvalidException(string message) : base(message)
         {
         }
+
+        public SecurityTokenInvalidException()
+        {
+        }
+
+        public SecurityTokenInvalidException(string message, System.Exception innerException) : base(message, innerException)
+        {
+        }
     }
 }

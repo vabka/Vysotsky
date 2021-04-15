@@ -3,9 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Flurl;
 using Microsoft.AspNetCore.Mvc;
+using Vysotsky.API.Dto;
 using Vysotsky.API.Dto.Categories;
 using Vysotsky.API.Dto.Common;
-using Vysotsky.API.Dto.Images;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Service.Interfaces;
 
@@ -35,15 +35,7 @@ namespace Vysotsky.API.Controllers.Categories
             if (image == null)
                 return BadRequest("Image not found", "images.notFound");
             var area = await _categoriesService.CreateAreaAsync(areaDto.Name, image);
-            return Created(Resources.Areas.AppendPathSegment(area.Id), new PersistedAreaDto
-            {
-                Id = area.Id,
-                Name = area.Name,
-                Image = new PersistedImageDto
-                {
-                    Id = area.Image.Id,
-                }
-            });
+            return Created(Resources.Areas.AppendPathSegment(area.Id), area.ToDto());
         }
 
         private static ObjectResult NotAuthorizedToEdit() =>
@@ -59,27 +51,14 @@ namespace Vysotsky.API.Controllers.Categories
             if (area == null)
                 return AreaNotFound();
             var category = await _categoriesService.CreateCategoryInAreaAsync(area, categoryDto.Name);
-            return Created(Resources.Areas.AppendPathSegments(areaId, "categories", category.Id),
-                new PersistedCategoryDto
-                {
-                    Id = category.Id,
-                    Name = category.Name
-                });
+            return Created(Resources.Areas.AppendPathSegments(areaId, "categories", category.Id), category.ToDto());
         }
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<PersistedAreaDto>>>> GetAllAreas()
         {
             var areas = await _categoriesService.GetAllAreasAsync();
-            return Ok(areas.Select(area => new PersistedAreaDto
-            {
-                Id = area.Id,
-                Name = area.Name,
-                Image = new PersistedImageDto
-                {
-                    Id = area.Image.Id
-                }
-            }));
+            return Ok(areas.Select(area => area.ToDto()));
         }
 
         [HttpGet("{areaId}/categories")]
@@ -90,11 +69,7 @@ namespace Vysotsky.API.Controllers.Categories
             if (area == null)
                 return AreaNotFound();
             var categories = await _categoriesService.GetAllCategoriesInAreaAsync(area);
-            return Ok(categories.Select(c => new PersistedCategoryDto
-            {
-                Id = c.Id,
-                Name = c.Name
-            }));
+            return Ok(categories.Select(c => c.ToDto()));
         }
 
         private NotFoundObjectResult AreaNotFound() => NotFound("Area not found", "categories.areaNotFound");

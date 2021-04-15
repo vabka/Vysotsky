@@ -1,0 +1,8 @@
+<Project>
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <LangVersion>latest</LangVersion>
+        <NoWarn>S3881, S3925, S1121</NoWarn>
+    </PropertyGroup>
+</Project>

@@ -25,10 +25,21 @@ namespace Vysotsky.Service.Tests.Integration
             DropDatabase();
         }
 
+        private bool _disposed;
+        private readonly object _disposeLock = new();
+
         public void Dispose()
         {
-            DropDatabase();
-            Database.Dispose();
+            if (_disposed)
+                return;
+            lock (_disposeLock)
+            {
+                if (_disposed)
+                    return;
+                DropDatabase();
+                Database.Dispose();
+                _disposed = true;
+            }
         }
 
         private void DropDatabase()

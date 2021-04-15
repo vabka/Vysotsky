@@ -122,7 +122,7 @@ namespace Vysotsky.Service.Impl
                 case IssueStatus.CancelledByCustomer:
                     throw CannotMoveFromTerminalState();
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new InvalidOperationException();
             }
         }
 
@@ -147,7 +147,7 @@ namespace Vysotsky.Service.Impl
                             Description = i.Description,
                             Note = i.Note,
                             Title = i.Title,
-                            AreaId = newCategory.AreaId,
+                            AreaId = newCategory.Area.Id,
                             CategoryId = newCategory.Id,
                             AuthorId = i.AuthorId,
                             CreatedAt = i.CreatedAt,
@@ -165,7 +165,7 @@ namespace Vysotsky.Service.Impl
                 case IssueStatus.Closed:
                     throw CannotMoveFromTerminalState();
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new InvalidOperationException();
             }
         }
 

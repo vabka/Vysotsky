@@ -120,7 +120,7 @@ namespace Vysotsky.API.Controllers.Buildings
                 RoomStatusDto.Owned => RoomStatus.Owned,
                 RoomStatusDto.Rented => RoomStatus.Rented,
                 RoomStatusDto.Unavalable => RoomStatus.Unavailable,
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new InvalidOperationException()
             };
     }
 }

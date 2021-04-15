@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using Vysotsky.API.Dto.Buildings;
+using Vysotsky.API.Dto.Categories;
+using Vysotsky.API.Dto.Images;
 using Vysotsky.API.Dto.Issues;
 using Vysotsky.API.Dto.Organizations;
 using Vysotsky.API.Dto.Users;
@@ -12,6 +14,17 @@ namespace Vysotsky.API.Dto
 {
     public static class MappingExtensions
     {
+        public static PersistedImageDto ToDto(this Image image) => new()
+        {
+            Id = image.Id
+        };
+
+        public static PersistedCategoryDto ToDto(this Category category) => new
+            (category.Id, category.Name);
+
+        public static PersistedAreaDto ToDto(this Area area) => new
+            (area.Id, area.Name, area.Image.ToDto());
+
         public static PersistedIssueDto ToDto(this Issue issue) =>
             new()
             {
@@ -41,7 +54,7 @@ namespace Vysotsky.API.Dto
                 RoomStatus.Owned => RoomStatusDto.Owned,
                 RoomStatus.Rented => RoomStatusDto.Rented,
                 RoomStatus.Unavailable => RoomStatusDto.Unavalable,
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new InvalidOperationException()
             }
         };
 

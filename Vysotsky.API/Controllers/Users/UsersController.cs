@@ -94,7 +94,7 @@ namespace Vysotsky.API.Controllers.Users
             c switch
             {
                 UserContactTypeDto.Phone => ContactType.Phone,
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new InvalidOperationException()
             };
 
         private static UserRole ToModel(UserRoleDto role) =>
@@ -104,7 +104,7 @@ namespace Vysotsky.API.Controllers.Users
                 UserRoleDto.Worker => UserRole.Worker,
                 UserRoleDto.Customer => UserRole.OrganizationOwner,
                 UserRoleDto.CustomerRepresentative => UserRole.OrganizationMember,
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new InvalidOperationException()
             };
 
         private NotFoundObjectResult UserNotFound(string username) =>
