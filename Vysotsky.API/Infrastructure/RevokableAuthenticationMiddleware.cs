@@ -7,6 +7,8 @@ using Vysotsky.Service.Interfaces;
 
 namespace Vysotsky.API.Infrastructure
 {
+    using System.Globalization;
+
     public class RevokableAuthenticationMiddleware : IMiddleware
     {
         private readonly IAuthenticationService authenticationService;
@@ -21,11 +23,11 @@ namespace Vysotsky.API.Infrastructure
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            if (context.User.Identity is ClaimsIdentity { IsAuthenticated: true } identity)
+            if (context.User.Identity is ClaimsIdentity {IsAuthenticated: true} identity)
             {
                 var claims = identity.Claims.ToDictionary(x => x.Type, x => x.Value);
                 var jti = Guid.Parse(claims["jti"]);
-                var iat = long.Parse(claims["iat"]);
+                var iat = long.Parse(claims["iat"], CultureInfo.InvariantCulture);
                 // Должен быть sub, но asp net почему-то ставит это.
                 var sub = claims["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
                 if (await this.authenticationService.CheckTokenRevokedAsync(jti))

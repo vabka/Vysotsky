@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using LinqToDB;
@@ -162,8 +163,8 @@ async Task CreateManyRooms(long building, int floorNumber, VysotskyDataConnectio
     var floor = await dataConnection.Floors.InsertWithInt64IdentityAsync(() => new FloorRecord
     {
         BuildingId = building,
-        Number = floorNumber.ToString(),
+        Number = floorNumber.ToString(CultureInfo.InvariantCulture),
     });
     await dataConnection.Rooms.BulkCopyAsync(new BulkCopyOptions(), Enumerable.Range(0, 100).Select(i =>
-        new RoomRecord { FloorId = floor, Number = ((floorNumber * 100) + i).ToString(), Status = RoomStatus.Free }));
+        new RoomRecord { FloorId = floor, Number = ((floorNumber * 100) + i).ToString(CultureInfo.InvariantCulture), Status = RoomStatus.Free }));
 }

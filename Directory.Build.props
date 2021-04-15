@@ -3,6 +3,5 @@
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <LangVersion>latest</LangVersion>
-        <NoWarn>S3881, S3925, S1121, RCS1090</NoWarn>
     </PropertyGroup>
 </Project>

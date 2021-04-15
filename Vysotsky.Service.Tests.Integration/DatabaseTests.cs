@@ -47,6 +47,7 @@ namespace Vysotsky.Service.Tests.Integration
 
                 this.DropDatabase();
                 this.DataConnection.Dispose();
+                GC.SuppressFinalize(this);
                 this.disposed = true;
             }
         }
