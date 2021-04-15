@@ -33,5 +33,13 @@ namespace Vysotsky.API.Infrastructure
                 UserRole.SuperUser => true,
                 _ => false
             };
+
+        public static bool CanEditCategories(this ICurrentUserProvider currentUserProvider) =>
+            currentUserProvider.CurrentUser?.Role switch
+            {
+                UserRole.Supervisor => true,
+                UserRole.SuperUser => true,
+                _ => false
+            };
     }
 }

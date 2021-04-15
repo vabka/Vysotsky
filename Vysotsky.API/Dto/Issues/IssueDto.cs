@@ -1,4 +1,4 @@
-namespace Vysotsky.API.Controllers.Issues
+namespace Vysotsky.API.Dto.Issues
 {
     public class IssueDto
     {
