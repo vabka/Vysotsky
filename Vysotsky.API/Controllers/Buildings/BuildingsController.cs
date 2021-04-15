@@ -45,7 +45,10 @@ namespace Vysotsky.API.Controllers.Buildings
         {
             var building = await _roomService.GetBuildingByIdOrNullAsync(buildingId);
             if (building == null)
-                return BuildingNotFound(buildingId);
+            {
+                return this.BuildingNotFound(buildingId);
+            }
+
             var floor = await _roomService.CreateFloorAsync(building, floorToCreate.Number);
             return Created(Resources.Buildings.AppendPathSegments(buildingId, "floors", floor.Id),
                 floor.ToDto()
@@ -60,10 +63,16 @@ namespace Vysotsky.API.Controllers.Buildings
         {
             var building = await _roomService.GetBuildingByIdOrNullAsync(buildingId);
             if (building == null)
-                return BuildingNotFound(buildingId);
+            {
+                return this.BuildingNotFound(buildingId);
+            }
+
             var floor = await _roomService.GetFloorByIdOrNullAsync(floorId);
             if (floor?.BuildingId != building.Id)
-                return FloorInBuildingNotFound(buildingId, floorId);
+            {
+                return this.FloorInBuildingNotFound(buildingId, floorId);
+            }
+
             var room = await _roomService.CreateRoomAsync(floor, roomToCreate.Name, roomToCreate.Number,
                 ToModel(roomToCreate.Status));
             return Created(
@@ -91,7 +100,10 @@ namespace Vysotsky.API.Controllers.Buildings
         {
             var building = await _roomService.GetBuildingByIdOrNullAsync(buildingId);
             if (building == null)
-                return BuildingNotFound(buildingId);
+            {
+                return this.BuildingNotFound(buildingId);
+            }
+
             var data = await _roomService.GetAllFloorsInBuildingAsync(building);
             return Ok(data.Select(f => f.ToDto()));
         }
@@ -102,10 +114,15 @@ namespace Vysotsky.API.Controllers.Buildings
         {
             var building = await _roomService.GetBuildingByIdOrNullAsync(buildingId);
             if (building == null)
-                return BuildingNotFound(buildingId);
+            {
+                return this.BuildingNotFound(buildingId);
+            }
+
             var floor = await _roomService.GetFloorByIdOrNullAsync(floorId);
             if (floor?.BuildingId != building.Id)
-                return FloorInBuildingNotFound(buildingId, floorId);
+            {
+                return this.FloorInBuildingNotFound(buildingId, floorId);
+            }
 
             var rooms = await _roomService.GetAllRoomsOnFloorAsync(floor);
             return Ok(rooms

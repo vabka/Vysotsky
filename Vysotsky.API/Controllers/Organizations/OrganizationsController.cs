@@ -37,10 +37,16 @@ namespace Vysotsky.API.Controllers.Organizations
         {
             var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization == null)
-                return OrganizationNotFound(organizationId);
+            {
+                return this.OrganizationNotFound(organizationId);
+            }
+
             if (!_currentUserProvider.CanReadOrganization(organizationId))
+            {
                 return NotAuthorized("Only organization member can read organization data",
                     "organization.read.notAuthorized");
+            }
+
             var buildings = await _roomService.GetOrganizationBuildingsAsync(organization);
             return Ok(buildings.Select(b => b.ToDto()));
         }
@@ -55,11 +61,16 @@ namespace Vysotsky.API.Controllers.Organizations
                 if (currentUser?.Role != UserRole.Supervisor
                     || currentUser.Role != UserRole.SuperUser
                     || currentUser.OrganizationId != organizationId)
+                {
                     organization = null;
+                }
             }
 
             if (organization == null)
-                return OrganizationNotFound(organizationId);
+            {
+                return this.OrganizationNotFound(organizationId);
+            }
+
             var users = await _userService.GetAllOrganizationMembersAsync(organization);
             return Ok(users.Select(u => u.ToDto()));
         }
@@ -70,10 +81,16 @@ namespace Vysotsky.API.Controllers.Organizations
         {
             var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization == null)
-                return OrganizationNotFound(organizationId);
+            {
+                return this.OrganizationNotFound(organizationId);
+            }
+
             if (!_currentUserProvider.CanReadOrganization(organizationId))
+            {
                 return NotAuthorized("Only organization member can read organization data",
                     "organization.read.notAuthorized");
+            }
+
             return Ok(organization.ToDto());
         }
 
@@ -86,10 +103,16 @@ namespace Vysotsky.API.Controllers.Organizations
         {
             var organization = await _organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization == null)
-                return OrganizationNotFound(organizationId);
+            {
+                return this.OrganizationNotFound(organizationId);
+            }
+
             if (!_currentUserProvider.CanWriteOrganization(organizationId))
+            {
                 return NotAuthorized("Only organization owner can edit organization",
                     "organizations.edit.notAuthorized");
+            }
+
             var newOrganization = organization with { Name = organizationDtoProperties.Name };
             await _organizationService.UpdateOrganization(newOrganization);
             return Ok();

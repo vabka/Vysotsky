@@ -36,15 +36,24 @@ namespace Vysotsky.API.Controllers.Issues
         {
             var currentUser = _currentUserProvider.CurrentUser;
             if (currentUser!.Role == UserRole.Worker)
+            {
                 return NotAuthorized("Worker is not authorized to create issues", "issues.notAthorized");
+            }
+
             var areaTask = _issueService.GetAreaByIdOrNull(newIssue.AreaId);
             var roomTask = _roomService.GetRoomByIdOrNullAsync(newIssue.RoomId);
             var area = await areaTask;
             if (area == null)
+            {
                 return BadRequest("Area not found", "issues.areaNotFound");
+            }
+
             var room = await roomTask;
             if (room == null)
+            {
                 return BadRequest("Room not found", "rooms.roomNotFound");
+            }
+
             var createdIssue =
                 await _issueService.CreateIssueAsync(newIssue.Title, newIssue.Description, area, room, currentUser);
             return Ok(createdIssue.ToDto());
@@ -57,9 +66,15 @@ namespace Vysotsky.API.Controllers.Issues
         {
             var issue = await _issueService.GetIssueByIdOrNullAsync(issueId);
             if (issue == null)
-                return IssueNotFound();
+            {
+                return this.IssueNotFound();
+            }
+
             if (!_currentUserProvider.IsSupervisor())
+            {
                 return NotAuthorized("Only supervisor can move task to NeedInfo state", "issues.notAuthorized");
+            }
+
             var newState =
                 await _issueService.MoveIssueToNeedInformationAsync(issue, _currentUserProvider.CurrentUser!,
                     data.Message);
@@ -75,16 +90,28 @@ namespace Vysotsky.API.Controllers.Issues
         {
             var issue = await _issueService.GetIssueByIdOrNullAsync(issueId);
             if (!_currentUserProvider.IsSupervisor())
+            {
                 return NotAuthorized("Only supervisor can move task to InProgress state", "issues.notAuthorized");
+            }
+
             if (issue == null)
-                return IssueNotFound();
+            {
+                return this.IssueNotFound();
+            }
+
             var currentUser = _currentUserProvider.CurrentUser!;
             var worker = await _workerService.GetWorkerByIdOrNullAsync(data.WorkerId);
             if (worker == null)
-                return WorkerNotFound();
+            {
+                return this.WorkerNotFound();
+            }
+
             var category = await _categoriesService.GetCategoryByIdOrNullAsync(data.CategoryId);
             if (category == null)
-                return CategoryNotFound();
+            {
+                return this.CategoryNotFound();
+            }
+
             var newState =
                 await _issueService.TakeToWorkAsync(issue, currentUser, worker, category);
             return Ok(newState.ToDto());

@@ -30,10 +30,16 @@ namespace Vysotsky.API.Controllers.Categories
         public async Task<ActionResult<ApiResponse<PersistedAreaDto>>> CreateArea([FromBody] AreaDto areaDto)
         {
             if (!_currentUserProvider.CanEditCategories())
+            {
                 return NotAuthorizedToEdit();
+            }
+
             var image = await _imagesService.GetImageByIdOrNullAsync(areaDto.ImageId);
             if (image == null)
+            {
                 return BadRequest("Image not found", "images.notFound");
+            }
+
             var area = await _categoriesService.CreateAreaAsync(areaDto.Name, image);
             return Created(Resources.Areas.AppendPathSegment(area.Id), area.ToDto());
         }
@@ -46,10 +52,16 @@ namespace Vysotsky.API.Controllers.Categories
             [FromBody] CategoryDto categoryDto)
         {
             if (!_currentUserProvider.CanEditCategories())
+            {
                 return NotAuthorizedToEdit();
+            }
+
             var area = await _categoriesService.GetAreaByIdOrNullAsync(areaId);
             if (area == null)
-                return AreaNotFound();
+            {
+                return this.AreaNotFound();
+            }
+
             var category = await _categoriesService.CreateCategoryInAreaAsync(area, categoryDto.Name);
             return Created(Resources.Areas.AppendPathSegments(areaId, "categories", category.Id), category.ToDto());
         }
@@ -67,7 +79,10 @@ namespace Vysotsky.API.Controllers.Categories
         {
             var area = await _categoriesService.GetAreaByIdOrNullAsync(areaId);
             if (area == null)
-                return AreaNotFound();
+            {
+                return this.AreaNotFound();
+            }
+
             var categories = await _categoriesService.GetAllCategoriesInAreaAsync(area);
             return Ok(categories.Select(c => c.ToDto()));
         }

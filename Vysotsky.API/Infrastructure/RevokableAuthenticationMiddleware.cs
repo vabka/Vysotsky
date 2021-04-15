@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -29,7 +29,10 @@ namespace Vysotsky.API.Infrastructure
                 // Должен быть sub, но asp net почему-то ставит это.
                 var sub = claims["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
                 if (await _authenticationService.CheckTokenRevokedAsync(jti))
+                {
                     throw new SecurityTokenRevokedException();
+                }
+
                 var lastPasswordChange = await _authenticationService.TryGetLastPasswordChangeTimeAsync(sub);
                 if (lastPasswordChange == null || lastPasswordChange.Value.ToUnixTimeSeconds() >= iat)
                 {

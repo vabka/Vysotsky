@@ -54,21 +54,36 @@ namespace Vysotsky.API.Controllers.Users
         {
             var alreadyCreatedUser = await _userService.GetUserByUsernameOrNullAsync(user.Username);
             if (alreadyCreatedUser != null)
+            {
                 return BadRequest("User with same username exists", "users.usernameExists");
+            }
+
             if (user.Role == UserRoleDto.CustomerRepresentative)
+            {
                 return BadRequest("Representative can be created only in organization",
                     "users.cannotCreateUnattachedRepresentative");
+            }
+
             await using var transaction = await _atomicService.BeginAtomicOperationAsync();
             Organization? organization = null;
             if (user.Role == UserRoleDto.Customer)
             {
                 if (user.Organization == null)
+                {
                     return BadRequest("Organization field in necessary", "users.necessaryFieldMissing");
+                }
+
                 var rooms = await _roomService.GetRoomsAsync(user.Organization.Rooms);
                 if (rooms.Any(room => room.OwnerId.HasValue))
+                {
                     return BadRequest("Can't obtain room", "rooms.occupied");
+                }
+
                 if (rooms.Length != user.Organization.Rooms.Length)
+                {
                     return BadRequest("Some rooms are not exist", "rooms.notFound");
+                }
+
                 organization = await _organizationService.CreateOrganizationAsync(user.Organization.Name, rooms);
             }
 

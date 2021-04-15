@@ -25,7 +25,10 @@ namespace Vysotsky.API.Infrastructure
             catch (SecurityTokenException invalidTokenException)
             {
                 if (!context.Response.HasStarted)
+                {
                     context.Response.StatusCode = 401;
+                }
+
                 await context.Response.WriteAsJsonAsync(new ApiResponse
                 {
                     Status = ResponseStatus.Error,
@@ -40,7 +43,10 @@ namespace Vysotsky.API.Infrastructure
             catch (Exception exception)
             {
                 if (!context.Response.HasStarted)
+                {
                     context.Response.StatusCode = 500;
+                }
+
                 await context.Response.WriteAsJsonAsync(new ApiResponse
                 {
                     Status = ResponseStatus.Error,

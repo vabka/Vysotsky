@@ -171,7 +171,10 @@ namespace Vysotsky.Service.Impl
 
             var roomsData = await roomsQuery.ToArrayAsync();
             if (roomsData.Length == 0)
+            {
                 return Array.Empty<FullBuilding>();
+            }
+
             var rooms = roomsData.GroupBy(x => x.FloorId, MapToRoom)
                 .ToDictionary(x => x.Key, x => x);
 

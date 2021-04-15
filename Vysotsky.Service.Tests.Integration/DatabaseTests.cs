@@ -17,7 +17,9 @@ namespace Vysotsky.Service.Tests.Integration
 
             var serviceProvider = Migrator.CreateServices(connectionString);
             using (serviceProvider.CreateScope())
+            {
                 Migrator.UpdateDatabase(serviceProvider);
+            }
 
             var options = new LinqToDbConnectionOptionsBuilder()
                 .UsePostgreSQL(connectionString)
@@ -32,11 +34,17 @@ namespace Vysotsky.Service.Tests.Integration
         public void Dispose()
         {
             if (_disposed)
+            {
                 return;
+            }
+
             lock (_disposeLock)
             {
                 if (_disposed)
+                {
                     return;
+                }
+
                 DropDatabase();
                 Database.Dispose();
                 _disposed = true;

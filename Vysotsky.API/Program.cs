@@ -17,6 +17,7 @@ Host.CreateDefaultBuilder(args)
     {
         builder.ClearProviders();
         if (ctx.HostingEnvironment.IsProduction() || ctx.HostingEnvironment.IsStaging())
+        {
             builder.AddJsonConsole(c =>
             {
                 c.UseUtcTimestamp = true;
@@ -27,22 +28,23 @@ Host.CreateDefaultBuilder(args)
                     Indented = false
                 };
             });
+        }
         else
+        {
             builder.AddConsole(c => c.FormatterName = "simple");
+        }
     })
     .ConfigureWebHost(builder =>
     {
         builder
             // Defaults
             .UseKestrel((builderContext, options) =>
-            {
-                options.Configure(builderContext.Configuration.GetSection("Kestrel"), reloadOnChange: true);
-            })
+                options.Configure(builderContext.Configuration.GetSection("Kestrel"), true))
             .ConfigureServices((hostingContext, services) =>
             {
                 services.PostConfigure<HostFilteringOptions>(options =>
                 {
-                    if (options.AllowedHosts is null or { Count: 0 })
+                      if (options.AllowedHosts is null or { Count: 0 })
                     {
                         var hosts = hostingContext
                             .Configuration["AllowedHosts"]
