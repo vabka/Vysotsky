@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using LinqToDB.Data;
 using Vysotsky.Data;
 using Vysotsky.Service.Interfaces;

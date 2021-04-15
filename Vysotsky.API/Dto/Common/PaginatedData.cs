@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Flurl;
@@ -55,14 +55,14 @@ namespace Vysotsky.API.Dto.Common
             var next = hasNext
                 ? resource
                     .SetQueryParams(
-                        paginationParameters with {PageNumber = paginationParameters.PageNumber + 1})
+                        paginationParameters with { PageNumber = paginationParameters.PageNumber + 1 })
                 : null;
 
             var hasPrevious = paginationParameters.PageNumber > 1;
             var previous = hasPrevious
                 ? resource
                     .SetQueryParams(
-                        paginationParameters with {PageNumber = paginationParameters.PageNumber - 1})
+                        paginationParameters with { PageNumber = paginationParameters.PageNumber - 1 })
                 : null;
 
             return new PaginatedData<T>

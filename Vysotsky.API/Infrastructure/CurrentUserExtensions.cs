@@ -8,11 +8,11 @@ namespace Vysotsky.API.Infrastructure
             currentUserProvider.CurrentUser switch
             {
                 null => false,
-                {Role: UserRole.SuperUser} => true,
-                {Role: UserRole.Supervisor} => true,
-                {Role: UserRole.Worker} => true,
-                {Role: UserRole.OrganizationMember, OrganizationId: var orgId} when orgId == organizationId => true,
-                {Role: UserRole.OrganizationOwner, OrganizationId: var orgId} when orgId == organizationId => true,
+                { Role: UserRole.SuperUser } => true,
+                { Role: UserRole.Supervisor } => true,
+                { Role: UserRole.Worker } => true,
+                { Role: UserRole.OrganizationMember, OrganizationId: var orgId } when orgId == organizationId => true,
+                { Role: UserRole.OrganizationOwner, OrganizationId: var orgId } when orgId == organizationId => true,
                 _ => false
             };
 
@@ -26,7 +26,7 @@ namespace Vysotsky.API.Infrastructure
                 _ => false
             };
 
-        
+
         public static bool IsSupervisor(this ICurrentUserProvider currentUserProvider) =>
             currentUserProvider.CurrentUser?.Role switch
             {

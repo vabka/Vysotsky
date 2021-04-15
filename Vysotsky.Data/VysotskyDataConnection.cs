@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -20,7 +20,7 @@ namespace Vysotsky.Data
         private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
-            Converters = {new JsonStringEnumConverter()},
+            Converters = { new JsonStringEnumConverter() },
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };

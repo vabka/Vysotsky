@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using FluentMigrator;
 using FluentMigrator.Builders;
 using FluentMigrator.Builders.Alter.Table;

@@ -1,4 +1,4 @@
-﻿using LinqToDB.Mapping;
+using LinqToDB.Mapping;
 using Vysotsky.Data.Entities.Abstraction;
 
 namespace Vysotsky.Data.Entities

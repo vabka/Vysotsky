@@ -42,7 +42,7 @@ namespace Vysotsky.API.Controllers.Organizations
                 return NotAuthorized("Only organization member can read organization data",
                     "organization.read.notAuthorized");
             var buildings = await _roomService.GetOrganizationBuildingsAsync(organization);
-            return Ok(buildings.Select(b=>b.ToDto()));
+            return Ok(buildings.Select(b => b.ToDto()));
         }
 
         [HttpGet("{organizationId:long}/representatives")]
@@ -90,7 +90,7 @@ namespace Vysotsky.API.Controllers.Organizations
             if (!_currentUserProvider.CanWriteOrganization(organizationId))
                 return NotAuthorized("Only organization owner can edit organization",
                     "organizations.edit.notAuthorized");
-            var newOrganization = organization with {Name = organizationDtoProperties.Name};
+            var newOrganization = organization with { Name = organizationDtoProperties.Name };
             await _organizationService.UpdateOrganization(newOrganization);
             return Ok();
         }

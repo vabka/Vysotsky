@@ -1,4 +1,4 @@
-﻿using Vysotsky.Service.Interfaces;
+using Vysotsky.Service.Interfaces;
 
 namespace Vysotsky.API.Infrastructure
 {

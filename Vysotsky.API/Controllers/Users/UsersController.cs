@@ -42,7 +42,7 @@ namespace Vysotsky.API.Controllers.Users
             return user switch
             {
                 null => UserNotFound(username),
-                {OrganizationId: not null and var userOrganizationId}
+                { OrganizationId: not null and var userOrganizationId }
                     when !_currentUserProvider.CanReadOrganization(userOrganizationId.Value) =>
                     NotAuthorized("Customer cant access another customer", "users.notAuthorized"),
                 _ => Ok(user.ToDto())

@@ -1,4 +1,4 @@
-﻿namespace Vysotsky.Service.Impl
+namespace Vysotsky.Service.Impl
 {
     public class AuthenticationServiceOptions
     {

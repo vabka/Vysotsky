@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using LinqToDB;
 using LinqToDB.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +16,8 @@ namespace Vysotsky.Service.Tests.Integration
             var connectionString = "User ID=postgres;Password=postgres;Host=localhost;Port=5433;Database=vysotsky";
 
             var serviceProvider = Migrator.CreateServices(connectionString);
-            using (serviceProvider.CreateScope()) Migrator.UpdateDatabase(serviceProvider);
+            using (serviceProvider.CreateScope())
+                Migrator.UpdateDatabase(serviceProvider);
 
             var options = new LinqToDbConnectionOptionsBuilder()
                 .UsePostgreSQL(connectionString)

@@ -1,4 +1,4 @@
-﻿namespace Vysotsky.API.Infrastructure
+namespace Vysotsky.API.Infrastructure
 {
     internal static class Resources
     {

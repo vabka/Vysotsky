@@ -108,9 +108,9 @@ namespace Vysotsky.Service.Impl
             var buildingToDelete = _dataConnection.Buildings.Where(building => building.Id == buildingId);
             var allFloors = _dataConnection.Floors.Where(floor => floor.BuildingId == buildingId);
             var allRoomsInBuilding = from room in _dataConnection.Rooms
-                join floor in _dataConnection.Floors on room.FloorId equals floor.Id
-                where floor.BuildingId == buildingId
-                select room;
+                                     join floor in _dataConnection.Floors on room.FloorId equals floor.Id
+                                     where floor.BuildingId == buildingId
+                                     select room;
 
 
             await using var transaction = await _dataConnection.BeginTransactionAsync();
@@ -176,10 +176,10 @@ namespace Vysotsky.Service.Impl
                 .ToDictionary(x => x.Key, x => x);
 
             var floorsQuery = from room in roomsQuery
-                group room by room.FloorId
+                              group room by room.FloorId
                 into r
-                join floor in _dataConnection.Floors on r.Key equals floor.Id
-                select floor;
+                              join floor in _dataConnection.Floors on r.Key equals floor.Id
+                              select floor;
             var floorsData = await floorsQuery.ToArrayAsync();
             var floors = floorsData
                 .GroupBy(x => x.BuildingId, x => new FullFloor
@@ -190,17 +190,17 @@ namespace Vysotsky.Service.Impl
                 }).ToDictionary(x => x.Key, x => x);
 
             var buildingsQuery = from floor in floorsQuery
-                group floor by floor.BuildingId
+                                 group floor by floor.BuildingId
                 into f
-                join building in _dataConnection.Buildings on f.Key equals building.Id
-                select building;
+                                 join building in _dataConnection.Buildings on f.Key equals building.Id
+                                 select building;
             var buildingsData = await buildingsQuery.ToArrayAsync();
             return buildingsData.Select(x => new FullBuilding
-                {
-                    Id = x.Id,
-                    Name = x.Name,
-                    Floors = floors[x.Id]
-                })
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Floors = floors[x.Id]
+            })
                 ;
         }
     }

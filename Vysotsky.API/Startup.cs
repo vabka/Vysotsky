@@ -182,7 +182,7 @@ namespace Vysotsky.API
                         var currentUser = ctx.RequestServices.GetRequiredService<ICurrentUserProvider>().CurrentUser;
                         await ctx.Response.WriteAsJsonAsync(currentUser, new JsonSerializerOptions()
                         {
-                            Converters = {new JsonStringEnumConverter()}
+                            Converters = { new JsonStringEnumConverter() }
                         });
                     });
                 }

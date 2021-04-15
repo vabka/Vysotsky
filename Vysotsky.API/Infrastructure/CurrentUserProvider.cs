@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Vysotsky.Service.Interfaces;
 
 namespace Vysotsky.API.Infrastructure

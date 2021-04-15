@@ -29,7 +29,7 @@ namespace Vysotsky.API.Controllers.Auth
                 loginDto.Password);
             return token switch
             {
-                {Token: var t, ExpiresAt: var exp} => Ok(new AccessTokenContainer(t, exp)),
+                { Token: var t, ExpiresAt: var exp } => Ok(new AccessTokenContainer(t, exp)),
                 _ => BadRequest("Invalid username or password", "auth.invalidUsernameOrPassword")
             };
         }

@@ -1,4 +1,4 @@
-﻿namespace Vysotsky.API.Dto.Common
+namespace Vysotsky.API.Dto.Common
 {
     /// <summary>
     /// Данные об ошибке

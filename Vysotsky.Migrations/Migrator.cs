@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using FluentMigrator.Runner;
 using Microsoft.Extensions.DependencyInjection;
 using Vysotsky.Migrations;

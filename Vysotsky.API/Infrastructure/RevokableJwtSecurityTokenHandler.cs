@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
@@ -14,7 +14,7 @@ namespace Vysotsky.API.Infrastructure
             var claimsPrincipal = base.ValidateToken(token, validationParameters, out validatedToken);
             return validatedToken switch
             {
-                JwtSecurityToken {Id: var id, IssuedAt: var issuedAt, ValidTo: var validTo, Subject: not ""}
+                JwtSecurityToken { Id: var id, IssuedAt: var issuedAt, ValidTo: var validTo, Subject: not "" }
                     when Guid.TryParse(id, out _) &&
                          issuedAt != default &&
                          validTo != default
