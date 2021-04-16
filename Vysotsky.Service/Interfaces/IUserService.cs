@@ -23,5 +23,8 @@ namespace Vysotsky.Service.Interfaces
 
         Task<(int Total, IEnumerable<User> Worker)> GetAllUsersWithRoleAsync(UserRole role, DateTimeOffset maxDate,
             int limit, int offset);
+
+        Task UpdateUserAsync(User currentUser, string userFirstName, string userLastName, string? userPatronymic,
+            IEnumerable<UserContact> userContacts);
     }
 }

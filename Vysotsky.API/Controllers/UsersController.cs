@@ -11,7 +11,7 @@ using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
 using Vysotsky.Service.Types;
 
-namespace Vysotsky.API.Controllers.Users
+namespace Vysotsky.API.Controllers
 {
     [Route(Resources.Users)]
     public class UsersController : ApiController
@@ -89,9 +89,9 @@ namespace Vysotsky.API.Controllers.Users
 
             var createdUser = await userService.CreateUserAsync(user.Username,
                 user.Password,
-                user.Name.FirstName,
-                user.Name.LastName,
-                user.Name.Patronymic,
+                user.FirstName,
+                user.LastName,
+                user.Patronymic,
                 user.Contacts
                     .Select(c => new UserContact
                     {
@@ -105,10 +105,10 @@ namespace Vysotsky.API.Controllers.Users
             return Created(Resources.Users.AppendPathSegment(createdUser.Username), createdUser.ToDto());
         }
 
-        private static ContactType ToModel(UserContactTypeDto c) =>
+        private static UserContactType ToModel(UserContactTypeDto c) =>
             c switch
             {
-                UserContactTypeDto.Phone => ContactType.Phone,
+                UserContactTypeDto.Phone => UserContactType.Phone,
                 _ => throw new InvalidOperationException()
             };
 

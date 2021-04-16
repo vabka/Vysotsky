@@ -10,7 +10,7 @@ using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
 using OrganizationDto = Vysotsky.API.Dto.Organizations.OrganizationDto;
 
-namespace Vysotsky.API.Controllers.Organizations
+namespace Vysotsky.API.Controllers
 {
     [Route(Resources.Organizations)]
     public class OrganizationsController : ApiController

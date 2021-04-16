@@ -1,4 +1,3 @@
-using Vysotsky.API.Dto.Users;
 
 namespace Vysotsky.API.Dto.Organizations
 {
@@ -6,6 +5,8 @@ namespace Vysotsky.API.Dto.Organizations
     {
         public long Id { get; set; }
         public string Username { get; init; } = null!;
-        public PersonName Name { get; init; } = null!;
+        public string FirstName { get; init; } = null!;
+        public string LastName { get; init; } = null!;
+        public string? Patronymic { get; init; }
     }
 }

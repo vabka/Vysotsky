@@ -108,6 +108,10 @@ namespace Vysotsky.Service.Impl
             return (total, workers);
         }
 
+        public Task UpdateUserAsync(User currentUser, string userFirstName, string userLastName, string? userPatronymic,
+            IEnumerable<UserContact> userContacts) =>
+            throw new NotImplementedException();
+
         public async Task<IEnumerable<User>> GetAllUsersWithRoleAsync(UserRole role) =>
             await db.Users
                 .Where(u => u.Role == role)

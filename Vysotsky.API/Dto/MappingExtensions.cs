@@ -14,10 +14,18 @@ namespace Vysotsky.API.Dto
 {
     public static class MappingExtensions
     {
-        public static PersistedImageDto ToDto(this Image image) => new()
+        public static UserContact ToModel(this UserContactDto userContactDto) => new()
         {
-            Id = image.Id
+            Name = userContactDto.Name,
+            Type = userContactDto.Type switch
+            {
+                UserContactTypeDto.Phone => UserContactType.Phone,
+                _                        => throw new ArgumentOutOfRangeException()
+            },
+            Value = userContactDto.Value
         };
+
+        public static PersistedImageDto ToDto(this Image image) => new() {Id = image.Id};
 
         public static ShortPersistedIssueDto ToDto(this ShortIssue issue) => new()
         {
@@ -44,22 +52,14 @@ namespace Vysotsky.API.Dto
             (area.Id, area.Name, area.Image.ToDto());
 
         public static PersistedIssueDto ToDto(this Issue issue) =>
-            new()
-            {
-                Id = issue.Id
-            };
+            new() {Id = issue.Id};
 
         public static PersistedBuildingDto ToDto(this Building building) => new()
         {
-            Id = building.Id,
-            Name = building.Name
+            Id = building.Id, Name = building.Name
         };
 
-        public static PersistedFloorDto ToDto(this Floor floor) => new()
-        {
-            Id = floor.Id,
-            Number = floor.Number
-        };
+        public static PersistedFloorDto ToDto(this Floor floor) => new() {Id = floor.Id, Number = floor.Number};
 
         public static PersistedRoomDto ToDto(this Room room) => new()
         {
@@ -68,11 +68,11 @@ namespace Vysotsky.API.Dto
             Number = room.Number,
             Status = room.Status switch
             {
-                RoomStatus.Free => RoomStatusDto.Free,
-                RoomStatus.Owned => RoomStatusDto.Owned,
-                RoomStatus.Rented => RoomStatusDto.Rented,
+                RoomStatus.Free        => RoomStatusDto.Free,
+                RoomStatus.Owned       => RoomStatusDto.Owned,
+                RoomStatus.Rented      => RoomStatusDto.Rented,
                 RoomStatus.Unavailable => RoomStatusDto.Unavalable,
-                _ => throw new InvalidOperationException()
+                _                      => throw new InvalidOperationException()
             }
         };
 
@@ -86,9 +86,7 @@ namespace Vysotsky.API.Dto
                 Number = f.Number,
                 Rooms = f.Rooms.Select(r => new OrganizationRoomDto
                 {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Number = r.Number
+                    Id = r.Id, Name = r.Name, Number = r.Number
                 })
             })
         };
@@ -96,32 +94,26 @@ namespace Vysotsky.API.Dto
         public static PersistedUserDto ToDto(this User user) => new()
         {
             Id = user.Id,
-            Name = new PersonName
-            {
-                FirstName = user.Firstname,
-                LastName = user.LastName,
-                Patronymic = user.Patronymic
-            },
+            FirstName = user.Firstname,
+            LastName = user.LastName,
+            Patronymic = user.Patronymic,
             Contacts = user.Contacts.Select(c => new UserContactDto
             {
-                Name = c.Name,
-                Type = c.Type.ToDto(),
-                Value = c.Value
+                Name = c.Name, Type = c.Type.ToDto(), Value = c.Value
             }),
             OrganizationId = user.OrganizationId,
             Username = user.Username
         };
 
-        public static UserContactTypeDto ToDto(this ContactType contactType) => contactType switch
+        public static UserContactTypeDto ToDto(this UserContactType userContactType) => userContactType switch
         {
-            ContactType.Phone => UserContactTypeDto.Phone,
-            _ => throw new ArgumentOutOfRangeException(nameof(contactType), contactType, null)
+            UserContactType.Phone => UserContactTypeDto.Phone,
+            _ => throw new ArgumentOutOfRangeException(nameof(userContactType), userContactType, null)
         };
 
         public static PersistedOrganizationDto ToDto(this Organization organization) => new()
         {
-            Id = organization.Id,
-            Name = organization.Name
+            Id = organization.Id, Name = organization.Name
         };
     }
 }

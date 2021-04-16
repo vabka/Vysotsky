@@ -7,11 +7,13 @@ namespace Vysotsky.API.Dto.Users
     {
         public string Username { get; init; } = null!;
         public string Password { get; init; } = null!;
-        public PersonName Name { get; init; } = null!;
+
+        public string FirstName { get; init; } = null!;
+        public string LastName { get; init; } = null!;
+        public string? Patronymic { get; init; }
         public UserContactDto[] Contacts { get; init; } = Array.Empty<UserContactDto>();
         public UserRoleDto Role { get; init; }
 
-        public string? Image { get; init; }
         public OrganizationDto? Organization { get; init; }
     }
 }

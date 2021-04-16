@@ -40,7 +40,7 @@ async Task Seed(VysotskyDataConnection dataConnection)
         {
             new UserContact
             {
-                Name = "Телефон, чтобы ночью звонить", Value = "88005553535", Type = ContactType.Phone
+                Name = "Телефон, чтобы ночью звонить", Value = "88005553535", Type = UserContactType.Phone
             }
         }
     });

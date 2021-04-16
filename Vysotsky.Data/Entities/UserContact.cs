@@ -4,6 +4,6 @@ namespace Vysotsky.Data.Entities
     {
         public string Name { get; init; } = null!;
         public string Value { get; init; } = null!;
-        public ContactType Type { get; init; }
+        public UserContactType Type { get; init; }
     }
 }

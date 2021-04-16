@@ -9,7 +9,7 @@ using Vysotsky.API.Dto.Common;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Service.Interfaces;
 
-namespace Vysotsky.API.Controllers.Categories
+namespace Vysotsky.API.Controllers
 {
     [Route(Resources.Areas)]
     public class AreasController : ApiController

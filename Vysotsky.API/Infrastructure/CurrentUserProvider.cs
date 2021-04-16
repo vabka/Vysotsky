@@ -13,5 +13,6 @@ namespace Vysotsky.API.Infrastructure
 
         public User CurrentUser => httpContextAccessor.HttpContext?.Items["CurrentUser"] as User ??
                                    throw new InvalidOperationException();
+
     }
 }

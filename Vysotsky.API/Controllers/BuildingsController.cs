@@ -10,7 +10,7 @@ using Vysotsky.API.Infrastructure;
 using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
 
-namespace Vysotsky.API.Controllers.Buildings
+namespace Vysotsky.API.Controllers
 {
     [Route(Resources.Buildings)]
     public class BuildingsController : ApiController

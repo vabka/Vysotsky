@@ -1,6 +1,6 @@
 namespace Vysotsky.Data.Entities
 {
-    public enum ContactType
+    public enum UserContactType
     {
         Phone
     }

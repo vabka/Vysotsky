@@ -8,7 +8,7 @@ using Vysotsky.API.Infrastructure;
 using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
 
-namespace Vysotsky.API.Controllers.Issues
+namespace Vysotsky.API.Controllers
 {
     [Route(Resources.Issues)]
     public class IssuesController : ApiController
