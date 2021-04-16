@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -19,10 +18,13 @@ namespace Vysotsky.API.Controllers.Workers
         public WorkersController(IUserService userService) => this.userService = userService;
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<IEnumerable<PersistedUserDto>>>> GetAllWorkers()
+        public async Task<ActionResult<ApiResponse<PaginatedData<PersistedUserDto>>>> GetAllWorkers(
+            [FromQuery] PaginationParameters paginationParameters)
         {
-            var workers = await userService.GetAllUsersWithRoleAsync(UserRole.Worker);
-            return Ok(workers.Select(w => w.ToDto()));
+            var (total, workers) = await userService.GetAllUsersWithRoleAsync(UserRole.Worker,
+                paginationParameters.Until, paginationParameters.ToTake(), paginationParameters.ToSkip());
+            return Ok(PaginatedData.Create(paginationParameters, total, workers.Select(w => w.ToDto()).ToArray(),
+                Resources.Workers));
         }
     }
 }
