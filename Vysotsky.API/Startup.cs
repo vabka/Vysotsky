@@ -115,6 +115,8 @@ namespace Vysotsky.API
                     options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    options.JsonSerializerOptions.Converters.Add(new DateTimeOffsetConverter());
+                    options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
                 });
 
             services.Scan(t =>
