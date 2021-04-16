@@ -61,24 +61,23 @@ namespace Vysotsky.API
                     var options = new LinqToDbConnectionOptionsBuilder()
                         .UsePostgreSQL(connectionString)
                         .WithTraceLevel(TraceLevel.Info)
-                        .WriteTraceWith((param1, param2, l) =>
+                        .WriteTraceWith((text, _, l) =>
                         {
                             switch (l)
                             {
                                 case TraceLevel.Off:
-                                    logger.LogCritical("{LinqToDBScope}: {LinqToDBText}", param2, param1);
                                     break;
                                 case TraceLevel.Error:
-                                    logger.LogError("{LinqToDBScope}: {LinqToDBText}", param2, param1);
+                                    logger.InterpolatedError($"{text}");
                                     break;
                                 case TraceLevel.Warning:
-                                    logger.LogWarning("{LinqToDBScope}: {LinqToDBText}", param2, param1);
+                                    logger.InterpolatedWarning($"{text}");
                                     break;
                                 case TraceLevel.Info:
-                                    logger.LogInformation("{LinqToDBScope}: {LinqToDBText}", param2, param1);
+                                    logger.InterpolatedInformation($"{text}");
                                     break;
                                 case TraceLevel.Verbose:
-                                    logger.LogDebug("{LinqToDBScope}: {LinqToDBText}", param2, param1);
+                                    logger.InterpolatedTrace($"{text}");
                                     break;
                                 default:
                                     throw new ArgumentOutOfRangeException(nameof(l), l, null);
@@ -153,6 +152,72 @@ namespace Vysotsky.API
                 endpoints.MapControllers();
                 if (env.IsDevelopment())
                 {
+                    endpoints.MapGet("/test", async ctx =>
+                    {
+                        var hasher = ctx.RequestServices.GetRequiredService<IStringHasher>();
+                        var database = ctx.RequestServices.GetRequiredService<VysotskyDataConnection>();
+                        var authService = ctx.RequestServices.GetRequiredService<IAuthenticationService>();
+                        if (!await database.Users.AnyAsync(i => i.Username == "test_superuser"))
+                        {
+                            await using var transaction = await database.BeginTransactionAsync();
+                            var hash = hasher.Hash("test");
+                            await database.Users.InsertAsync(() => new UserRecord
+                            {
+                                Username = "test_superuser",
+                                PasswordHash = hash,
+                                Role = UserRole.SuperUser,
+                                FirstName = "Админ",
+                                LastName = "Админович",
+                                Contacts = Array.Empty<UserContact>(),
+                                LastPasswordChange = DateTimeOffset.MinValue
+                            });
+                            await database.Users.InsertAsync(() => new UserRecord
+                            {
+                                Username = "test_supervisor",
+                                PasswordHash = hash,
+                                Role = UserRole.Supervisor,
+                                FirstName = "Диспетчер",
+                                LastName = "Админович",
+                                Contacts = Array.Empty<UserContact>(),
+                                LastPasswordChange = DateTimeOffset.MinValue
+                            });
+                            await database.Users.InsertAsync(() => new UserRecord
+                            {
+                                Username = "test_worker",
+                                PasswordHash = hash,
+                                Role = UserRole.Worker,
+                                FirstName = "Работник",
+                                LastName = "Админович",
+                                Contacts = Array.Empty<UserContact>(),
+                                LastPasswordChange = DateTimeOffset.MinValue
+                            });
+                            await transaction.CommitAsync();
+                        }
+
+                        await ctx.Response.WriteAsJsonAsync(new
+                        {
+                            superuser = new
+                            {
+                                username = "test_superuser",
+                                token = await authService.TryIssueTokenByUserCredentialsAsync("test_superuser", "test",
+                                    true),
+                            },
+                            supervisor = new
+                            {
+                                username = "test_supervisor",
+                                token = await authService.TryIssueTokenByUserCredentialsAsync("test_supervisor",
+                                    "test",
+                                    true),
+                            },
+                            worker = new
+                            {
+                                username = "test_worker",
+                                token = await authService.TryIssueTokenByUserCredentialsAsync("test_worker",
+                                    "test",
+                                    true),
+                            }
+                        }, new JsonSerializerOptions {WriteIndented = true});
+                    });
                     endpoints.MapPost("/api/users/admin", async ctx =>
                     {
                         var hasher = ctx.RequestServices.GetRequiredService<IStringHasher>();
@@ -173,10 +238,8 @@ namespace Vysotsky.API
                     endpoints.MapGet("/api/currentUser", async ctx =>
                     {
                         var currentUser = ctx.RequestServices.GetRequiredService<ICurrentUserProvider>().CurrentUser;
-                        await ctx.Response.WriteAsJsonAsync(currentUser, new JsonSerializerOptions()
-                        {
-                            Converters = { new JsonStringEnumConverter() }
-                        });
+                        await ctx.Response.WriteAsJsonAsync(currentUser,
+                            new JsonSerializerOptions {Converters = {new JsonStringEnumConverter()}});
                     });
                 }
             });

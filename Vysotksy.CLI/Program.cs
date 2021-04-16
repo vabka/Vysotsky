@@ -21,7 +21,9 @@ var options = new LinqToDbConnectionOptionsBuilder()
     .WithTraceLevel(TraceLevel.Info)
     .Build<VysotskyDataConnection>();
 await using var db = new VysotskyDataConnection(options);
+await using var transaction = await db.BeginTransactionAsync();
 await Seed(db);
+await transaction.CommitAsync();
 
 async Task Seed(VysotskyDataConnection dataConnection)
 {
@@ -136,7 +138,7 @@ async Task Seed(VysotskyDataConnection dataConnection)
     {
         ExternalId = "icon://light_bulb"
     });
-    var area = await dataConnection.Areas.InsertWithInt64IdentityAsync(() => new AreaRecord
+    var electricity = await dataConnection.Areas.InsertWithInt64IdentityAsync(() => new AreaRecord
     {
         Name = "Электрика",
         ImageId = electrical
@@ -144,17 +146,18 @@ async Task Seed(VysotskyDataConnection dataConnection)
     await dataConnection.Categories.InsertWithInt64IdentityAsync(() => new CategoryRecord
     {
         Name = "Лампочку заменить",
-        AreaId = area
+        AreaId = electricity
     });
     await dataConnection.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
     {
+        Version = 1,
         Status = IssueStatus.New,
-        AreaId = area,
+        AreaId = electricity,
         Description = "Хз почему не светит",
         Note = "",
         RoomId = room404,
         AuthorId = representative,
-        Title = "Лампочка не светит"
+        Title = "Лампочка не светит",
     });
 }
 

@@ -58,7 +58,7 @@ namespace Vysotsky.API.Controllers.Organizations
             if (organization != null)
             {
                 var currentUser = currentUserProvider.CurrentUser;
-                if (currentUser?.Role != UserRole.Supervisor
+                if (currentUser.Role != UserRole.Supervisor
                     || currentUser.Role != UserRole.SuperUser
                     || currentUser.OrganizationId != organizationId)
                 {

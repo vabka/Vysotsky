@@ -29,7 +29,7 @@ namespace Vysotsky.API.Dto.Common
         /// <summary>
         /// Дата, до которой предоставляются данные (верхняя граница)
         /// </summary>
-        public DateTime Until { get; init; }
+        public DateTimeOffset Until { get; init; }
 
         /// <summary>
         /// Страницы для перехода
@@ -42,7 +42,7 @@ namespace Vysotsky.API.Dto.Common
         /// Данные
         /// </summary>
 
-        public IReadOnlyCollection<T> Data { get; init; } = Array.Empty<T>();
+        public IEnumerable<T> Data { get; init; } = Array.Empty<T>();
     }
 
     internal static class PaginatedData

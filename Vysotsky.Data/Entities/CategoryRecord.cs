@@ -8,6 +8,7 @@ namespace Vysotsky.Data.Entities
     {
         [Column("area_id")]
         public long AreaId { get; init; }
+
         [Column("name")]
         public string Name { get; init; } = null!;
     }

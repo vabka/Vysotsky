@@ -18,7 +18,7 @@ namespace Vysotsky.API.Infrastructure
 
         public static bool CanWriteOrganization(this ICurrentUserProvider currentUserProvider, long organizationId) =>
             currentUserProvider.CanReadOrganization(organizationId) &&
-            currentUserProvider.CurrentUser?.Role switch
+            currentUserProvider.CurrentUser.Role switch
             {
                 UserRole.SuperUser => true,
                 UserRole.Supervisor => true,
@@ -30,7 +30,7 @@ namespace Vysotsky.API.Infrastructure
 
 
         public static bool IsSupervisor(this ICurrentUserProvider currentUserProvider) =>
-            currentUserProvider.CurrentUser?.Role switch
+            currentUserProvider.CurrentUser.Role switch
             {
                 UserRole.Supervisor => true,
                 UserRole.SuperUser => true,
@@ -41,7 +41,7 @@ namespace Vysotsky.API.Infrastructure
             };
 
         public static bool CanEditCategories(this ICurrentUserProvider currentUserProvider) =>
-            currentUserProvider.CurrentUser?.Role switch
+            currentUserProvider.CurrentUser.Role switch
             {
                 UserRole.Supervisor => true,
                 UserRole.SuperUser => true,

@@ -7,42 +7,50 @@ namespace Vysotsky.Migrations.Migrations
     {
         public override void Up()
         {
-            Create.Entity("user");
-            Create.Entity("organization")
+            Create.SortableEntity("user");
+            Create.SortableEntity("organization")
                 .WithColumn("name").AsString();
-            Create.Entity("image")
+
+            Create.EntityWithId("image")
                 .WithColumn("external_id").AsString();
 
-            Create.Entity("area")
+            Create.SortableEntity("area")
                 .WithColumn("name").AsString()
                 .WithColumn("image_id").References("image");
-            Create.Entity("category")
+
+            Create.SortableEntity("category")
                 .WithColumn("area_id").References("area")
                 .WithColumn("name").AsString();
 
-            Create.Entity("building")
+            Create.SortableEntity("building")
                 .WithColumn("name").AsString();
-            Create.Entity("floor")
+
+            Create.SortableEntity("floor")
                 .WithColumn("number").AsString()
                 .WithColumn("building_id").References("building");
 
             Execute.CreateEnum("room_status", "Free", "Owned", "Rented", "Unavailable");
-            Create.Entity("room")
+
+            Create.SortableEntity("room")
                 .WithColumn("floor_id").References("floor")
                 .WithColumn("owner_id").References("organization").Nullable()
                 .WithColumn("status").AsEnum("room_status")
                 .WithColumn("name").AsString().Nullable()
                 .WithColumn("number").AsString().Nullable();
+
             Create.Index()
                 .OnTable("room")
                 .OnColumn("owner_id");
+
             Execute.CreateEnum("user_role",
                 "SuperUser",
                 "Supervisor",
                 "Worker",
                 "OrganizationOwner",
                 "OrganizationMember");
-            Alter.Table("user").AddColumn("username").AsString().Unique()
+
+            Alter.Table("user")
+                .AddColumn("username").AsString().Unique()
                 .AddColumn("password_hash")
                 .AsBinary(512 / 8)
                 .AddColumn("image_id").References("image").Nullable()
@@ -68,6 +76,7 @@ namespace Vysotsky.Migrations.Migrations
                 "Completed",
                 "Accepted",
                 "Closed");
+
             Create.VersionedEntity("issue")
                 .WithColumn("status").AsEnum("issue_status")
                 .WithColumn("title").AsString()
@@ -79,14 +88,16 @@ namespace Vysotsky.Migrations.Migrations
                 .WithColumn("supervisor_id").References("user").Nullable()
                 .WithColumn("worker_id").References("user").Nullable()
                 .WithColumn("room_id").References("room");
+
             Create.Table("issue_image")
-                .WithColumn("issue_id").References("issue").PrimaryKey()
+                .WithColumn("issue_id").AsInt64().PrimaryKey() // References(issue)
                 .WithColumn("image_id").References("image").PrimaryKey();
 
-            Create.Entity("issue_comment")
-                .WithColumn("issue_id").References("issue")
+            Create.SortableEntity("issue_comment")
+                .WithColumn("issue_id").AsInt64() // References(issue)
                 .WithColumn("author_id").References("user")
                 .WithColumn("text").AsString();
+
             Create.Table("issue_comment_image")
                 .WithColumn("issue_comment_id").References("issue_comment")
                 .WithColumn("image_id").References("image");

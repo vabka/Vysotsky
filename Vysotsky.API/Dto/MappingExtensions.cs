@@ -19,6 +19,24 @@ namespace Vysotsky.API.Dto
             Id = image.Id
         };
 
+        public static ShortPersistedIssueDto ToDto(this ShortIssue issue) => new()
+        {
+            Id = issue.Id, Title = issue.Title, CreatedAt = issue.CreatedAt, Status = issue.Status.ToDto()
+        };
+
+        public static IssueStatusDto ToDto(this IssueStatus status) => status switch
+        {
+            IssueStatus.New                 => IssueStatusDto.New,
+            IssueStatus.CancelledByCustomer => IssueStatusDto.Cancelled,
+            IssueStatus.NeedInfo            => IssueStatusDto.NeedInfo,
+            IssueStatus.Rejected            => IssueStatusDto.Rejected,
+            IssueStatus.InProgress          => IssueStatusDto.InProgress,
+            IssueStatus.Completed           => IssueStatusDto.InProgress,
+            IssueStatus.Accepted            => IssueStatusDto.InProgress,
+            IssueStatus.Closed              => IssueStatusDto.Done,
+            _                               => throw new ArgumentOutOfRangeException(nameof(status), status, null)
+        };
+
         public static PersistedCategoryDto ToDto(this Category category) => new
             (category.Id, category.Name);
 

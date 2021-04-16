@@ -9,7 +9,7 @@ namespace Vysotsky.API.Dto.Common
         /// Максимальная дата (нужно, чтобы при переключении страниц не возникало дубликатов)
         /// </summary>
         [FromQuery(Name = "until")]
-        public DateTime Until { get; init; } = DateTime.Now;
+        public DateTimeOffset Until { get; init; } = DateTimeOffset.UtcNow;
 
         /// <summary>
         /// Размер страницы, не меньше 1

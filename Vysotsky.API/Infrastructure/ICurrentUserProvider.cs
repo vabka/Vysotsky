@@ -4,6 +4,6 @@ namespace Vysotsky.API.Infrastructure
 {
     public interface ICurrentUserProvider
     {
-        User? CurrentUser { get; }
+        User CurrentUser { get; }
     }
 }

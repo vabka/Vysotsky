@@ -7,7 +7,7 @@ namespace Vysotsky.Data.Entities
     public class FloorRecord : SortableEntity
     {
         [Column("number")] public string Number { get; init; } = null!;
-        [Column("building_id")]
-        public long BuildingId { get; init; }
+
+        [Column("building_id")] public long BuildingId { get; init; }
     }
 }

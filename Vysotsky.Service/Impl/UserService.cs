@@ -11,7 +11,7 @@ using Vysotsky.Service.Types;
 
 namespace Vysotsky.Service.Impl
 {
-    public class UserService : IUserService
+    public class UserService : IUserService, IWorkerService
     {
         private readonly VysotskyDataConnection dataConnection;
         private readonly IStringHasher hasher;
@@ -96,5 +96,11 @@ namespace Vysotsky.Service.Impl
                 .Where(u => u.Role == role)
                 .Select(MapToUser)
                 .ToArrayAsync();
+
+        public async Task<User?> GetWorkerByIdOrNullAsync(long workerId) =>
+            await dataConnection.Users.Where(u => u.Role == UserRole.Worker)
+                .Where(u => u.Id == workerId)
+                .Select(MapToUser)
+                .SingleOrDefaultAsync();
     }
 }

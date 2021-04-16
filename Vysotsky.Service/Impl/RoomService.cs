@@ -187,7 +187,8 @@ namespace Vysotsky.Service.Impl
                     Id = x.Id,
                     Number = x.Number,
                     Rooms = rooms[x.Id]
-                }).ToDictionary(x => x.Key, x => x);
+                })
+                .ToDictionary(x => x.Key, x => x);
 
             var buildingsQuery = from floor in floorsQuery
                                  group floor by floor.BuildingId

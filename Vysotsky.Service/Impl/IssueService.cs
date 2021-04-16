@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using LinqToDB;
 using Vysotsky.Data;
 using Vysotsky.Data.Entities;
+using Vysotsky.Data.Entities.Abstraction;
 using Vysotsky.Service.Interfaces;
 using Vysotsky.Service.Types;
 
@@ -30,22 +32,20 @@ namespace Vysotsky.Service.Impl
             AuthorId = i.AuthorId
         };
 
-        private readonly VysotskyDataConnection vysotskyDataConnection;
+        private readonly VysotskyDataConnection db;
 
-        public IssueService(VysotskyDataConnection vysotskyDataConnection) => this.vysotskyDataConnection = vysotskyDataConnection;
+        public IssueService(VysotskyDataConnection vysotskyDataConnection) =>
+            db = vysotskyDataConnection;
 
         public async Task<Area?> GetAreaByIdOrNull(long id) =>
-            await vysotskyDataConnection.Areas
+            await db.Areas
                 .Where(x => x.Id == id)
-                .Select(x => new Area
-                {
-                    Id = id
-                })
+                .Select(x => new Area {Id = id})
                 .SingleOrDefaultAsync();
 
         public async Task<Issue> CreateIssueAsync(string title, string description, Area area, Room room, User author)
         {
-            var id = await vysotskyDataConnection.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
+            var id = await db.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
             {
                 Title = title,
                 Description = description,
@@ -59,12 +59,12 @@ namespace Vysotsky.Service.Impl
         }
 
         private async Task<Issue> GetIssueByIdWithSpecificVersion(long issueId, long version) =>
-            await vysotskyDataConnection.Issues
+            await db.Issues
                 .Select(MapToIssue)
                 .SingleAsync(i => i.Id == issueId && i.Version == version);
 
         public async Task<Issue?> GetIssueByIdOrNullAsync(long issueId) =>
-            await vysotskyDataConnection.Issues
+            await db.Issues
                 .Where(x => x.Id == issueId)
                 .OrderByDescending(x => x.Version)
                 .Select(MapToIssue)
@@ -77,18 +77,16 @@ namespace Vysotsky.Service.Impl
             {
                 case IssueStatus.New:
                 {
-                    await using var transaction = await vysotskyDataConnection.BeginTransactionAsync();
-                    await vysotskyDataConnection.IssueComments
+                    await using var transaction = await db.BeginTransactionAsync();
+                    await db.IssueComments
                         .InsertAsync(() => new IssueCommentRecord
                         {
-                            IssueId = issue.Id,
-                            AuthorId = supervisor.Id,
-                            Text = message
+                            IssueId = issue.Id, AuthorId = supervisor.Id, Text = message
                         });
-                    await vysotskyDataConnection.Issues
+                    await db.Issues
                         .Where(i => i.Id == issue.Id && i.Version == issue.Version)
                         .Take(1)
-                        .InsertAsync(vysotskyDataConnection.Issues,
+                        .InsertAsync(db.Issues,
                             i => new IssueRecord
                             {
                                 Id = i.Id,
@@ -131,26 +129,27 @@ namespace Vysotsky.Service.Impl
                 case IssueStatus.New:
                 case IssueStatus.NeedInfo:
                 {
-                    await vysotskyDataConnection.Issues
+                    await db.Issues
                         .Where(i => i.Id == issue.Id && i.Version == issue.Version)
                         .Take(1)
-                        .InsertAsync(vysotskyDataConnection.Issues, i => new IssueRecord
-                        {
-                            Id = i.Id,
-                            Version = i.Version + 1,
-                            Status = IssueStatus.InProgress,
-                            WorkerId = worker.Id,
-                            SupervisorId = supervisor.Id,
-                            Description = i.Description,
-                            Note = i.Note,
-                            Title = i.Title,
-                            AreaId = newCategory.Area.Id,
-                            CategoryId = newCategory.Id,
-                            AuthorId = i.AuthorId,
-                            CreatedAt = i.CreatedAt,
-                            UpdatedAt = DateTimeOffset.Now,
-                            RoomId = i.RoomId
-                        });
+                        .InsertAsync(db.Issues,
+                            i => new IssueRecord
+                            {
+                                Id = i.Id,
+                                Version = i.Version + 1,
+                                Status = IssueStatus.InProgress,
+                                WorkerId = worker.Id,
+                                SupervisorId = supervisor.Id,
+                                Description = i.Description,
+                                Note = i.Note,
+                                Title = i.Title,
+                                AreaId = newCategory.Area.Id,
+                                CategoryId = newCategory.Id,
+                                AuthorId = i.AuthorId,
+                                CreatedAt = i.CreatedAt,
+                                UpdatedAt = DateTimeOffset.Now,
+                                RoomId = i.RoomId
+                            });
                     return await GetIssueByIdWithSpecificVersion(issue.Id, issue.Version + 1);
                 }
                 case IssueStatus.Accepted:
@@ -166,6 +165,54 @@ namespace Vysotsky.Service.Impl
             }
         }
 
-        private static InvalidOperationException CannotMoveFromTerminalState() => new("Cannot move from terminal state");
+        private static readonly Expression<Func<IssueRecord, ShortIssue>> MapToShortIssue = record => new ShortIssue
+        {
+            Id = record.Id, Status = record.Status, Title = record.Title, CreatedAt = record.CreatedAt
+        };
+
+        public async Task<(int total, IEnumerable<ShortIssue>)> GetIssuesToShowUser(User user, DateTimeOffset maxDate,
+            int limit,
+            int offset)
+        {
+            var query = db.Issues
+                .Where(i => i.CreatedAt < maxDate)
+                .OrderByDescending(i => i.CreatedAt)
+                .ThenBy(i => i.Id)
+                .AsQueryable();
+            query = user switch
+            {
+                {Role: UserRole.SuperUser or UserRole.Supervisor}
+                    => query,
+                {Role: UserRole.Worker}
+                    => query.Where(i => i.WorkerId == user.Id),
+                {Role: UserRole.OrganizationOwner or UserRole.OrganizationMember}
+                    => query
+                        .InnerJoin(db.Users, (l, r) => l.AuthorId == r.Id,
+                            (i, u) => new {Issue = i, u.OrganizationId})
+                        .Where(x => x.OrganizationId == user.OrganizationId)
+                        .Select(x => x.Issue),
+                _ => throw new InvalidOperationException()
+            };
+            query = GetActualVersions(query);
+            var count = await query.CountAsync();
+            var data = await query
+                .Select(MapToShortIssue)
+                .Skip(offset)
+                .Take(limit)
+                .ToArrayAsync();
+            return (count, data);
+        }
+
+        private static IQueryable<T> GetActualVersions<T>(IQueryable<T> query) where T : VersionedEntity =>
+            query
+                .Select(i => new
+                {
+                    Record = i, rn = Sql.Ext.RowNumber().Over().PartitionBy(i.Id).OrderByDesc(i.Version).ToValue()
+                })
+                .Where(i => i.rn == 1)
+                .Select(i => i.Record);
+
+        private static InvalidOperationException CannotMoveFromTerminalState() =>
+            new("Cannot move from terminal state");
     }
 }

@@ -11,28 +11,23 @@ namespace Vysotsky.Migrations
 {
     public static class MigrationExtensions
     {
-        public static ICreateTableWithColumnSyntax Entity(this ICreateExpressionRoot create, string name) =>
+        public static ICreateTableWithColumnSyntax EntityWithId(this ICreateExpressionRoot create, string name) =>
             create.Table(name)
                 .WithColumn("id")
                 .AsInt64()
                 .Identity()
-                .PrimaryKey()
+                .PrimaryKey();
+        public static ICreateTableWithColumnSyntax SortableEntity(this ICreateExpressionRoot create, string name) =>
+            create.EntityWithId(name)
                 .WithColumn("created_at")
                 .AsDateTimeOffset()
                 .WithDefault(SystemMethods.CurrentUTCDateTime);
 
         public static ICreateTableWithColumnSyntax VersionedEntity(this ICreateExpressionRoot create, string name) =>
-            create.Table(name)
-                .WithColumn("id")
-                .AsInt64()
-                .Identity()
-                .PrimaryKey()
+            create.SortableEntity(name)
                 .WithColumn("version")
                 .AsInt64()
                 .PrimaryKey()
-                .WithColumn("created_at")
-                .AsDateTimeOffset()
-                .WithDefault(SystemMethods.CurrentUTCDateTime)
                 .WithColumn("updated_at")
                 .AsDateTimeOffset()
                 .WithDefault(SystemMethods.CurrentUTCDateTime);

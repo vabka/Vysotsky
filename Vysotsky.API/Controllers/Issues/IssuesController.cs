@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Dto;
@@ -29,6 +30,18 @@ namespace Vysotsky.API.Controllers.Issues
             this.roomService = roomService;
             this.workerService = workerService;
             this.categoriesService = categoriesService;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<ApiResponse<PaginatedData<ShortPersistedIssueDto>>>> GetAllIssues(
+            [FromQuery] PaginationParameters paginationParameters)
+        {
+            var (total, data) = await issueService.GetIssuesToShowUser(currentUserProvider.CurrentUser,
+                paginationParameters.Until, paginationParameters.ToTake(), paginationParameters.ToSkip());
+            return Ok(PaginatedData.Create(paginationParameters,
+                total,
+                data.Select(x => x.ToDto()).ToArray(),
+                Resources.Issues));
         }
 
         [HttpPost]
@@ -116,8 +129,10 @@ namespace Vysotsky.API.Controllers.Issues
             return Ok(newState.ToDto());
         }
 
-        private ActionResult<ApiResponse<PersistedIssueDto>> CategoryNotFound() => throw new System.NotImplementedException();
+        private ActionResult<ApiResponse<PersistedIssueDto>> CategoryNotFound() =>
+            throw new System.NotImplementedException();
 
-        private ActionResult<ApiResponse<PersistedIssueDto>> WorkerNotFound() => NotFound("Worker not found", "workers.notFound");
+        private ActionResult<ApiResponse<PersistedIssueDto>> WorkerNotFound() =>
+            NotFound("Worker not found", "workers.notFound");
     }
 }
