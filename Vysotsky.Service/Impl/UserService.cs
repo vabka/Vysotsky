@@ -13,8 +13,8 @@ namespace Vysotsky.Service.Impl
 {
     public class UserService : IUserService, IWorkerService
     {
-        private readonly VysotskyDataConnection db;
-        private readonly IStringHasher hasher;
+        private readonly VysotskyDataConnection _db;
+        private readonly IStringHasher _hasher;
 
         private static readonly Expression<Func<UserRecord, User>> MapToUser = u => new User
         {
@@ -30,8 +30,8 @@ namespace Vysotsky.Service.Impl
 
         public UserService(VysotskyDataConnection db, IStringHasher hasher)
         {
-            this.db = db;
-            this.hasher = hasher;
+            _db = db;
+            _hasher = hasher;
         }
 
         public async Task<User> CreateUserAsync(string username,
@@ -43,10 +43,10 @@ namespace Vysotsky.Service.Impl
             UserRole role,
             Organization? organization)
         {
-            var passwordHash = hasher.Hash(password);
+            var passwordHash = _hasher.Hash(password);
             var contactsArray = contacts.ToArray();
             var organizationId = organization?.Id;
-            var id = await db.Users
+            var id = await _db.Users
                 .InsertWithInt64IdentityAsync(() => new UserRecord
                 {
                     Username = username,
@@ -74,19 +74,19 @@ namespace Vysotsky.Service.Impl
         }
 
         public async Task<User?> GetUserByIdOrNull(long userId) =>
-            await db.Users
+            await _db.Users
                 .Where(u => u.Id == userId)
                 .Select(MapToUser)
                 .SingleOrDefaultAsync();
 
         public async Task<User?> GetUserByUsernameOrNullAsync(string username) =>
-            await db.Users
+            await _db.Users
                 .Where(u => u.Username == username)
                 .Select(MapToUser)
                 .SingleOrDefaultAsync();
 
         public async Task<IEnumerable<User>> GetAllOrganizationMembersAsync(Organization organization) =>
-            await db.Users
+            await _db.Users
                 .Where(u => u.OrganizationId == organization.Id && u.Role == UserRole.OrganizationMember)
                 .Select(MapToUser)
                 .ToArrayAsync();
@@ -96,7 +96,7 @@ namespace Vysotsky.Service.Impl
             DateTimeOffset maxDate, int limit,
             int offset)
         {
-            var query = db.Users
+            var query = _db.Users
                 .Where(u => u.CreatedAt < maxDate)
                 .Where(u => u.Role == role)
                 .Select(MapToUser);
@@ -113,13 +113,13 @@ namespace Vysotsky.Service.Impl
             throw new NotImplementedException();
 
         public async Task<IEnumerable<User>> GetAllUsersWithRoleAsync(UserRole role) =>
-            await db.Users
+            await _db.Users
                 .Where(u => u.Role == role)
                 .Select(MapToUser)
                 .ToArrayAsync();
 
         public async Task<User?> GetWorkerByIdOrNullAsync(long workerId) =>
-            await db.Users.Where(u => u.Role == UserRole.Worker)
+            await _db.Users.Where(u => u.Role == UserRole.Worker)
                 .Where(u => u.Id == workerId)
                 .Select(MapToUser)
                 .SingleOrDefaultAsync();

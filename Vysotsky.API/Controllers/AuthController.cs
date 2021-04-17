@@ -13,20 +13,20 @@ namespace Vysotsky.API.Controllers
     [Route(Resources.Auth)]
     public class AuthController : ApiController
     {
-        private readonly IAuthenticationService authenticationService;
+        private readonly IAuthenticationService _authenticationService;
 
-        public AuthController(IAuthenticationService authenticationService) => this.authenticationService = authenticationService;
+        public AuthController(IAuthenticationService authenticationService) => _authenticationService = authenticationService;
 
         [AllowAnonymous]
         [HttpPost("authenticate")]
         public async Task<ActionResult<ApiResponse<AccessTokenContainer>>> Authenticate(
             [FromBody] LoginDto loginDto)
         {
-            var token = await authenticationService.TryIssueTokenByUserCredentialsAsync(loginDto.Username,
+            var token = await _authenticationService.TryIssueTokenByUserCredentialsAsync(loginDto.Username,
                 loginDto.Password);
             return token switch
             {
-                { Token: var t, ExpiresAt: var exp } => Ok(new AccessTokenContainer(t, exp)),
+                { token: var t, expiresAt: var exp } => Ok(new AccessTokenContainer(t, exp)),
                 _ => BadRequest("Invalid username or password", "auth.invalidUsernameOrPassword")
             };
         }
@@ -38,7 +38,7 @@ namespace Vysotsky.API.Controllers
             if (authorizationHeaderValue.HasValue)
             {
                 var tokenText = authorizationHeaderValue.Value.ToString()["Bearer ".Length..];
-                await authenticationService.RevokeTokenAsync(tokenText);
+                await _authenticationService.RevokeTokenAsync(tokenText);
             }
 
             return Ok();

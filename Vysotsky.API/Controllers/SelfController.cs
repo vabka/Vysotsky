@@ -12,23 +12,23 @@ namespace Vysotsky.API.Controllers
     [Route(Resources.Self)]
     public class SelfController : ApiController
     {
-        private readonly IUserService userService;
-        private readonly ICurrentUserProvider currentUserProvider;
+        private readonly IUserService _userService;
+        private readonly ICurrentUserProvider _currentUserProvider;
 
         public SelfController(IUserService userService, ICurrentUserProvider currentUserProvider)
         {
-            this.userService = userService;
-            this.currentUserProvider = currentUserProvider;
+            _userService = userService;
+            _currentUserProvider = currentUserProvider;
         }
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PersistedUserDto>>> Get() =>
-            Ok(await userService.GetUserByIdOrNull(currentUserProvider.CurrentUser.Id));
+            Ok(await _userService.GetUserByIdOrNull(_currentUserProvider.CurrentUser.Id));
 
         [HttpPost]
         public async Task<ActionResult<ApiResponse>> Post([FromBody] EditableUserFieldsDto user)
         {
-            await userService.UpdateUserAsync(currentUserProvider.CurrentUser,
+            await _userService.UpdateUserAsync(_currentUserProvider.CurrentUser,
                 user.FirstName,
                 user.LastName,
                 user.Patronymic,

@@ -14,23 +14,23 @@ namespace Vysotsky.Service.Impl
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly VysotskyDataConnection vysotskyDataConnection;
-        private readonly IStringHasher hasher;
-        private readonly AuthenticationServiceOptions options;
+        private readonly VysotskyDataConnection _vysotskyDataConnection;
+        private readonly IStringHasher _hasher;
+        private readonly AuthenticationServiceOptions _options;
 
         public AuthenticationService(VysotskyDataConnection vysotskyDataConnection, IStringHasher hasher,
             AuthenticationServiceOptions options)
         {
-            this.vysotskyDataConnection = vysotskyDataConnection;
-            this.hasher = hasher;
-            this.options = options;
+            _vysotskyDataConnection = vysotskyDataConnection;
+            _hasher = hasher;
+            _options = options;
         }
 
         public async Task<TokenContainer?> TryIssueTokenByUserCredentialsAsync(string username, string password,
             bool longLiving = false)
         {
             var now = DateTimeOffset.UtcNow;
-            var user = await vysotskyDataConnection.Users
+            var user = await _vysotskyDataConnection.Users
                 .Where(x => x.Username == username)
                 .Select(x => new
                 {
@@ -43,7 +43,7 @@ namespace Vysotsky.Service.Impl
                 .SingleOrDefaultAsync();
             if (user != null)
             {
-                var passwordHash = hasher.Hash(password);
+                var passwordHash = _hasher.Hash(password);
                 if (user.PasswordHash.SequenceEqual(passwordHash))
                 {
                     var exp = now.AddDays(longLiving ? 180 : 1);
@@ -65,7 +65,7 @@ namespace Vysotsky.Service.Impl
         public async Task<bool> ValidateTokenAsync(string token)
         {
             var payload = DecodeToken(token);
-            return await vysotskyDataConnection.BlockedTokens.AllAsync(x => x.Jti != payload.Jti);
+            return await _vysotskyDataConnection.BlockedTokens.AllAsync(x => x.Jti != payload.Jti);
         }
 
         public async Task RevokeTokenAsync(string token)
@@ -76,7 +76,7 @@ namespace Vysotsky.Service.Impl
         }
 
         public Task RevokeTokenByJtiAsync(Guid tokenIdentifier, DateTimeOffset expiration) =>
-            vysotskyDataConnection.BlockedTokens
+            _vysotskyDataConnection.BlockedTokens
                 .InsertAsync(() => new BlockedTokenRecord
                 {
                     ExpirationTime = expiration,
@@ -84,19 +84,19 @@ namespace Vysotsky.Service.Impl
                 });
 
         public Task<DateTimeOffset?> TryGetLastPasswordChangeTimeAsync(string username) =>
-            vysotskyDataConnection.Users
+            _vysotskyDataConnection.Users
                 .Where(u => u.Username == username)
                 .Select(u => u.LastPasswordChange)
                 .Cast<DateTimeOffset?>()
                 .SingleOrDefaultAsync();
 
         public Task<bool> CheckTokenRevokedAsync(Guid tokenIdentifier) =>
-            vysotskyDataConnection.BlockedTokens.AnyAsync(x => x.Jti == tokenIdentifier);
+            _vysotskyDataConnection.BlockedTokens.AnyAsync(x => x.Jti == tokenIdentifier);
 
         private string EncodeToken(TokenPayload payload) =>
             JwtBuilder.Create()
                 .WithAlgorithm(new HMACSHA256Algorithm())
-                .WithSecret(options.Secret)
+                .WithSecret(_options.Secret)
                 .AddClaim("exp", payload.Exp)
                 .AddClaim("iat", payload.Iat)
                 .AddClaim("sub", payload.Sub)
@@ -106,7 +106,7 @@ namespace Vysotsky.Service.Impl
         private TokenPayload DecodeToken(string token) =>
             JwtBuilder.Create()
                 .WithAlgorithm(new HMACSHA256Algorithm())
-                .WithSecret(options.Secret)
+                .WithSecret(_options.Secret)
                 .MustVerifySignature()
                 .Decode<TokenPayload>(token);
 

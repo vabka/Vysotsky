@@ -10,19 +10,19 @@ namespace Vysotsky.Service.Impl
 {
     public class OrganizationService : IOrganizationService
     {
-        private readonly VysotskyDataConnection dataConnection;
+        private readonly VysotskyDataConnection _dataConnection;
 
-        public OrganizationService(VysotskyDataConnection dataConnection) => this.dataConnection = dataConnection;
+        public OrganizationService(VysotskyDataConnection dataConnection) => _dataConnection = dataConnection;
 
         public async Task<Organization> CreateOrganizationAsync(string name, Room[] rooms)
         {
-            await using var transaction = await dataConnection.BeginTransactionAsync();
-            var organizationId = await dataConnection.Organizations.InsertWithInt64IdentityAsync(() =>
+            await using var transaction = await _dataConnection.BeginTransactionAsync();
+            var organizationId = await _dataConnection.Organizations.InsertWithInt64IdentityAsync(() =>
                 new OrganizationRecord
                 {
                     Name = name,
                 });
-            await dataConnection.Users.UpdateAsync(_ => new UserRecord
+            await _dataConnection.Users.UpdateAsync(_ => new UserRecord
             {
                 OrganizationId = organizationId
             });
@@ -35,7 +35,7 @@ namespace Vysotsky.Service.Impl
         }
 
         public async Task<Organization?> GetOrganizationByIdOrNullAsync(long organizationId) =>
-            await dataConnection.Organizations
+            await _dataConnection.Organizations
                 .Select(o => new Organization
                 {
                     Id = o.Id,
@@ -44,7 +44,7 @@ namespace Vysotsky.Service.Impl
                 .SingleOrDefaultAsync(x => x.Id == organizationId);
 
         public async Task UpdateOrganization(Organization newOrganization) =>
-            await dataConnection.Organizations
+            await _dataConnection.Organizations
                 .UpdateAsync(o => o.Id == newOrganization.Id, o =>
                     new OrganizationRecord
                     {
@@ -52,7 +52,7 @@ namespace Vysotsky.Service.Impl
                     });
 
         public async Task<Organization[]> GetAllOrganizations() =>
-            await dataConnection.Organizations
+            await _dataConnection.Organizations
                 .OrderBy(o => o.CreatedAt)
                 .Select(o => new Organization
                 {

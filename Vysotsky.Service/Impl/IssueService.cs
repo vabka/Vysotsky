@@ -32,20 +32,20 @@ namespace Vysotsky.Service.Impl
             AuthorId = i.AuthorId
         };
 
-        private readonly VysotskyDataConnection db;
+        private readonly VysotskyDataConnection _db;
 
         public IssueService(VysotskyDataConnection vysotskyDataConnection) =>
-            db = vysotskyDataConnection;
+            _db = vysotskyDataConnection;
 
         public async Task<Area?> GetAreaByIdOrNull(long id) =>
-            await db.Areas
+            await _db.Areas
                 .Where(x => x.Id == id)
                 .Select(x => new Area {Id = id})
                 .SingleOrDefaultAsync();
 
         public async Task<Issue> CreateIssueAsync(string title, string description, Area area, Room room, User author)
         {
-            var id = await db.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
+            var id = await _db.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
             {
                 Title = title,
                 Description = description,
@@ -59,12 +59,12 @@ namespace Vysotsky.Service.Impl
         }
 
         private async Task<Issue> GetIssueByIdWithSpecificVersion(long issueId, long version) =>
-            await db.Issues
+            await _db.Issues
                 .Select(MapToIssue)
                 .SingleAsync(i => i.Id == issueId && i.Version == version);
 
         public async Task<Issue?> GetIssueByIdOrNullAsync(long issueId) =>
-            await db.Issues
+            await _db.Issues
                 .Where(x => x.Id == issueId)
                 .OrderByDescending(x => x.Version)
                 .Select(MapToIssue)
@@ -77,16 +77,16 @@ namespace Vysotsky.Service.Impl
             {
                 case IssueStatus.New:
                 {
-                    await using var transaction = await db.BeginTransactionAsync();
-                    await db.IssueComments
+                    await using var transaction = await _db.BeginTransactionAsync();
+                    await _db.IssueComments
                         .InsertAsync(() => new IssueCommentRecord
                         {
                             IssueId = issue.Id, AuthorId = supervisor.Id, Text = message
                         });
-                    await db.Issues
+                    await _db.Issues
                         .Where(i => i.Id == issue.Id && i.Version == issue.Version)
                         .Take(1)
-                        .InsertAsync(db.Issues,
+                        .InsertAsync(_db.Issues,
                             i => new IssueRecord
                             {
                                 Id = i.Id,
@@ -129,10 +129,10 @@ namespace Vysotsky.Service.Impl
                 case IssueStatus.New:
                 case IssueStatus.NeedInfo:
                 {
-                    await db.Issues
+                    await _db.Issues
                         .Where(i => i.Id == issue.Id && i.Version == issue.Version)
                         .Take(1)
-                        .InsertAsync(db.Issues,
+                        .InsertAsync(_db.Issues,
                             i => new IssueRecord
                             {
                                 Id = i.Id,
@@ -174,7 +174,7 @@ namespace Vysotsky.Service.Impl
             int limit,
             int offset)
         {
-            var query = db.Issues
+            var query = _db.Issues
                 .Where(i => i.CreatedAt < maxDate)
                 .OrderByDescending(i => i.CreatedAt)
                 .ThenBy(i => i.Id)
@@ -187,7 +187,7 @@ namespace Vysotsky.Service.Impl
                     => query.Where(i => i.WorkerId == user.Id),
                 {Role: UserRole.OrganizationOwner or UserRole.OrganizationMember}
                     => query
-                        .InnerJoin(db.Users, (l, r) => l.AuthorId == r.Id,
+                        .InnerJoin(_db.Users, (l, r) => l.AuthorId == r.Id,
                             (i, u) => new {Issue = i, u.OrganizationId})
                         .Where(x => x.OrganizationId == user.OrganizationId)
                         .Select(x => x.Issue),

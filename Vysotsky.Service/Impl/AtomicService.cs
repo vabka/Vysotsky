@@ -7,25 +7,25 @@ namespace Vysotsky.Service.Impl
 {
     public class AtomicService : IAtomicService
     {
-        private readonly VysotskyDataConnection dataConnection;
+        private readonly VysotskyDataConnection _dataConnection;
 
-        public AtomicService(VysotskyDataConnection dataConnection) => this.dataConnection = dataConnection;
+        public AtomicService(VysotskyDataConnection dataConnection) => _dataConnection = dataConnection;
 
         public async Task<IAtomicOperation> BeginAtomicOperationAsync() =>
-            new AtomicOperation(await dataConnection.BeginTransactionAsync());
+            new AtomicOperation(await _dataConnection.BeginTransactionAsync());
 
         private class AtomicOperation : IAtomicOperation
         {
-            private readonly DataConnectionTransaction transaction;
+            private readonly DataConnectionTransaction _transaction;
 
             public AtomicOperation(DataConnectionTransaction transaction) =>
-                this.transaction = transaction;
+                _transaction = transaction;
 
             public async ValueTask DisposeAsync() =>
-                await transaction.DisposeAsync();
+                await _transaction.DisposeAsync();
 
             public async Task CompleteAsync() =>
-                await transaction.CommitAsync();
+                await _transaction.CommitAsync();
         }
     }
 }

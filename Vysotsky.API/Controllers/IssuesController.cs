@@ -13,11 +13,11 @@ namespace Vysotsky.API.Controllers
     [Route(Resources.Issues)]
     public class IssuesController : ApiController
     {
-        private readonly ICurrentUserProvider currentUserProvider;
-        private readonly IIssueService issueService;
-        private readonly IRoomService roomService;
-        private readonly IWorkerService workerService;
-        private readonly ICategoriesService categoriesService;
+        private readonly ICurrentUserProvider _currentUserProvider;
+        private readonly IIssueService _issueService;
+        private readonly IRoomService _roomService;
+        private readonly IWorkerService _workerService;
+        private readonly ICategoriesService _categoriesService;
 
         public IssuesController(ICurrentUserProvider currentUserProvider,
             IIssueService issueService,
@@ -25,18 +25,18 @@ namespace Vysotsky.API.Controllers
             IWorkerService workerService,
             ICategoriesService categoriesService)
         {
-            this.currentUserProvider = currentUserProvider;
-            this.issueService = issueService;
-            this.roomService = roomService;
-            this.workerService = workerService;
-            this.categoriesService = categoriesService;
+            _currentUserProvider = currentUserProvider;
+            _issueService = issueService;
+            _roomService = roomService;
+            _workerService = workerService;
+            _categoriesService = categoriesService;
         }
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PaginatedData<ShortPersistedIssueDto>>>> GetAllIssues(
             [FromQuery] PaginationParameters paginationParameters)
         {
-            var (total, data) = await issueService.GetIssuesToShowUser(currentUserProvider.CurrentUser,
+            var (total, data) = await _issueService.GetIssuesToShowUser(_currentUserProvider.CurrentUser,
                 paginationParameters.Until, paginationParameters.ToTake(), paginationParameters.ToSkip());
             return Ok(PaginatedData.Create(paginationParameters,
                 total,
@@ -47,14 +47,14 @@ namespace Vysotsky.API.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> CreateIssue([FromBody] IssueDto newIssue)
         {
-            var currentUser = currentUserProvider.CurrentUser;
+            var currentUser = _currentUserProvider.CurrentUser;
             if (currentUser!.Role == UserRole.Worker)
             {
                 return NotAuthorized("Worker is not authorized to create issues", "issues.notAthorized");
             }
 
-            var areaTask = issueService.GetAreaByIdOrNull(newIssue.AreaId);
-            var roomTask = roomService.GetRoomByIdOrNullAsync(newIssue.RoomId);
+            var areaTask = _issueService.GetAreaByIdOrNull(newIssue.AreaId);
+            var roomTask = _roomService.GetRoomByIdOrNullAsync(newIssue.RoomId);
             var area = await areaTask;
             if (area == null)
             {
@@ -68,7 +68,7 @@ namespace Vysotsky.API.Controllers
             }
 
             var createdIssue =
-                await issueService.CreateIssueAsync(newIssue.Title, newIssue.Description, area, room, currentUser);
+                await _issueService.CreateIssueAsync(newIssue.Title, newIssue.Description, area, room, currentUser);
             return Ok(createdIssue.ToDto());
         }
 
@@ -77,19 +77,19 @@ namespace Vysotsky.API.Controllers
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToNeedInfo([FromRoute] long issueId,
             [FromBody] MoveIssueToNeedInfoDto data)
         {
-            var issue = await issueService.GetIssueByIdOrNullAsync(issueId);
+            var issue = await _issueService.GetIssueByIdOrNullAsync(issueId);
             if (issue == null)
             {
                 return IssueNotFound();
             }
 
-            if (!currentUserProvider.IsSupervisor())
+            if (!_currentUserProvider.IsSupervisor())
             {
                 return NotAuthorized("Only supervisor can move task to NeedInfo state", "issues.notAuthorized");
             }
 
             var newState =
-                await issueService.MoveIssueToNeedInformationAsync(issue, currentUserProvider.CurrentUser!,
+                await _issueService.MoveIssueToNeedInformationAsync(issue, _currentUserProvider.CurrentUser!,
                     data.Message);
             return Ok(newState.ToDto());
         }
@@ -100,8 +100,8 @@ namespace Vysotsky.API.Controllers
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToInProgress([FromRoute] long issueId,
             [FromBody] MoveIssueToInPgoressDto data)
         {
-            var issue = await issueService.GetIssueByIdOrNullAsync(issueId);
-            if (!currentUserProvider.IsSupervisor())
+            var issue = await _issueService.GetIssueByIdOrNullAsync(issueId);
+            if (!_currentUserProvider.IsSupervisor())
             {
                 return NotAuthorized("Only supervisor can move task to InProgress state", "issues.notAuthorized");
             }
@@ -111,21 +111,21 @@ namespace Vysotsky.API.Controllers
                 return IssueNotFound();
             }
 
-            var currentUser = currentUserProvider.CurrentUser!;
-            var worker = await workerService.GetWorkerByIdOrNullAsync(data.WorkerId);
+            var currentUser = _currentUserProvider.CurrentUser!;
+            var worker = await _workerService.GetWorkerByIdOrNullAsync(data.WorkerId);
             if (worker == null)
             {
                 return WorkerNotFound();
             }
 
-            var category = await categoriesService.GetCategoryByIdOrNullAsync(data.CategoryId);
+            var category = await _categoriesService.GetCategoryByIdOrNullAsync(data.CategoryId);
             if (category == null)
             {
                 return CategoryNotFound();
             }
 
             var newState =
-                await issueService.TakeToWorkAsync(issue, currentUser, worker, category);
+                await _issueService.TakeToWorkAsync(issue, currentUser, worker, category);
             return Ok(newState.ToDto());
         }
 

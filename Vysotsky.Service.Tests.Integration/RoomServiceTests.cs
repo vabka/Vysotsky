@@ -9,14 +9,14 @@ namespace Vysotsky.Service.Tests.Integration
 {
     public class RoomServiceTests : DatabaseTests
     {
-        private readonly RoomService roomService;
+        private readonly RoomService _roomService;
 
-        public RoomServiceTests() => roomService = new RoomService(DataConnection);
+        public RoomServiceTests() => _roomService = new RoomService(DataConnection);
 
         [Fact]
         public async Task CreateBuildingSuccessfully()
         {
-            var building = await roomService.CreateBuildingAsync("Высоцкий");
+            var building = await _roomService.CreateBuildingAsync("Высоцкий");
             var buildings = await DataConnection.Buildings.ToArrayAsync();
 
             buildings.Length.Should().Be(1);
@@ -30,7 +30,7 @@ namespace Vysotsky.Service.Tests.Integration
         public async Task GetSingleBuildingSuccessfully()
         {
             var id = await CreateBuilding("A");
-            var buildings = await roomService.GetAllBuildingsAsync();
+            var buildings = await _roomService.GetAllBuildingsAsync();
             buildings.Length.Should().Be(1);
             buildings[0].Id.Should().Be(id);
             buildings[0].Name.Should().Be("A");
@@ -39,7 +39,7 @@ namespace Vysotsky.Service.Tests.Integration
         [Fact]
         public async Task GetNoBuildingsSuccessfully()
         {
-            var buildings = await roomService.GetAllBuildingsAsync();
+            var buildings = await _roomService.GetAllBuildingsAsync();
             buildings.Length.Should().Be(0);
         }
 
@@ -48,7 +48,7 @@ namespace Vysotsky.Service.Tests.Integration
         {
             var id1 = await CreateBuilding("A");
             var id2 = await CreateBuilding("B");
-            var buildings = await roomService.GetAllBuildingsAsync();
+            var buildings = await _roomService.GetAllBuildingsAsync();
             buildings.Length.Should().Be(2);
 
             buildings[0].Id.Should().Be(id1);
