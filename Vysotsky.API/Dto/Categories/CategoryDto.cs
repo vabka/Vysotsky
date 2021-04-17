@@ -1,4 +1,7 @@
 namespace Vysotsky.API.Dto.Categories
 {
-    public record CategoryDto(string name);
+    public class CategoryDto
+    {
+        public string Name { get; init; } = null!;
+    }
 }

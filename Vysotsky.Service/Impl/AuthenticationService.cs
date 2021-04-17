@@ -54,7 +54,12 @@ namespace Vysotsky.Service.Impl
                         Exp = exp.ToUnixTimeSeconds(),
                         Iat = iat.ToUnixTimeSeconds()
                     });
-                    return new TokenContainer(token, exp, iat);
+                    return new TokenContainer
+                    {
+                        Token = token,
+                        ExpiresAt = exp,
+                        IssuesAt = iat
+                    };
                 }
             }
 

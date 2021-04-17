@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
+using Vysotsky.API.Dto;
 using Vysotsky.API.Dto.Auth;
 using Vysotsky.API.Dto.Common;
 using Vysotsky.API.Infrastructure;
@@ -19,14 +20,14 @@ namespace Vysotsky.API.Controllers
 
         [AllowAnonymous]
         [HttpPost("authenticate")]
-        public async Task<ActionResult<ApiResponse<AccessTokenContainer>>> Authenticate(
+        public async Task<ActionResult<ApiResponse<AccessTokenDto>>> Authenticate(
             [FromBody] LoginDto loginDto)
         {
             var token = await _authenticationService.TryIssueTokenByUserCredentialsAsync(loginDto.Username,
                 loginDto.Password);
             return token switch
             {
-                { token: var t, expiresAt: var exp } => Ok(new AccessTokenContainer(t, exp)),
+                { } t => Ok(t.ToDto()),
                 _ => BadRequest("Invalid username or password", "auth.invalidUsernameOrPassword")
             };
         }

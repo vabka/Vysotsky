@@ -218,7 +218,7 @@ namespace Vysotsky.API
                                     "test",
                                     true),
                             }
-                        }, new JsonSerializerOptions {WriteIndented = true});
+                        }, new JsonSerializerOptions { WriteIndented = true });
                     });
                     endpoints.MapPost("/api/users/admin", async ctx =>
                     {
@@ -241,7 +241,7 @@ namespace Vysotsky.API
                     {
                         var currentUser = ctx.RequestServices.GetRequiredService<ICurrentUserProvider>().CurrentUser;
                         await ctx.Response.WriteAsJsonAsync(currentUser,
-                            new JsonSerializerOptions {Converters = {new JsonStringEnumConverter()}});
+                            new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } });
                     });
                 }
             });

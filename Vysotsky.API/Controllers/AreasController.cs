@@ -34,13 +34,13 @@ namespace Vysotsky.API.Controllers
                 return NotAuthorizedToEdit();
             }
 
-            var image = await _imagesService.GetImageByIdOrNullAsync(areaDto.imageId);
+            var image = await _imagesService.GetImageByIdOrNullAsync(areaDto.ImageId);
             if (image == null)
             {
                 return BadRequest("Image not found", "images.notFound");
             }
 
-            var area = await _categoriesService.CreateAreaAsync(areaDto.name, image);
+            var area = await _categoriesService.CreateAreaAsync(areaDto.Name, image);
             return Created(Resources.Areas.AppendPathSegment(area.Id), area.ToDto());
         }
 
@@ -62,7 +62,7 @@ namespace Vysotsky.API.Controllers
                 return AreaNotFound();
             }
 
-            var category = await _categoriesService.CreateCategoryInAreaAsync(area, categoryDto.name);
+            var category = await _categoriesService.CreateCategoryInAreaAsync(area, categoryDto.Name);
             return Created(Resources.Areas.AppendPathSegments(areaId, "categories", category.Id), category.ToDto());
         }
 

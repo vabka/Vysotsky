@@ -1,4 +1,8 @@
 namespace Vysotsky.API.Dto.Categories
 {
-    public record AreaDto(string name, long imageId);
+    public class AreaDto
+    {
+        public string Name { get; init; } = null!;
+        public long ImageId { get; init; }
+    }
 }

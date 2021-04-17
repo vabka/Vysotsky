@@ -40,7 +40,7 @@ namespace Vysotsky.Service.Tests.Integration
 
             container.Should().NotBeNull();
 
-            var payload = DecodeToken(container!.token);
+            var payload = DecodeToken(container!.Token);
 
             payload["sub"].Should().Be("admin");
             payload["exp"].Should().BeOfType<long>();
@@ -74,7 +74,7 @@ namespace Vysotsky.Service.Tests.Integration
         {
             await CreateAdminAsync();
             var container = await _authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
-            (await _authenticationService.ValidateTokenAsync(container!.token)).Should().BeTrue();
+            (await _authenticationService.ValidateTokenAsync(container!.Token)).Should().BeTrue();
         }
 
         [Fact]
@@ -83,8 +83,8 @@ namespace Vysotsky.Service.Tests.Integration
             await CreateAdminAsync();
 
             var container = await _authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
-            await _authenticationService.RevokeTokenAsync(container!.token);
-            (await _authenticationService.ValidateTokenAsync(container!.token)).Should().BeFalse();
+            await _authenticationService.RevokeTokenAsync(container!.Token);
+            (await _authenticationService.ValidateTokenAsync(container!.Token)).Should().BeFalse();
         }
     }
 }

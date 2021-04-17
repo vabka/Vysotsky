@@ -1,11 +1,10 @@
 using System;
 
-namespace Vysotsky.Service.Types
+namespace Vysotsky.API.Dto.Auth
 {
-    public record TokenContainer
+    public record AccessTokenDto
     {
         public string Token { get; init; } = null!;
         public DateTimeOffset ExpiresAt { get; init; }
-        public DateTimeOffset IssuesAt { get; init; }
     }
 }

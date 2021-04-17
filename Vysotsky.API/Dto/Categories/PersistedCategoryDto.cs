@@ -1,4 +1,8 @@
 namespace Vysotsky.API.Dto.Categories
 {
-    public record PersistedCategoryDto(long id, string name);
+    public class PersistedCategoryDto
+    {
+        public long Id { get; init; }
+        public string Name { get; init; } = null!;
+    }
 }

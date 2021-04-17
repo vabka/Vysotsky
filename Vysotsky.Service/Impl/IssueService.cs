@@ -40,7 +40,7 @@ namespace Vysotsky.Service.Impl
         public async Task<Area?> GetAreaByIdOrNull(long id) =>
             await _db.Areas
                 .Where(x => x.Id == id)
-                .Select(x => new Area {Id = id})
+                .Select(x => new Area { Id = id })
                 .SingleOrDefaultAsync();
 
         public async Task<Issue> CreateIssueAsync(string title, string description, Area area, Room room, User author)
@@ -81,7 +81,9 @@ namespace Vysotsky.Service.Impl
                     await _db.IssueComments
                         .InsertAsync(() => new IssueCommentRecord
                         {
-                            IssueId = issue.Id, AuthorId = supervisor.Id, Text = message
+                            IssueId = issue.Id,
+                            AuthorId = supervisor.Id,
+                            Text = message
                         });
                     await _db.Issues
                         .Where(i => i.Id == issue.Id && i.Version == issue.Version)
@@ -167,7 +169,10 @@ namespace Vysotsky.Service.Impl
 
         private static readonly Expression<Func<IssueRecord, ShortIssue>> MapToShortIssue = record => new ShortIssue
         {
-            Id = record.Id, Status = record.Status, Title = record.Title, CreatedAt = record.CreatedAt
+            Id = record.Id,
+            Status = record.Status,
+            Title = record.Title,
+            CreatedAt = record.CreatedAt
         };
 
         public async Task<(int total, IEnumerable<ShortIssue>)> GetIssuesToShowUser(User user, DateTimeOffset maxDate,
@@ -181,14 +186,14 @@ namespace Vysotsky.Service.Impl
                 .AsQueryable();
             query = user switch
             {
-                {Role: UserRole.SuperUser or UserRole.Supervisor}
+                { Role: UserRole.SuperUser or UserRole.Supervisor }
                     => query,
-                {Role: UserRole.Worker}
+                { Role: UserRole.Worker }
                     => query.Where(i => i.WorkerId == user.Id),
-                {Role: UserRole.OrganizationOwner or UserRole.OrganizationMember}
+                { Role: UserRole.OrganizationOwner or UserRole.OrganizationMember }
                     => query
                         .InnerJoin(_db.Users, (l, r) => l.AuthorId == r.Id,
-                            (i, u) => new {Issue = i, u.OrganizationId})
+                            (i, u) => new { Issue = i, u.OrganizationId })
                         .Where(x => x.OrganizationId == user.OrganizationId)
                         .Select(x => x.Issue),
                 _ => throw new InvalidOperationException()
@@ -207,7 +212,8 @@ namespace Vysotsky.Service.Impl
             query
                 .Select(i => new
                 {
-                    Record = i, rn = Sql.Ext.RowNumber().Over().PartitionBy(i.Id).OrderByDesc(i.Version).ToValue()
+                    Record = i,
+                    rn = Sql.Ext.RowNumber().Over().PartitionBy(i.Id).OrderByDesc(i.Version).ToValue()
                 })
                 .Where(i => i.rn == 1)
                 .Select(i => i.Record);

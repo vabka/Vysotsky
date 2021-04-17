@@ -5,7 +5,7 @@ using Vysotsky.Service.Types;
 
 namespace Vysotsky.Service.Impl
 {
-    public class CategoryService:ICategoriesService
+    public class CategoryService : ICategoriesService
     {
         public Task<Area> CreateAreaAsync(string areaName, Image image) => throw new System.NotImplementedException();
 
