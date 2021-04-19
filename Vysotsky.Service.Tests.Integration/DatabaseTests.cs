@@ -29,7 +29,7 @@ namespace Vysotsky.Service.Tests.Integration
         }
 
         private bool disposed;
-        private readonly object _disposeLock = new();
+        private readonly object disposeLock = new();
 
         public void Dispose()
         {
@@ -38,7 +38,7 @@ namespace Vysotsky.Service.Tests.Integration
                 return;
             }
 
-            lock (_disposeLock)
+            lock (disposeLock)
             {
                 if (disposed)
                 {

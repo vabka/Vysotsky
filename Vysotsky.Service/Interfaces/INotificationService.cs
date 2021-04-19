@@ -8,6 +8,6 @@ namespace Vysotsky.Service.Interfaces
         Task SendNotificationToSupervisors(Notification notification);
         Task SendNotificationToOrganization(Notification notification, Organization organization);
         Task SendNotificationToUser(Notification notification, User user);
-        Task SendNotificationToIssueSubscribers(Notification notification, Issue issue);
+        Task SendNotificationToIssueSubscribers(Notification notification, FullIssue issue);
     }
 }

@@ -14,33 +14,33 @@ namespace Vysotsky.API.Controllers
     [Route(Resources.Areas)]
     public class AreasController : ApiController
     {
-        private readonly ICategoriesService _categoriesService;
-        private readonly IImagesService _imagesService;
-        private readonly ICurrentUserProvider _currentUserProvider;
+        private readonly ICategoriesService categoriesService;
+        private readonly IImagesService imagesService;
+        private readonly ICurrentUserProvider currentUserProvider;
 
         public AreasController(ICategoriesService categoriesService, IImagesService imagesService,
             ICurrentUserProvider currentUserProvider)
         {
-            _categoriesService = categoriesService;
-            _imagesService = imagesService;
-            _currentUserProvider = currentUserProvider;
+            this.categoriesService = categoriesService;
+            this.imagesService = imagesService;
+            this.currentUserProvider = currentUserProvider;
         }
 
         [HttpPost]
         public async Task<ActionResult<ApiResponse<PersistedAreaDto>>> CreateArea([FromBody] AreaDto areaDto)
         {
-            if (!_currentUserProvider.CanEditCategories())
+            if (!currentUserProvider.CanEditCategories())
             {
                 return NotAuthorizedToEdit();
             }
 
-            var image = await _imagesService.GetImageByIdOrNullAsync(areaDto.ImageId);
+            var image = await imagesService.GetImageByIdOrNullAsync(areaDto.ImageId);
             if (image == null)
             {
                 return BadRequest("Image not found", "images.notFound");
             }
 
-            var area = await _categoriesService.CreateAreaAsync(areaDto.Name, image);
+            var area = await categoriesService.CreateAreaAsync(areaDto.Name, image);
             return Created(Resources.Areas.AppendPathSegment(area.Id), area.ToDto());
         }
 
@@ -51,25 +51,25 @@ namespace Vysotsky.API.Controllers
         public async Task<ActionResult<ApiResponse<PersistedCategoryDto>>> CreateCategory([FromRoute] long areaId,
             [FromBody] CategoryDto categoryDto)
         {
-            if (!_currentUserProvider.CanEditCategories())
+            if (!currentUserProvider.CanEditCategories())
             {
                 return NotAuthorizedToEdit();
             }
 
-            var area = await _categoriesService.GetAreaByIdOrNullAsync(areaId);
+            var area = await categoriesService.GetAreaByIdOrNullAsync(areaId);
             if (area == null)
             {
                 return AreaNotFound();
             }
 
-            var category = await _categoriesService.CreateCategoryInAreaAsync(area, categoryDto.Name);
+            var category = await categoriesService.CreateCategoryInAreaAsync(area, categoryDto.Name);
             return Created(Resources.Areas.AppendPathSegments(areaId, "categories", category.Id), category.ToDto());
         }
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<PersistedAreaDto>>>> GetAllAreas()
         {
-            var areas = await _categoriesService.GetAllAreasAsync();
+            var areas = await categoriesService.GetAllAreasAsync();
             return Ok(areas.Select(area => area.ToDto()));
         }
 
@@ -77,13 +77,13 @@ namespace Vysotsky.API.Controllers
         public async Task<ActionResult<ApiResponse<IEnumerable<PersistedCategoryDto>>>> GetAllCategoriesInArea(
             long areaId)
         {
-            var area = await _categoriesService.GetAreaByIdOrNullAsync(areaId);
+            var area = await categoriesService.GetAreaByIdOrNullAsync(areaId);
             if (area == null)
             {
                 return AreaNotFound();
             }
 
-            var categories = await _categoriesService.GetAllCategoriesInAreaAsync(area);
+            var categories = await categoriesService.GetAllCategoriesInAreaAsync(area);
             return Ok(categories.Select(c => c.ToDto()));
         }
 

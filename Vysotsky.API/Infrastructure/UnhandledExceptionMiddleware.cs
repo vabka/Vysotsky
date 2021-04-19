@@ -9,10 +9,10 @@ namespace Vysotsky.API.Infrastructure
 {
     internal class UnhandledExceptionMiddleware : IMiddleware
     {
-        private readonly ILogger<UnhandledExceptionMiddleware> _logger;
+        private readonly ILogger<UnhandledExceptionMiddleware> logger;
 
         public UnhandledExceptionMiddleware(ILogger<UnhandledExceptionMiddleware> logger) =>
-            _logger = logger;
+            this.logger = logger;
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
@@ -36,7 +36,7 @@ namespace Vysotsky.API.Infrastructure
                         Code = "auth.invalidAccessToken"
                     }
                 });
-                _logger.LogInformation(invalidTokenException, "Invalid token");
+                logger.LogInformation(invalidTokenException, "Invalid token");
             }
             catch (Exception exception)
             {
@@ -54,7 +54,7 @@ namespace Vysotsky.API.Infrastructure
                         Code = "internalError"
                     }
                 });
-                _logger.LogError(exception, "Unhandled exception");
+                logger.LogError(exception, "Unhandled exception");
             }
         }
     }

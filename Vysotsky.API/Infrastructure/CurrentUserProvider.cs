@@ -6,12 +6,12 @@ namespace Vysotsky.API.Infrastructure
 {
     public class CurrentUserProvider : ICurrentUserProvider
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IHttpContextAccessor httpContextAccessor;
 
         public CurrentUserProvider(IHttpContextAccessor httpContextAccessor) =>
-            _httpContextAccessor = httpContextAccessor;
+            this.httpContextAccessor = httpContextAccessor;
 
-        public User CurrentUser => _httpContextAccessor.HttpContext?.Items["CurrentUser"] as User ??
+        public User CurrentUser => httpContextAccessor.HttpContext?.Items["CurrentUser"] as User ??
                                    throw new InvalidOperationException();
 
     }

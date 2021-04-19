@@ -15,80 +15,71 @@ namespace Vysotsky.API.Dto
 {
     public static class MappingExtensions
     {
-
         public static AccessTokenDto ToDto(this TokenContainer token) => new()
         {
-            Token = token.Token,
-            ExpiresAt = token.ExpiresAt
+            Token = token.Token, ExpiresAt = token.ExpiresAt
         };
+
         public static UserContact ToModel(this UserContactDto userContactDto) => new()
         {
-            Name = userContactDto.Name,
-            Type = userContactDto.Type.ToModel(),
-            Value = userContactDto.Value
+            Name = userContactDto.Name, Type = userContactDto.Type.ToModel(), Value = userContactDto.Value
         };
 
         public static UserContactType ToModel(this UserContactTypeDto type) => type switch
         {
             UserContactTypeDto.Phone => UserContactType.Phone,
-            _ => throw new ArgumentOutOfRangeException(nameof(type))
+            _                        => throw new ArgumentOutOfRangeException(nameof(type))
         };
-        public static PersistedImageDto ToDto(this Image image) => new()
-        {
-            Id = image.Id
-        };
+
+        public static PersistedImageDto ToDto(this Image image) => new() {Id = image.Id};
 
         public static ShortPersistedIssueDto ToDto(this ShortIssue issue) => new()
         {
-            Id = issue.Id,
-            Title = issue.Title,
-            CreatedAt = issue.CreatedAt,
-            Status = issue.Status.ToDto()
+            Id = issue.Id, Title = issue.Title, CreatedAt = issue.CreatedAt, Status = issue.Status.ToDto()
         };
 
         public static IssueStatusDto ToDto(this IssueStatus status) => status switch
         {
-            IssueStatus.New => IssueStatusDto.New,
+            IssueStatus.New                 => IssueStatusDto.New,
             IssueStatus.CancelledByCustomer => IssueStatusDto.Cancelled,
-            IssueStatus.NeedInfo => IssueStatusDto.NeedInfo,
-            IssueStatus.Rejected => IssueStatusDto.Rejected,
-            IssueStatus.InProgress => IssueStatusDto.InProgress,
-            IssueStatus.Completed => IssueStatusDto.InProgress,
-            IssueStatus.Accepted => IssueStatusDto.InProgress,
-            IssueStatus.Closed => IssueStatusDto.Done,
-            _ => throw new ArgumentOutOfRangeException(nameof(status), status, null)
+            IssueStatus.NeedInfo            => IssueStatusDto.NeedInfo,
+            IssueStatus.Rejected            => IssueStatusDto.Rejected,
+            IssueStatus.InProgress          => IssueStatusDto.InProgress,
+            IssueStatus.Completed           => IssueStatusDto.InProgress,
+            IssueStatus.Accepted            => IssueStatusDto.InProgress,
+            IssueStatus.Closed              => IssueStatusDto.Done,
+            _                               => throw new ArgumentOutOfRangeException(nameof(status), status, null)
         };
 
         public static PersistedCategoryDto ToDto(this Category category) => new()
         {
-            Id = category.Id,
-            Name = category.Name
+            Id = category.Id, Name = category.Name
         };
 
         public static PersistedAreaDto ToDto(this Area area) => new()
         {
-            Id = area.Id,
-            Image = area.Image.ToDto(),
-            Name = area.Name
+            Id = area.Id, Image = area.Image.ToDto(), Name = area.Name
         };
 
-        public static PersistedIssueDto ToDto(this Issue issue) =>
+        public static PersistedIssueDto ToDto(this FullIssue issue) =>
             new()
             {
-                Id = issue.Id
+                Id = issue.Id,
+                Version = issue.Version,
+                Description = issue.Description,
+                Status = issue.Status.ToDto(),
+                Title = issue.Title,
+                Area = issue.Area.ToDto(),
+                Room = issue.Room.ToDto(),
+                Category = issue.Category?.ToDto()
             };
 
         public static PersistedBuildingDto ToDto(this Building building) => new()
         {
-            Id = building.Id,
-            Name = building.Name
+            Id = building.Id, Name = building.Name
         };
 
-        public static PersistedFloorDto ToDto(this Floor floor) => new()
-        {
-            Id = floor.Id,
-            Number = floor.Number
-        };
+        public static PersistedFloorDto ToDto(this Floor floor) => new() {Id = floor.Id, Number = floor.Number};
 
         public static PersistedRoomDto ToDto(this Room room) => new()
         {
@@ -97,11 +88,11 @@ namespace Vysotsky.API.Dto
             Number = room.Number,
             Status = room.Status switch
             {
-                RoomStatus.Free => RoomStatusDto.Free,
-                RoomStatus.Owned => RoomStatusDto.Owned,
-                RoomStatus.Rented => RoomStatusDto.Rented,
+                RoomStatus.Free        => RoomStatusDto.Free,
+                RoomStatus.Owned       => RoomStatusDto.Owned,
+                RoomStatus.Rented      => RoomStatusDto.Rented,
                 RoomStatus.Unavailable => RoomStatusDto.Unavalable,
-                _ => throw new InvalidOperationException()
+                _                      => throw new InvalidOperationException()
             }
         };
 
@@ -115,9 +106,7 @@ namespace Vysotsky.API.Dto
                 Number = f.Number,
                 Rooms = f.Rooms.Select(r => new OrganizationRoomDto
                 {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Number = r.Number
+                    Id = r.Id, Name = r.Name, Number = r.Number
                 })
             })
         };
@@ -130,9 +119,7 @@ namespace Vysotsky.API.Dto
             Patronymic = user.Patronymic,
             Contacts = user.Contacts.Select(c => new UserContactDto
             {
-                Name = c.Name,
-                Type = c.Type.ToDto(),
-                Value = c.Value
+                Name = c.Name, Type = c.Type.ToDto(), Value = c.Value
             }),
             OrganizationId = user.OrganizationId,
             Username = user.Username
@@ -146,8 +133,7 @@ namespace Vysotsky.API.Dto
 
         public static PersistedOrganizationDto ToDto(this Organization organization) => new()
         {
-            Id = organization.Id,
-            Name = organization.Name
+            Id = organization.Id, Name = organization.Name
         };
     }
 }

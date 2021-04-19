@@ -10,14 +10,14 @@ namespace Vysotsky.API.Infrastructure
 {
     public class RevokableAuthenticationMiddleware : IMiddleware
     {
-        private readonly IAuthenticationService _authenticationService;
-        private readonly IUserService _userService;
+        private readonly IAuthenticationService authenticationService;
+        private readonly IUserService userService;
 
         public RevokableAuthenticationMiddleware(IAuthenticationService authenticationService,
             IUserService userService)
         {
-            _authenticationService = authenticationService;
-            _userService = userService;
+            this.authenticationService = authenticationService;
+            this.userService = userService;
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
@@ -29,20 +29,20 @@ namespace Vysotsky.API.Infrastructure
                 var iat = long.Parse(claims["iat"], CultureInfo.InvariantCulture);
                 // Должен быть sub, но asp net почему-то ставит это.
                 var sub = claims["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
-                if (await _authenticationService.CheckTokenRevokedAsync(jti))
+                if (await authenticationService.CheckTokenRevokedAsync(jti))
                 {
                     throw new SecurityTokenRevokedException();
                 }
 
-                var lastPasswordChange = await _authenticationService.TryGetLastPasswordChangeTimeAsync(sub);
+                var lastPasswordChange = await authenticationService.TryGetLastPasswordChangeTimeAsync(sub);
                 if (lastPasswordChange == null || lastPasswordChange.Value.ToUnixTimeSeconds() >= iat)
                 {
-                    await _authenticationService.RevokeTokenByJtiAsync(jti,
+                    await authenticationService.RevokeTokenByJtiAsync(jti,
                         DateTimeOffset.FromUnixTimeSeconds(iat));
                     throw new SecurityTokenIsNotActualException();
                 }
 
-                var user = await _userService.GetUserByUsernameOrNullAsync(sub);
+                var user = await userService.GetUserByUsernameOrNullAsync(sub);
                 context.Items.Add("CurrentUser", user);
             }
 

@@ -16,11 +16,11 @@ namespace Vysotsky.API.Controllers
     [Route(Resources.Users)]
     public class UsersController : ApiController
     {
-        private readonly IOrganizationService _organizationService;
-        private readonly IUserService _userService;
-        private readonly IAtomicService _atomicService;
-        private readonly ICurrentUserProvider _currentUserProvider;
-        private readonly IRoomService _roomService;
+        private readonly IOrganizationService organizationService;
+        private readonly IUserService userService;
+        private readonly IAtomicService atomicService;
+        private readonly ICurrentUserProvider currentUserProvider;
+        private readonly IRoomService roomService;
 
         public UsersController(IOrganizationService organizationService,
             IUserService userService,
@@ -28,22 +28,22 @@ namespace Vysotsky.API.Controllers
             ICurrentUserProvider currentUserProvider,
             IRoomService roomService)
         {
-            _organizationService = organizationService;
-            _userService = userService;
-            _atomicService = atomicService;
-            _currentUserProvider = currentUserProvider;
-            _roomService = roomService;
+            this.organizationService = organizationService;
+            this.userService = userService;
+            this.atomicService = atomicService;
+            this.currentUserProvider = currentUserProvider;
+            this.roomService = roomService;
         }
 
         [HttpGet("{username}")]
         public async Task<ActionResult<ApiResponse<PersistedUserDto>>> GetUser(string username)
         {
-            var user = await _userService.GetUserByUsernameOrNullAsync(username);
+            var user = await userService.GetUserByUsernameOrNullAsync(username);
             return user switch
             {
                 null => UserNotFound(username),
                 { OrganizationId: not null and var userOrganizationId }
-                    when !_currentUserProvider.CanReadOrganization(userOrganizationId.Value) =>
+                    when !currentUserProvider.CanReadOrganization(userOrganizationId.Value) =>
                     NotAuthorized("Customer cant access another customer", "users.notAuthorized"),
                 _ => Ok(user.ToDto())
             };
@@ -52,7 +52,7 @@ namespace Vysotsky.API.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse<PersistedUserDto>>> RegisterUser(UserDto user)
         {
-            var alreadyCreatedUser = await _userService.GetUserByUsernameOrNullAsync(user.Username);
+            var alreadyCreatedUser = await userService.GetUserByUsernameOrNullAsync(user.Username);
             if (alreadyCreatedUser != null)
             {
                 return BadRequest("User with same username exists", "users.usernameExists");
@@ -64,7 +64,7 @@ namespace Vysotsky.API.Controllers
                     "users.cannotCreateUnattachedRepresentative");
             }
 
-            await using var transaction = await _atomicService.BeginAtomicOperationAsync();
+            await using var transaction = await atomicService.BeginAtomicOperationAsync();
             Organization? organization = null;
             if (user.Role == UserRoleDto.Customer)
             {
@@ -73,7 +73,7 @@ namespace Vysotsky.API.Controllers
                     return BadRequest("Organization field in necessary", "users.necessaryFieldMissing");
                 }
 
-                var rooms = await _roomService.GetRoomsAsync(user.Organization.Rooms);
+                var rooms = await roomService.GetRoomsAsync(user.Organization.Rooms);
                 if (rooms.Any(room => room.OwnerId.HasValue))
                 {
                     return BadRequest("Can't obtain room", "rooms.occupied");
@@ -84,10 +84,10 @@ namespace Vysotsky.API.Controllers
                     return BadRequest("Some rooms are not exist", "rooms.notFound");
                 }
 
-                organization = await _organizationService.CreateOrganizationAsync(user.Organization.Name, rooms);
+                organization = await organizationService.CreateOrganizationAsync(user.Organization.Name, rooms);
             }
 
-            var createdUser = await _userService.CreateUserAsync(user.Username,
+            var createdUser = await userService.CreateUserAsync(user.Username,
                 user.Password,
                 user.FirstName,
                 user.LastName,

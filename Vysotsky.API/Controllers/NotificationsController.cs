@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Dto.Common;
+using Vysotsky.API.Dto.Notifications;
 using Vysotsky.API.Infrastructure;
 
 namespace Vysotsky.API.Controllers

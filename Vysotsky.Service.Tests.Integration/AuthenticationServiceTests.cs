@@ -15,28 +15,28 @@ namespace Vysotsky.Service.Tests.Integration
 {
     public class AuthenticationServiceTests : DatabaseTests
     {
-        private readonly SecureHasher _hasher;
+        private readonly SecureHasher hasher;
 
         public AuthenticationServiceTests()
         {
-            _hasher = new SecureHasher(new SecureHasherOptions
+            hasher = new SecureHasher(new SecureHasherOptions
             {
                 Salt = "0"
             });
-            _authenticationService = new AuthenticationService(DataConnection, _hasher, new AuthenticationServiceOptions
+            authenticationService = new AuthenticationService(DataConnection, hasher, new AuthenticationServiceOptions
             {
                 Secret = "secret"
             });
         }
 
-        private readonly AuthenticationService _authenticationService;
+        private readonly AuthenticationService authenticationService;
 
         [Fact]
         public async Task SuccessfullyIssueTokenWithCorrectCredentials()
         {
             await CreateAdminAsync();
 
-            var container = await _authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
+            var container = await authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
 
             container.Should().NotBeNull();
 
@@ -58,7 +58,7 @@ namespace Vysotsky.Service.Tests.Integration
             DataConnection.Users.InsertWithInt64IdentityAsync(() => new UserRecord
             {
                 Username = "admin",
-                PasswordHash = _hasher.Hash("1234"),
+                PasswordHash = hasher.Hash("1234"),
                 Role = UserRole.SuperUser,
                 OrganizationId = null,
                 FirstName = "Иван",
@@ -73,8 +73,8 @@ namespace Vysotsky.Service.Tests.Integration
         public async Task SuccessfullyValidateIssuedToken()
         {
             await CreateAdminAsync();
-            var container = await _authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
-            (await _authenticationService.ValidateTokenAsync(container!.Token)).Should().BeTrue();
+            var container = await authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
+            (await authenticationService.ValidateTokenAsync(container!.Token)).Should().BeTrue();
         }
 
         [Fact]
@@ -82,9 +82,9 @@ namespace Vysotsky.Service.Tests.Integration
         {
             await CreateAdminAsync();
 
-            var container = await _authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
-            await _authenticationService.RevokeTokenAsync(container!.Token);
-            (await _authenticationService.ValidateTokenAsync(container!.Token)).Should().BeFalse();
+            var container = await authenticationService.TryIssueTokenByUserCredentialsAsync("admin", "1234");
+            await authenticationService.RevokeTokenAsync(container!.Token);
+            (await authenticationService.ValidateTokenAsync(container!.Token)).Should().BeFalse();
         }
     }
 }

@@ -155,6 +155,7 @@ namespace Vysotsky.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<NotificationHub>("/notification-hub");
+                endpoints.MapHub<ChatHub>("/chat-hub");
                 endpoints.MapControllers();
                 if (env.IsDevelopment())
                 {
@@ -221,8 +222,22 @@ namespace Vysotsky.API
                                 token = await authService.TryIssueTokenByUserCredentialsAsync("test_worker",
                                     "test",
                                     true),
+                            },
+                            representative = new
+                            {
+                                username = "representative",
+                                token = await authService.TryIssueTokenByUserCredentialsAsync("representative",
+                                    "test",
+                                    true)
+                            },
+                            customer = new
+                            {
+                                username = "customer",
+                                token = await authService.TryIssueTokenByUserCredentialsAsync("customer",
+                                    "test",
+                                    true)
                             }
-                        }, new JsonSerializerOptions { WriteIndented = true });
+                        }, new JsonSerializerOptions {WriteIndented = true});
                     });
                     endpoints.MapPost("/api/users/admin", async ctx =>
                     {
@@ -245,7 +260,7 @@ namespace Vysotsky.API
                     {
                         var currentUser = ctx.RequestServices.GetRequiredService<ICurrentUserProvider>().CurrentUser;
                         await ctx.Response.WriteAsJsonAsync(currentUser,
-                            new JsonSerializerOptions { Converters = { new JsonStringEnumConverter() } });
+                            new JsonSerializerOptions {Converters = {new JsonStringEnumConverter()}});
                     });
                 }
             });

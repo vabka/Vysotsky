@@ -14,38 +14,60 @@ namespace Vysotsky.Service.Impl
 {
     public class IssueService : IIssueService
     {
-        private static readonly Expression<Func<IssueRecord, Issue>> MapToIssue = i => new Issue
+        private static readonly Expression<Func<IssueRecord, FullIssue>> MapToIssue = issue => new FullIssue
         {
-            Id = i.Id,
-            Version = i.Version,
-            Status = i.Status,
-            Title = i.Title,
-            Description = i.Description,
-            Note = i.Note,
-            AreaId = i.AreaId,
-            CategoryId = i.CategoryId,
-            CreatedAt = i.CreatedAt,
-            UpdatedAt = i.UpdatedAt,
-            RoomId = i.RoomId,
-            SupervisorId = i.SupervisorId,
-            WorkerId = i.WorkerId,
-            AuthorId = i.AuthorId
+            Id = issue.Id,
+            Area =
+                new Area {Id = issue.Area!.Id, Name = issue.Area.Name, Image = new Image {Id = issue.Area.ImageId}},
+            Category =
+                issue.Category != null
+                    ? new Category {Id = issue.Category.Id, Name = issue.Category.Name, AreaId = issue.Category.AreaId}
+                    : null,
+            Description = issue.Description,
+            Note = issue.Description,
+            Room =
+                new Room
+                {
+                    Id = issue.Room!.Id,
+                    Name = issue.Room.Name,
+                    Number = issue.Room.Number,
+                    Status = issue.Room.Status,
+                    OwnerId = issue.Room.OwnerId
+                },
+            Status = issue.Status,
+            Title = issue.Title,
+            Version = issue.Version,
+            Author = new User
+            {
+                Id = issue.Author!.Id,
+                Firstname = issue.Author.FirstName,
+                LastName = issue.Author.LastName,
+                Patronymic = issue.Author.Patronymic,
+                Contacts = issue.Author.Contacts,
+                Role = issue.Author.Role,
+                Username = issue.Author.Username,
+                OrganizationId = issue.Author.OrganizationId
+            },
+            SupervisorId = issue.SupervisorId,
+            CreatedAt = issue.CreatedAt,
+            UpdatedAt = issue.UpdatedAt,
+            WorkerId = issue.WorkerId
         };
 
-        private readonly VysotskyDataConnection _db;
+        private readonly VysotskyDataConnection db;
 
         public IssueService(VysotskyDataConnection vysotskyDataConnection) =>
-            _db = vysotskyDataConnection;
+            db = vysotskyDataConnection;
 
         public async Task<Area?> GetAreaByIdOrNull(long id) =>
-            await _db.Areas
+            await db.Areas
                 .Where(x => x.Id == id)
                 .Select(x => new Area {Id = id})
                 .SingleOrDefaultAsync();
 
-        public async Task<Issue> CreateIssueAsync(string title, string description, Area area, Room room, User author)
+        public async Task<FullIssue> CreateIssueAsync(string title, string description, Area area, Room room, User author)
         {
-            var id = await _db.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
+            var id = await db.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
             {
                 Title = title,
                 Description = description,
@@ -58,35 +80,34 @@ namespace Vysotsky.Service.Impl
             return (await GetIssueByIdOrNullAsync(id))!;
         }
 
-        private async Task<Issue> GetIssueByIdWithSpecificVersion(long issueId, long version) =>
-            await _db.Issues
+        private async Task<FullIssue> GetIssueByIdWithSpecificVersion(long issueId, long version) =>
+            await db.Issues
                 .Select(MapToIssue)
                 .SingleAsync(i => i.Id == issueId && i.Version == version);
 
-        public async Task<Issue?> GetIssueByIdOrNullAsync(long issueId) =>
-            await _db.Issues
+        public async Task<FullIssue?> GetIssueByIdOrNullAsync(long issueId) =>
+            await db.Issues
                 .Where(x => x.Id == issueId)
-                .OrderByDescending(x => x.Version)
+                .GetActualVersions()
                 .Select(MapToIssue)
-                .Take(1)
                 .SingleOrDefaultAsync();
 
-        public async Task<Issue> MoveIssueToNeedInformationAsync(Issue issue, User supervisor, string message)
+        public async Task<FullIssue> MoveIssueToNeedInformationAsync(FullIssue issue, User supervisor, string message)
         {
             switch (issue.Status)
             {
                 case IssueStatus.New:
                 {
-                    await using var transaction = await _db.BeginTransactionAsync();
-                    await _db.IssueComments
+                    await using var transaction = await db.BeginTransactionAsync();
+                    await db.IssueComments
                         .InsertAsync(() => new IssueCommentRecord
                         {
                             IssueId = issue.Id, AuthorId = supervisor.Id, Text = message
                         });
-                    await _db.Issues
+                    await db.Issues
                         .Where(i => i.Id == issue.Id && i.Version == issue.Version)
                         .Take(1)
-                        .InsertAsync(_db.Issues,
+                        .InsertAsync(db.Issues,
                             i => new IssueRecord
                             {
                                 Id = i.Id,
@@ -121,7 +142,7 @@ namespace Vysotsky.Service.Impl
             }
         }
 
-        public async Task<Issue> TakeToWorkAsync(Issue issue, User supervisor, User worker,
+        public async Task<FullIssue> TakeToWorkAsync(FullIssue issue, User supervisor, User worker,
             Category newCategory)
         {
             switch (issue.Status)
@@ -129,10 +150,10 @@ namespace Vysotsky.Service.Impl
                 case IssueStatus.New:
                 case IssueStatus.NeedInfo:
                 {
-                    await _db.Issues
+                    await db.Issues
                         .Where(i => i.Id == issue.Id && i.Version == issue.Version)
                         .Take(1)
-                        .InsertAsync(_db.Issues,
+                        .InsertAsync(db.Issues,
                             i => new IssueRecord
                             {
                                 Id = i.Id,
@@ -143,7 +164,7 @@ namespace Vysotsky.Service.Impl
                                 Description = i.Description,
                                 Note = i.Note,
                                 Title = i.Title,
-                                AreaId = newCategory.Area.Id,
+                                AreaId = newCategory.AreaId,
                                 CategoryId = newCategory.Id,
                                 AuthorId = i.AuthorId,
                                 CreatedAt = i.CreatedAt,
@@ -175,7 +196,7 @@ namespace Vysotsky.Service.Impl
             int limit,
             int offset)
         {
-            var query = _db.Issues
+            var query = db.Issues
                 .Where(i => i.CreatedAt < maxDate)
                 .OrderByDescending(i => i.CreatedAt)
                 .ThenBy(i => i.Id)
@@ -188,13 +209,13 @@ namespace Vysotsky.Service.Impl
                     => query.Where(i => i.WorkerId == user.Id),
                 {Role: UserRole.OrganizationOwner or UserRole.OrganizationMember}
                     => query
-                        .InnerJoin(_db.Users, (l, r) => l.AuthorId == r.Id,
+                        .InnerJoin(db.Users, (l, r) => l.AuthorId == r.Id,
                             (i, u) => new {Issue = i, u.OrganizationId})
                         .Where(x => x.OrganizationId == user.OrganizationId)
                         .Select(x => x.Issue),
                 _ => throw new InvalidOperationException()
             };
-            query = GetActualVersions(query);
+            query = query.GetActualVersions();
             var count = await query.CountAsync();
             var data = await query
                 .Select(MapToShortIssue)
@@ -204,14 +225,21 @@ namespace Vysotsky.Service.Impl
             return (count, data);
         }
 
-        public async Task<IEnumerable<Issue>> GetIssueHistoryAsync(Issue issue) =>
-            await _db.Issues
+        public async Task<IEnumerable<FullIssue>> GetIssueHistoryAsync(FullIssue issue) =>
+            await db.Issues
                 .Where(i => i.Id == issue.Id)
                 .OrderBy(i => i.Version)
                 .Select(MapToIssue)
                 .ToArrayAsync();
 
-        private static IQueryable<T> GetActualVersions<T>(IQueryable<T> query) where T : VersionedEntity =>
+
+        private static InvalidOperationException CannotMoveFromTerminalState() =>
+            new("Cannot move from terminal state");
+    }
+
+    public static class VersionedEntityExtensions
+    {
+        public static IQueryable<T> GetActualVersions<T>(this IQueryable<T> query) where T : VersionedEntity =>
             query
                 .Select(i => new
                 {
@@ -219,8 +247,5 @@ namespace Vysotsky.Service.Impl
                 })
                 .Where(i => i.rn == 1)
                 .Select(i => i.Record);
-
-        private static InvalidOperationException CannotMoveFromTerminalState() =>
-            new("Cannot move from terminal state");
     }
 }
