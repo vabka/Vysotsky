@@ -7,7 +7,7 @@ namespace Vysotsky.Migrations.Migrations
     {
         public override void Up()
         {
-            Execute.CreateEnum("notification_platform", "Firebase");
+            Execute.CreateEnum("notification_platform", "SignalR", "Firebase");
             Create.Table("notification_token")
                 .WithColumn("user_id").References("user").PrimaryKey()
                 .WithColumn("token").AsString().PrimaryKey()

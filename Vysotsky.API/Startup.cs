@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Security;
+using Vysotsky.API.Hubs;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Data;
 using Vysotsky.Data.Entities;
@@ -134,6 +135,8 @@ namespace Vysotsky.API
             {
                 Secret = s.GetRequiredService<IConfiguration>().GetValue<string>("SECRET")
             });
+
+            services.AddSignalR();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) =>
@@ -151,6 +154,7 @@ namespace Vysotsky.API
             app.UseMiddleware<RevokableAuthenticationMiddleware>();
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<NotificationHub>("/notification-hub");
                 endpoints.MapControllers();
                 if (env.IsDevelopment())
                 {
