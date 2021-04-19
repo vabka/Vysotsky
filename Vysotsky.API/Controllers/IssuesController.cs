@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,7 @@ using Vysotsky.API.Dto.Issues;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
+using Vysotsky.Service.Types;
 
 namespace Vysotsky.API.Controllers
 {
@@ -94,24 +96,31 @@ namespace Vysotsky.API.Controllers
             return Ok(newState.ToDto());
         }
 
+        [HttpGet("{issueId:long}/history")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<Issue>>>> GetHistory([FromRoute] long issueId) =>
+            await _issueService.GetIssueByIdOrNullAsync(issueId) switch
+            {
+                null      => IssueNotFound(),
+                var issue => Ok((await _issueService.GetIssueHistoryAsync(issue)).Select(i => i.ToDto()))
+            };
+
         private ActionResult IssueNotFound() => NotFound("Issue not found", "issue.notFound");
 
         [HttpPost("{issueId:long}/inProgress")]
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToInProgress([FromRoute] long issueId,
             [FromBody] MoveIssueToInPgoressDto data)
         {
-            var issue = await _issueService.GetIssueByIdOrNullAsync(issueId);
             if (!_currentUserProvider.IsSupervisor())
             {
                 return NotAuthorized("Only supervisor can move task to InProgress state", "issues.notAuthorized");
             }
 
+            var issue = await _issueService.GetIssueByIdOrNullAsync(issueId);
             if (issue == null)
             {
                 return IssueNotFound();
             }
 
-            var currentUser = _currentUserProvider.CurrentUser!;
             var worker = await _workerService.GetWorkerByIdOrNullAsync(data.WorkerId);
             if (worker == null)
             {
@@ -125,14 +134,14 @@ namespace Vysotsky.API.Controllers
             }
 
             var newState =
-                await _issueService.TakeToWorkAsync(issue, currentUser, worker, category);
+                await _issueService.TakeToWorkAsync(issue, _currentUserProvider.CurrentUser, worker, category);
             return Ok(newState.ToDto());
         }
 
         private ActionResult<ApiResponse<PersistedIssueDto>> CategoryNotFound() =>
-            throw new System.NotImplementedException();
+            BadRequest("Category or area not found", "categories.notFound");
 
         private ActionResult<ApiResponse<PersistedIssueDto>> WorkerNotFound() =>
-            NotFound("Worker not found", "workers.notFound");
+            BadRequest("Worker not found", "workers.notFound");
     }
 }
