@@ -10,5 +10,6 @@ namespace Vysotsky.Service.Interfaces
         Task<IEnumerable<ChatMessage>> GetMessagesAsync(Chat chat);
         Task<Chat?> GetChatByIdOrNullAsync(long id);
         Task<Chat> GetChatByUserAsync(User user);
+        Task MarkAllMessagesReadAsync(User reader, Chat chat);
     }
 }
