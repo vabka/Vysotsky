@@ -11,5 +11,6 @@ namespace Vysotsky.API.Infrastructure
         public const string Areas = "/api/areas";
         public const string Workers = "/api/workers";
         public const string Self = "/api/self";
+        public const string Notifications = "/api/notifications";
     }
 }
