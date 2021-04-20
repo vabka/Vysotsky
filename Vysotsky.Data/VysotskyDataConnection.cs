@@ -6,12 +6,14 @@ using System.Text.Unicode;
 using LinqToDB;
 using LinqToDB.Configuration;
 using LinqToDB.Data;
+using LinqToDB.Mapping;
 using Npgsql;
 using Npgsql.NameTranslation;
 using Npgsql.TypeHandlers;
 using Npgsql.TypeMapping;
 using NpgsqlTypes;
 using Vysotsky.Data.Entities;
+using Vysotsky.Data.Entities.Abstraction;
 
 namespace Vysotsky.Data
 {
@@ -60,5 +62,13 @@ namespace Vysotsky.Data
         public ITable<IssueCommentImageRelation> IssueCommentImages => GetTable<IssueCommentImageRelation>();
         public ITable<CategoryRecord> Categories => GetTable<CategoryRecord>();
         public ITable<AreaRecord> Areas => GetTable<AreaRecord>();
+        public ITable<SupportChatMessageRecord> Messages => GetTable<SupportChatMessageRecord>();
+        public ITable<ConversationRecord> Conversations => GetTable<ConversationRecord>();
+    }
+
+    [Table("conversation")]
+    public class ConversationRecord : SortableEntity
+    {
+        [Column("has_unread")] public bool HasUnread { get; init; }
     }
 }

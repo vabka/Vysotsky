@@ -1,4 +1,5 @@
 using System;
+using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
 
 namespace Vysotsky.Service.Types
@@ -9,11 +10,5 @@ namespace Vysotsky.Service.Types
         public User From { get; init; } = null!;
         public MessageContent Content { get; init; } = null!;
         public ChatMessageStatus Status { get; init; }
-    }
-
-    public enum ChatMessageStatus
-    {
-        Sent,
-        Read
     }
 }
