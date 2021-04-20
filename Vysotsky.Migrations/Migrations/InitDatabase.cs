@@ -14,12 +14,8 @@ namespace Vysotsky.Migrations.Migrations
             Create.EntityWithId("image")
                 .WithColumn("external_id").AsString();
 
-            Create.SortableEntity("area")
-                .WithColumn("name").AsString()
-                .WithColumn("image_id").References("image");
-
             Create.SortableEntity("category")
-                .WithColumn("area_id").References("area")
+                .WithColumn("image_id").References("image")
                 .WithColumn("name").AsString();
 
             Create.SortableEntity("building")
@@ -82,8 +78,7 @@ namespace Vysotsky.Migrations.Migrations
                 .WithColumn("title").AsString()
                 .WithColumn("description").AsString()
                 .WithColumn("note").AsString()
-                .WithColumn("area_id").References("area")
-                .WithColumn("category_id").References("category").Nullable()
+                .WithColumn("category_id").References("category")
                 .WithColumn("author_id").References("user")
                 .WithColumn("supervisor_id").References("user").Nullable()
                 .WithColumn("worker_id").References("user").Nullable()
@@ -106,7 +101,6 @@ namespace Vysotsky.Migrations.Migrations
         public override void Down()
         {
             Delete.Table("image");
-            Delete.Table("area");
             Delete.Table("category");
             Delete.Table("building");
             Delete.Table("floor");

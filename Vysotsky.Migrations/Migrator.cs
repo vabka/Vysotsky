@@ -17,10 +17,6 @@ namespace Vysotsky.Migrations
             new ServiceCollection()
                 .AddFluentMigratorCore()
                 .ConfigureRunner(rb => rb
-                    .ConfigureGlobalProcessorOptions(p =>
-                    {
-
-                    })
                     .AddPostgres()
                     .WithGlobalConnectionString(connectionString)
                     .ScanIn(typeof(InitDatabase).Assembly).For.Migrations())
