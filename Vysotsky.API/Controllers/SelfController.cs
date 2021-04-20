@@ -23,7 +23,7 @@ namespace Vysotsky.API.Controllers
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PersistedUserDto>>> Get() =>
-            Ok(await userService.GetUserByIdOrNull(currentUserProvider.CurrentUser.Id));
+            Ok(await userService.GetUserByIdOrNullAsync(currentUserProvider.CurrentUser.Id));
 
         [HttpPost]
         public async Task<ActionResult<ApiResponse>> Post([FromBody] EditableUserFieldsDto user)

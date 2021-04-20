@@ -59,7 +59,6 @@ namespace Vysotsky.Data
         public ITable<IssueCommentRecord> IssueComments => GetTable<IssueCommentRecord>();
         public ITable<IssueCommentImageRelation> IssueCommentImages => GetTable<IssueCommentImageRelation>();
         public ITable<CategoryRecord> Categories => GetTable<CategoryRecord>();
-        public ITable<AreaRecord> Areas => GetTable<AreaRecord>();
         public ITable<SupportChatMessageRecord> Messages => GetTable<SupportChatMessageRecord>();
         public ITable<ConversationRecord> Conversations => GetTable<ConversationRecord>();
     }

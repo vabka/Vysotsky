@@ -14,85 +14,58 @@ namespace Vysotsky.Service.Impl
 {
     public class IssueService : IIssueService
     {
-        private static readonly Expression<Func<IssueRecord, FullIssue>> MapToIssue = issue => new FullIssue
+        private readonly VysotskyDataConnection db;
+
+        private static readonly Expression<Func<IssueRecord, Issue>> MapToIssue = issue => new Issue
         {
             Id = issue.Id,
-            Area =
-                new Area {Id = issue.Area!.Id, Name = issue.Area.Name, Image = new Image {Id = issue.Area.ImageId}},
-            Category =
-                issue.Category != null
-                    ? new Category {Id = issue.Category.Id, Name = issue.Category.Name, AreaId = issue.Category.AreaId}
-                    : null,
+            CategoryId = issue.CategoryId,
             Description = issue.Description,
-            Note = issue.Description,
-            Room =
-                new Room
-                {
-                    Id = issue.Room!.Id,
-                    Name = issue.Room.Name,
-                    Number = issue.Room.Number,
-                    Status = issue.Room.Status,
-                    OwnerId = issue.Room.OwnerId
-                },
+            RoomId =issue.RoomId,
             Status = issue.Status,
             Title = issue.Title,
             Version = issue.Version,
-            Author = new User
-            {
-                Id = issue.Author!.Id,
-                Firstname = issue.Author.FirstName,
-                LastName = issue.Author.LastName,
-                Patronymic = issue.Author.Patronymic,
-                Contacts = issue.Author.Contacts,
-                Role = issue.Author.Role,
-                Username = issue.Author.Username,
-                OrganizationId = issue.Author.OrganizationId
-            },
+            AuthorId = issue.AuthorId,
             SupervisorId = issue.SupervisorId,
             CreatedAt = issue.CreatedAt,
             UpdatedAt = issue.UpdatedAt,
             WorkerId = issue.WorkerId
         };
 
-        private readonly VysotskyDataConnection db;
-
         public IssueService(VysotskyDataConnection vysotskyDataConnection) =>
             db = vysotskyDataConnection;
 
-        public async Task<Area?> GetAreaByIdOrNull(long id) =>
-            await db.Areas
-                .Where(x => x.Id == id)
-                .Select(x => new Area {Id = id})
-                .SingleOrDefaultAsync();
 
-        public async Task<FullIssue> CreateIssueAsync(string title, string description, Area area, Room room, User author)
+        public async Task<Issue> CreateIssueAsync(string title, string description, Category category, Room room,
+            User author)
         {
             var id = await db.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
             {
                 Title = title,
                 Description = description,
-                AreaId = area.Id,
                 AuthorId = author.Id,
                 RoomId = room.Id,
+                CategoryId = category.Id,
                 Note = "",
                 Status = IssueStatus.New
             });
             return (await GetIssueByIdOrNullAsync(id))!;
         }
 
-        private async Task<FullIssue> GetIssueByIdWithSpecificVersion(long issueId, long version) =>
+        private async Task<Issue> GetIssueByIdWithSpecificVersion(long issueId, long version) =>
             await db.Issues
                 .Select(MapToIssue)
                 .SingleAsync(i => i.Id == issueId && i.Version == version);
 
-        public async Task<FullIssue?> GetIssueByIdOrNullAsync(long issueId) =>
+
+        public async Task<Issue?> GetIssueByIdOrNullAsync(long issueId) =>
             await db.Issues
                 .Where(x => x.Id == issueId)
                 .GetActualVersions()
                 .Select(MapToIssue)
                 .SingleOrDefaultAsync();
 
-        public async Task<FullIssue> MoveIssueToNeedInformationAsync(FullIssue issue, User supervisor, string message)
+        public async Task<Issue> MoveIssueToNeedInformationAsync(Issue issue, User supervisor, string message)
         {
             switch (issue.Status)
             {
@@ -118,7 +91,6 @@ namespace Vysotsky.Service.Impl
                                 Description = i.Description,
                                 Note = i.Note,
                                 AuthorId = i.AuthorId,
-                                AreaId = i.AreaId,
                                 CategoryId = i.CategoryId,
                                 RoomId = i.RoomId,
                                 WorkerId = i.WorkerId,
@@ -142,7 +114,7 @@ namespace Vysotsky.Service.Impl
             }
         }
 
-        public async Task<FullIssue> TakeToWorkAsync(FullIssue issue, User supervisor, User worker,
+        public async Task<Issue> TakeToWorkAsync(Issue issue, User supervisor, User worker,
             Category newCategory)
         {
             switch (issue.Status)
@@ -164,7 +136,6 @@ namespace Vysotsky.Service.Impl
                                 Description = i.Description,
                                 Note = i.Note,
                                 Title = i.Title,
-                                AreaId = newCategory.AreaId,
                                 CategoryId = newCategory.Id,
                                 AuthorId = i.AuthorId,
                                 CreatedAt = i.CreatedAt,
@@ -225,7 +196,7 @@ namespace Vysotsky.Service.Impl
             return (count, data);
         }
 
-        public async Task<IEnumerable<FullIssue>> GetIssueHistoryAsync(FullIssue issue) =>
+        public async Task<IEnumerable<Issue>> GetIssueHistoryAsync(Issue issue) =>
             await db.Issues
                 .Where(i => i.Id == issue.Id)
                 .OrderBy(i => i.Version)

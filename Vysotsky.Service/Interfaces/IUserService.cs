@@ -17,7 +17,7 @@ namespace Vysotsky.Service.Interfaces
             UserRole role,
             Organization? organization);
 
-        Task<User?> GetUserByIdOrNull(long userId);
+        Task<User?> GetUserByIdOrNullAsync(long userId);
         Task<User?> GetUserByUsernameOrNullAsync(string username);
         Task<IEnumerable<User>> GetAllOrganizationMembersAsync(Organization organization);
 

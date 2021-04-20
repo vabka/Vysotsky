@@ -8,9 +8,7 @@ namespace Vysotsky.Data.Entities
     {
         [Column("room_id")] public long RoomId { get; init; }
 
-        [Column("area_id")] public long AreaId { get; init; }
-
-        [Column("category_id")] public long? CategoryId { get; init; }
+        [Column("category_id")] public long CategoryId { get; init; }
 
         [Column("status", DbType = "issue_status")]
         public IssueStatus Status { get; init; }
@@ -53,14 +51,8 @@ namespace Vysotsky.Data.Entities
 
         [Association(ThisKey = nameof(CategoryId),
             OtherKey = nameof(CategoryRecord.Id),
-            CanBeNull = true,
-            Relationship = Relationship.ManyToOne)]
-        public CategoryRecord? Category { get; init; }
-
-        [Association(ThisKey = nameof(AreaId),
-            OtherKey = nameof(AreaRecord.Id),
             CanBeNull = false,
             Relationship = Relationship.ManyToOne)]
-        public AreaRecord? Area { get; init; }
+        public CategoryRecord? Category { get; init; }
     }
 }

@@ -73,7 +73,7 @@ namespace Vysotsky.Service.Impl
             };
         }
 
-        public async Task<User?> GetUserByIdOrNull(long userId) =>
+        public async Task<User?> GetUserByIdOrNullAsync(long userId) =>
             await db.Users
                 .Where(u => u.Id == userId)
                 .Select(MapToUser)

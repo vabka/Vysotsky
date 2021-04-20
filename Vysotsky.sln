@@ -15,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vysotsky.Service.Tests.Inte
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Vysotsky.API.LoadTesting", "Vysotsky.API.LoadTesting\Vysotsky.API.LoadTesting.fsproj", "{CEDC9B8B-75B9-4098-B1CF-F9B7579A9E98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vysotksy.CLI", "Vysotksy.CLI\Vysotksy.CLI.csproj", "{35F9F0DC-8C61-40AF-A75A-C0D4F4C79F31}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,17 +100,5 @@ Global
 		{CEDC9B8B-75B9-4098-B1CF-F9B7579A9E98}.Release|x64.Build.0 = Release|Any CPU
 		{CEDC9B8B-75B9-4098-B1CF-F9B7579A9E98}.Release|x86.ActiveCfg = Release|Any CPU
 		{CEDC9B8B-75B9-4098-B1CF-F9B7579A9E98}.Release|x86.Build.0 = Release|Any CPU
-		{35F9F0DC-8C61-40AF-A75A-C0D4F4C79F31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{35F9F0DC-8C61-40AF-A75A-C0D4F4C79F31}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{35F9F0DC-8C61-40AF-A75A-C0D4F4C79F31}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{35F9F0DC-8C61-40AF-A75A-C0D4F4C79F31}.Debug|x64.Build.0 = Debug|Any CPU
-		{35F9F0DC-8C61-40AF-A75A-C0D4F4C79F31}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{35F9F0DC-8C61-40AF-A75A-C0D4F4C79F31}.Debug|x86.Build.0 = Debug|Any CPU
-		{35F9F0DC-8C61-40AF-A75A-C0D4F4C79F31}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{35F9F0DC-8C61-40AF-A75A-C0D4F4C79F31}.Release|Any CPU.Build.0 = Release|Any CPU
-		{35F9F0DC-8C61-40AF-A75A-C0D4F4C79F31}.Release|x64.ActiveCfg = Release|Any CPU
-		{35F9F0DC-8C61-40AF-A75A-C0D4F4C79F31}.Release|x64.Build.0 = Release|Any CPU
-		{35F9F0DC-8C61-40AF-A75A-C0D4F4C79F31}.Release|x86.ActiveCfg = Release|Any CPU
-		{35F9F0DC-8C61-40AF-A75A-C0D4F4C79F31}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

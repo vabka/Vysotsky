@@ -8,7 +8,7 @@ namespace Vysotsky.API.Infrastructure
         public const string Auth = "/api/auth";
         public const string Buildings = "/api/buildings";
         public const string Issues = "/api/issues";
-        public const string Areas = "/api/areas";
+        public const string Categories = "/api/categories";
         public const string Workers = "/api/workers";
         public const string Self = "/api/self";
         public const string Notifications = "/api/notifications";

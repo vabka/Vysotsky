@@ -20,18 +20,20 @@ namespace Vysotsky.API.Controllers
         private readonly IRoomService roomService;
         private readonly IWorkerService workerService;
         private readonly ICategoriesService categoriesService;
+        private readonly IUserService userService;
 
         public IssuesController(ICurrentUserProvider currentUserProvider,
             IIssueService issueService,
             IRoomService roomService,
             IWorkerService workerService,
-            ICategoriesService categoriesService)
+            ICategoriesService categoriesService, IUserService userService)
         {
             this.currentUserProvider = currentUserProvider;
             this.issueService = issueService;
             this.roomService = roomService;
             this.workerService = workerService;
             this.categoriesService = categoriesService;
+            this.userService = userService;
         }
 
         [HttpGet]
@@ -55,8 +57,9 @@ namespace Vysotsky.API.Controllers
                 return IssueNotFound();
             }
 
+            var issueCustomer = await userService.GetUserByIdOrNullAsync(issue.AuthorId);
             if (currentUserProvider.IsCustomer() &&
-                currentUserProvider.CurrentUser.OrganizationId != issue.Author.OrganizationId)
+                currentUserProvider.CurrentUser.OrganizationId != issueCustomer?.OrganizationId)
             {
                 return NotAuthorized("Customer can read only authored issues", "issues.notAuthorized");
             }
@@ -73,10 +76,10 @@ namespace Vysotsky.API.Controllers
                 return NotAuthorized("Worker is not authorized to create issues", "issues.notAuthorized");
             }
 
-            var areaTask = issueService.GetAreaByIdOrNull(newIssue.AreaId);
+            var categoryTask = categoriesService.GetByIdOrNullAsync(newIssue.CategoryId);
             var roomTask = roomService.GetRoomByIdOrNullAsync(newIssue.RoomId);
-            var area = await areaTask;
-            if (area == null)
+            var category = await categoryTask;
+            if (category == null)
             {
                 return BadRequest("Area not found", "issues.areaNotFound");
             }
@@ -88,7 +91,7 @@ namespace Vysotsky.API.Controllers
             }
 
             var createdIssue =
-                await issueService.CreateIssueAsync(newIssue.Title, newIssue.Description, area, room, currentUser);
+                await issueService.CreateIssueAsync(newIssue.Title, newIssue.Description, category, room, currentUser);
             return Ok(createdIssue.ToDto());
         }
 
@@ -115,7 +118,7 @@ namespace Vysotsky.API.Controllers
         }
 
         [HttpGet("{issueId:long}/history")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<FullIssue>>>> GetHistory([FromRoute] long issueId) =>
+        public async Task<ActionResult<ApiResponse<IEnumerable<Issue>>>> GetHistory([FromRoute] long issueId) =>
             await issueService.GetIssueByIdOrNullAsync(issueId) switch
             {
                 null      => IssueNotFound(),
@@ -145,7 +148,7 @@ namespace Vysotsky.API.Controllers
                 return WorkerNotFound();
             }
 
-            var category = await categoriesService.GetCategoryByIdOrNullAsync(data.CategoryId);
+            var category = await categoriesService.GetByIdOrNullAsync(data.CategoryId);
             if (category == null)
             {
                 return CategoryNotFound();

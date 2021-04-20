@@ -1,5 +1,3 @@
-using Vysotsky.API.Dto.Buildings;
-using Vysotsky.API.Dto.Categories;
 
 namespace Vysotsky.API.Dto.Issues
 {
@@ -10,8 +8,7 @@ namespace Vysotsky.API.Dto.Issues
         public IssueStatusDto Status { get; init; }
         public string Title { get; init; } = "";
         public string Description { get; init; } = "";
-        public PersistedAreaDto Area { get; init; } = null!;
-        public PersistedCategoryDto? Category { get; init; }
-        public PersistedRoomDto Room { get; init; } = null!;
+        public long CategoryId { get; init; }
+        public long RoomId { get; init; }
     }
 }

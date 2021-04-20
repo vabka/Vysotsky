@@ -94,12 +94,8 @@ namespace Vysotsky.API.Dto
             Id = category.Id, Name = category.Name
         };
 
-        public static PersistedAreaDto ToDto(this Area area) => new()
-        {
-            Id = area.Id, Image = area.Image.ToDto(), Name = area.Name
-        };
 
-        public static PersistedIssueDto ToDto(this FullIssue issue) =>
+        public static PersistedIssueDto ToDto(this Issue issue) =>
             new()
             {
                 Id = issue.Id,
@@ -107,9 +103,8 @@ namespace Vysotsky.API.Dto
                 Description = issue.Description,
                 Status = issue.Status.ToDto(),
                 Title = issue.Title,
-                Area = issue.Area.ToDto(),
-                Room = issue.Room.ToDto(),
-                Category = issue.Category?.ToDto()
+                CategoryId = issue.CategoryId,
+                RoomId = issue.RoomId
             };
 
         public static PersistedBuildingDto ToDto(this Building building) => new()

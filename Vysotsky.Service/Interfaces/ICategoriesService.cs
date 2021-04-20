@@ -6,11 +6,9 @@ namespace Vysotsky.Service.Interfaces
 {
     public interface ICategoriesService
     {
-        Task<Area> CreateAreaAsync(string areaName, Image image);
-        Task<Area?> GetAreaByIdOrNullAsync(long areaId);
-        Task<Category> CreateCategoryInAreaAsync(Area area, string categoryDtoName);
-        Task<IEnumerable<Area>> GetAllAreasAsync();
-        Task<IEnumerable<Category>> GetAllCategoriesInAreaAsync(Area area);
-        Task<Category?> GetCategoryByIdOrNullAsync(long dataCategoryId);
+        Task<Category> CreateAsync(string categoryName, Image image);
+        Task<IEnumerable<Category>> GetAllAsync();
+        Task<Category?> GetByIdOrNullAsync(long categoryId);
+        Task RemoveAsync(Category category);
     }
 }
