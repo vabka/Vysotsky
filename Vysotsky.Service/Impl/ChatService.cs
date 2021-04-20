@@ -77,7 +77,7 @@ namespace Vysotsky.Service.Impl
             };
         }
 
-        public async Task<IEnumerable<Conversation>> GetAllStartedConversations() =>
+        public async Task<IEnumerable<Conversation>> GetAllStartedConversationsAsync() =>
             await db.Conversations
                 .Select(
                     x => new Conversation {AttachedUserId = x.Id, HasUnreadMessages = x.HasUnreadForSupport})

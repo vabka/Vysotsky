@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,14 +23,15 @@ namespace Vysotsky.API.Controllers
         }
 
         [HttpGet]
-        public ActionResult<ApiResponse<IEnumerable<ChatInfoDto>>> GetChats()
+        public async Task<ActionResult<ApiResponse<IEnumerable<ConversationDto>>>> GetChats()
         {
             if (!currentUserProvider.IsSupervisor())
             {
-                return NotAuthorized("", "");
+                return NotAuthorized("Only supervisor can read all conversations", "chats.notAuthorized");
             }
 
-            throw new NotImplementedException();
+            var conversations = await chatService.GetAllStartedConversationsAsync();
+            return Ok(conversations.Select(x => x.ToDto()));
         }
 
         [HttpGet("support/messages")]
@@ -91,6 +91,32 @@ namespace Vysotsky.API.Controllers
 
             var messages = await chatService.GetMessagesAsync(conversation);
             return Ok(messages.Select(m => m.ToDto()));
+        }
+
+        [HttpPost("support/read")]
+        public async Task<ActionResult<ApiResponse>> MarkSupportChatAsRead()
+        {
+            var conversation = await chatService.GetConversationByUserAsync(currentUserProvider.CurrentUser);
+            await chatService.MarkAllMessagesReadAsync(currentUserProvider.CurrentUser, conversation);
+            return Ok();
+        }
+
+        [HttpPost("{conversationId:long}/read")]
+        public async Task<ActionResult<ApiResponse>> MarkConversationAsRead([FromRoute] long conversationId)
+        {
+            if (!currentUserProvider.IsSupervisor())
+            {
+                return NotAuthorized("Only supervisor can read messages from customers", "chats.notAuthorized");
+            }
+
+            var conversation = await chatService.GetConversationByIdOrNullAsync(conversationId);
+            if (conversation == null)
+            {
+                return ConversationNotFound();
+            }
+
+            await chatService.MarkAllMessagesReadAsync(currentUserProvider.CurrentUser, conversation);
+            return Ok();
         }
     }
 }

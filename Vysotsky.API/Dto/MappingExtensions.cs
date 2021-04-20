@@ -16,6 +16,13 @@ namespace Vysotsky.API.Dto
 {
     public static class MappingExtensions
     {
+        public static ConversationDto ToDto(this Conversation conversation) => new()
+        {
+            Id = conversation.AttachedUserId,
+            Counterpart = conversation.AttachedUserId,
+            HasUnreadMessages = conversation.HasUnreadMessages
+        };
+
         public static MessageContent ToModel(this MessageContentDto content) => new() {Text = content.Text!};
 
         public static ChatMessageDto ToDto(this ChatMessage message) => new()
