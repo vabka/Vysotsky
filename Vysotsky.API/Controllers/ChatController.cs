@@ -32,7 +32,6 @@ namespace Vysotsky.API.Controllers
             }
 
             throw new NotImplementedException();
-
         }
 
         [HttpGet("support/messages")]
@@ -41,6 +40,16 @@ namespace Vysotsky.API.Controllers
             var chat = await chatService.GetConversationByUserAsync(currentUserProvider.CurrentUser);
             var messages = await chatService.GetMessagesAsync(chat);
             return Ok(messages.Select(m => m.ToDto()));
+        }
+
+        [HttpPost("support/messages")]
+        public async Task<ActionResult<ApiResponse<ChatMessageDto>>> SendMessageToSupport(
+            [FromBody] MessageContentDto content)
+        {
+            var conversation = await chatService.GetConversationByUserAsync(currentUserProvider.CurrentUser);
+            var msg = await chatService.SendAsync(currentUserProvider.CurrentUser, conversation,
+                content.ToModel());
+            return Ok(msg.ToDto());
         }
 
         [HttpPost("{conversationId:long}/messages")]

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
 using Vysotsky.Data.Entities;
 
 namespace Vysotsky.Service.Interfaces
@@ -14,7 +13,6 @@ namespace Vysotsky.Service.Interfaces
         public UserRole Role { get; init; }
         public IEnumerable<UserContact> Contacts { get; init; } = null!;
 
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public long? OrganizationId { get; init; }
     }
 }

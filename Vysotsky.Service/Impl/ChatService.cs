@@ -17,8 +17,41 @@ namespace Vysotsky.Service.Impl
         public ChatService(VysotskyDataConnection vysotskyDataConnection) =>
             db = vysotskyDataConnection;
 
-        public Task<ChatMessage> SendAsync(User author, Conversation destination, MessageContent messageContent) =>
-            throw new NotImplementedException();
+        public async Task<ChatMessage> SendAsync(User author, Conversation destination, MessageContent messageContent)
+        {
+            var transaction = await db.BeginTransactionAsync();
+            var msgId = await db.Messages.InsertWithInt64IdentityAsync(() => new SupportChatMessageRecord
+            {
+                AuthorId = author.Id,
+                UserId = destination.AttachedUserId,
+                Status = ChatMessageStatus.Sent,
+                TextContent = messageContent.Text
+            });
+            if (author.Id == destination.AttachedUserId)
+            {
+                await db.Conversations.UpdateAsync(x => x.Id == destination.AttachedUserId,
+                    x => new ConversationRecord {HasUnreadForSupport = true});
+            }
+            else
+            {
+                await db.Conversations.UpdateAsync(x => x.Id == destination.AttachedUserId,
+                    x => new ConversationRecord {HasUnreadForCustomer = true});
+            }
+
+            await transaction.CommitAsync();
+            return await db.Messages
+                .Where(x => x.Id == msgId)
+                .InnerJoin(db.Users, (l, r) => l.AuthorId == r.Id,
+                    (l, r) => new {Message = l, Author = r})
+                .Select(m => new ChatMessage
+                {
+                    Content = new MessageContent {Text = m.Message.TextContent},
+                    From = m.Author.Id,
+                    Status = m.Message.Status,
+                    CreatedAt = m.Message.CreatedAt
+                })
+                .SingleAsync();
+        }
 
         public Task<IEnumerable<ChatMessage>> GetMessagesAsync(Conversation conversation) =>
             throw new NotImplementedException();
@@ -26,7 +59,7 @@ namespace Vysotsky.Service.Impl
         public async Task<Conversation?> GetConversationByIdOrNullAsync(long id) =>
             await db.Conversations
                 .Where(x => x.Id == id)
-                .Select(x => new Conversation {AttachedUserId = x.Id, HasUnreadMessages = x.HasUnread})
+                .Select(x => new Conversation {AttachedUserId = x.Id, HasUnreadMessages = x.HasUnreadForSupport})
                 .SingleOrDefaultAsync();
 
         public async Task<Conversation> GetConversationByUserAsync(User user)
@@ -34,17 +67,21 @@ namespace Vysotsky.Service.Impl
             var conversation = await db.Conversations.SingleOrDefaultAsync(x => x.Id == user.Id);
             if (conversation == null)
             {
-                await db.Conversations.InsertAsync(() => new ConversationRecord {Id = user.Id, HasUnread = false});
+                await db.Conversations.InsertAsync(() =>
+                    new ConversationRecord {Id = user.Id, HasUnreadForCustomer = false, HasUnreadForSupport = false});
             }
 
-            return new Conversation {AttachedUserId = user.Id, HasUnreadMessages = conversation?.HasUnread ?? false};
+            return new Conversation
+            {
+                AttachedUserId = user.Id, HasUnreadMessages = conversation?.HasUnreadForSupport ?? false
+            };
         }
 
-        public async Task<IEnumerable<Conversation>> GetAllStartedConversations()
-        {
-            var chats = await db.Conversations.OrderByDescending(x => x.HasUnread).ToArrayAsync();
-            return chats.Select(x => new Conversation {AttachedUserId = x.Id, HasUnreadMessages = x.HasUnread});
-        }
+        public async Task<IEnumerable<Conversation>> GetAllStartedConversations() =>
+            await db.Conversations
+                .Select(
+                    x => new Conversation {AttachedUserId = x.Id, HasUnreadMessages = x.HasUnreadForSupport})
+                .OrderByDescending(x => x.HasUnreadMessages).ToArrayAsync();
 
         public async Task MarkAllMessagesReadAsync(User reader, Conversation conversation)
         {
@@ -55,8 +92,20 @@ namespace Vysotsky.Service.Impl
                     x.Status == ChatMessageStatus.Sent,
                 x => new SupportChatMessageRecord {Status = ChatMessageStatus.Read}
             );
-            await db.Conversations.UpdateAsync(x => x.Id == conversation.AttachedUserId,
-                x => new ConversationRecord {HasUnread = false});
+            switch (reader.Role)
+            {
+                case UserRole.Supervisor or UserRole.SuperUser:
+                    await db.Conversations.UpdateAsync(x => x.Id == conversation.AttachedUserId,
+                        x => new ConversationRecord {HasUnreadForSupport = false});
+                    break;
+                case UserRole.OrganizationMember or UserRole.OrganizationOwner:
+                    await db.Conversations.UpdateAsync(x => x.Id == conversation.AttachedUserId,
+                        x => new ConversationRecord {HasUnreadForCustomer = false});
+                    break;
+                default:
+                    throw new InvalidOperationException();
+            }
+
             await t.CommitAsync();
         }
     }

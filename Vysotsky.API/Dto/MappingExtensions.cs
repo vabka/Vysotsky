@@ -21,7 +21,7 @@ namespace Vysotsky.API.Dto
         public static ChatMessageDto ToDto(this ChatMessage message) => new()
         {
             CreatedAt = message.CreatedAt,
-            From = message.From.ToShortDto(),
+            From = message.From,
             Content = message.Content.ToDto(),
             Status = message.Status.ToDto()
         };
