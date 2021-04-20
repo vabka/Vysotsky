@@ -3,6 +3,7 @@ using System.Linq;
 using Vysotsky.API.Dto.Auth;
 using Vysotsky.API.Dto.Buildings;
 using Vysotsky.API.Dto.Categories;
+using Vysotsky.API.Dto.Chats;
 using Vysotsky.API.Dto.Images;
 using Vysotsky.API.Dto.Issues;
 using Vysotsky.API.Dto.Organizations;
@@ -15,10 +16,40 @@ namespace Vysotsky.API.Dto
 {
     public static class MappingExtensions
     {
+        public static MessageContent ToModel(this MessageContentDto content) => new() {Text = content.Text!};
+
+        public static ChatMessageDto ToDto(this ChatMessage message) => new()
+        {
+            CreatedAt = message.CreatedAt,
+            From = message.From.ToShortDto(),
+            Content = message.Content.ToDto(),
+            Status = message.Status.ToDto()
+        };
+
+        public static ChatMessageStatusDto ToDto(this ChatMessageStatus status) => status switch
+        {
+            ChatMessageStatus.Sent => ChatMessageStatusDto.Sent,
+            ChatMessageStatus.Read => ChatMessageStatusDto.Read,
+            _                      => throw new ArgumentOutOfRangeException(nameof(status), status, null)
+        };
+
+        public static MessageContentDto ToDto(this MessageContent content) => new() {Text = content.Text};
+
         public static AccessTokenDto ToDto(this TokenContainer token) => new()
         {
             Token = token.Token, ExpiresAt = token.ExpiresAt
         };
+
+        public static ShortPersistedUserDto ToShortDto(this User user) =>
+            new()
+            {
+                Id = user.Id,
+                Patronymic = user.Patronymic,
+                Username = user.Username,
+                FirstName = user.Firstname,
+                LastName = user.LastName,
+                OrganizationId = user.OrganizationId
+            };
 
         public static UserContact ToModel(this UserContactDto userContactDto) => new()
         {

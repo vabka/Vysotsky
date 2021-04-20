@@ -1,6 +1,6 @@
 namespace Vysotsky.Service.Types
 {
-    public class Chat
+    public class Conversation
     {
         public long AttachedUserId { get; init; }
     }

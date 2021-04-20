@@ -8,14 +8,16 @@ namespace Vysotsky.Service.Impl
 {
     public class ChatService : IChatService
     {
-        public Task SendAsync(User author, Chat destination, MessageContent messageContent) =>
+        public Task<ChatMessage> SendAsync(User author, Conversation destination, MessageContent messageContent) =>
             throw new NotImplementedException();
 
-        public Task<IEnumerable<ChatMessage>> GetMessagesAsync(Chat chat) => throw new NotImplementedException();
+        public Task<IEnumerable<ChatMessage>> GetMessagesAsync(Conversation conversation) => throw new NotImplementedException();
 
-        public Task<Chat?> GetChatByIdOrNullAsync(long id) => throw new NotImplementedException();
+        public Task<Conversation?> GetConversationByIdOrNullAsync(long id) => throw new NotImplementedException();
 
-        public Task<Chat> GetChatByUserAsync(User user) => throw new NotImplementedException();
-        public Task MarkAllMessagesReadAsync(User reader, Chat chat) => throw new NotImplementedException();
+        public Task<Conversation> GetConversationByUserAsync(User user) => throw new NotImplementedException();
+        public Task<IEnumerable<Conversation>> GetAllStartedConversations() => throw new NotImplementedException();
+
+        public Task MarkAllMessagesReadAsync(User reader, Conversation conversation) => throw new NotImplementedException();
     }
 }

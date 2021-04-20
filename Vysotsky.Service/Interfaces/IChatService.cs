@@ -6,10 +6,11 @@ namespace Vysotsky.Service.Interfaces
 {
     public interface IChatService
     {
-        Task SendAsync(User author, Chat destination, MessageContent messageContent);
-        Task<IEnumerable<ChatMessage>> GetMessagesAsync(Chat chat);
-        Task<Chat?> GetChatByIdOrNullAsync(long id);
-        Task<Chat> GetChatByUserAsync(User user);
-        Task MarkAllMessagesReadAsync(User reader, Chat chat);
+        Task<ChatMessage> SendAsync(User author, Conversation destination, MessageContent messageContent);
+        Task<IEnumerable<ChatMessage>> GetMessagesAsync(Conversation conversation);
+        Task<Conversation?> GetConversationByIdOrNullAsync(long id);
+        Task<Conversation> GetConversationByUserAsync(User user);
+        Task<IEnumerable<Conversation>> GetAllStartedConversations();
+        Task MarkAllMessagesReadAsync(User reader, Conversation conversation);
     }
 }

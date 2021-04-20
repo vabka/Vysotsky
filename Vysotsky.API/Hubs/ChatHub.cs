@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Vysotsky.API.Dto.Chats;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Service.Interfaces;
 using Vysotsky.Service.Types;
@@ -20,29 +21,29 @@ namespace Vysotsky.API.Hubs
             this.chatService = chatService;
         }
 
-        public async Task SendMessageToSupport(string text)
+        public async Task SendMessageToSupport(MessageContentDto content)
         {
             if (currentUserProvider.IsCustomer())
             {
-                var chat = await chatService.GetChatByUserAsync(currentUserProvider.CurrentUser);
-                await SendText(text, chat);
+                var chat = await chatService.GetConversationByUserAsync(currentUserProvider.CurrentUser);
+                await Send(content, chat);
             }
         }
 
-        public async Task SendMessageToCustomer(long customerId, string text)
+        public async Task SendMessageToCustomer(long customerId, MessageContentDto content)
         {
             if (currentUserProvider.IsSupervisor())
             {
-                var chat = await chatService.GetChatByIdOrNullAsync(customerId);
+                var chat = await chatService.GetConversationByIdOrNullAsync(customerId);
                 if (chat != null)
                 {
-                    await SendText(text, chat);
+                    await Send(content, chat);
                 }
             }
         }
 
-        private async Task SendText(string text, Chat chat) =>
-            await chatService.SendAsync(currentUserProvider.CurrentUser, chat,
-                new MessageContent {Text = text});
+        private async Task Send(MessageContentDto content, Conversation conversation) =>
+            await chatService.SendAsync(currentUserProvider.CurrentUser, conversation,
+                new MessageContent {Text = content.Text!});
     }
 }
