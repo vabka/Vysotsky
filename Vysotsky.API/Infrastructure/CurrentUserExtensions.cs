@@ -1,14 +1,15 @@
 using Vysotsky.Data.Entities;
+using Vysotsky.Service.Interfaces;
 
 namespace Vysotsky.API.Infrastructure
 {
     public static class CurrentUserExtensions
     {
-        public static bool IsCustomer(this ICurrentUserProvider currentUserProvider) =>
-            currentUserProvider.CurrentUser.Role is UserRole.OrganizationOwner or UserRole.OrganizationMember;
+        public static bool IsCustomer(this User currentUser) =>
+            currentUser.Role is UserRole.OrganizationOwner or UserRole.OrganizationMember;
 
-        public static bool CanReadOrganization(this ICurrentUserProvider currentUserProvider, long organizationId) =>
-            currentUserProvider.CurrentUser switch
+        public static bool CanReadOrganization(this User currentUser, long organizationId) =>
+            currentUser switch
             {
                 null                                                                                        => false,
                 {Role: UserRole.SuperUser}                                                                  => true,
@@ -19,9 +20,9 @@ namespace Vysotsky.API.Infrastructure
                 _                                                                                           => false
             };
 
-        public static bool CanWriteOrganization(this ICurrentUserProvider currentUserProvider, long organizationId) =>
-            currentUserProvider.CanReadOrganization(organizationId) &&
-            currentUserProvider.CurrentUser.Role switch
+        public static bool CanWriteOrganization(this User currentUser, long organizationId) =>
+            currentUser.CanReadOrganization(organizationId) &&
+            currentUser.Role switch
             {
                 UserRole.SuperUser          => true,
                 UserRole.Supervisor         => true,
@@ -32,8 +33,19 @@ namespace Vysotsky.API.Infrastructure
             };
 
 
-        public static bool IsSupervisor(this ICurrentUserProvider currentUserProvider) =>
-            currentUserProvider.CurrentUser.Role switch
+        public static bool IsWorker(this User currentUser) =>
+            currentUser.Role is UserRole.Worker;
+
+        public static bool CanCompleteIssue(this User currentUser, long workerId) =>
+            currentUser switch
+            {
+                {Role: UserRole.Supervisor or UserRole.SuperUser} => true,
+                {Role: UserRole.Worker, Id: var id}               => workerId == id,
+                _                                                 => false
+            };
+
+        public static bool IsSupervisor(this User currentUser) =>
+            currentUser.Role switch
             {
                 UserRole.Supervisor         => true,
                 UserRole.SuperUser          => true,
@@ -43,11 +55,11 @@ namespace Vysotsky.API.Infrastructure
                 _                           => false
             };
 
-        public static bool IsSuperuser(this ICurrentUserProvider currentUserProvider) =>
-            currentUserProvider.CurrentUser.Role == UserRole.SuperUser;
+        public static bool IsSuperuser(this User currentUser) =>
+            currentUser.Role == UserRole.SuperUser;
 
-        public static bool CanEditCategories(this ICurrentUserProvider currentUserProvider) =>
-            currentUserProvider.CurrentUser.Role switch
+        public static bool CanEditCategories(this User currentUser) =>
+            currentUser.Role switch
             {
                 UserRole.Supervisor         => true,
                 UserRole.SuperUser          => true,

@@ -25,7 +25,7 @@ namespace Vysotsky.API.Controllers
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IEnumerable<ConversationDto>>>> GetChats()
         {
-            if (!currentUserProvider.IsSupervisor())
+            if (!currentUserProvider.CurrentUser.IsSupervisor())
             {
                 return NotAuthorized("Only supervisor can read all conversations", "chats.notAuthorized");
             }
@@ -56,7 +56,7 @@ namespace Vysotsky.API.Controllers
         public async Task<ActionResult<ApiResponse<ChatMessageDto>>> SendMessage([FromRoute] long conversationId,
             [FromBody] MessageContentDto content)
         {
-            if (!currentUserProvider.IsSupervisor())
+            if (!currentUserProvider.CurrentUser.IsSupervisor())
             {
                 return NotAuthorized("Only supervisor can send messages to customers", "chats.notAuthorized");
             }
@@ -78,7 +78,7 @@ namespace Vysotsky.API.Controllers
         public async Task<ActionResult<ApiResponse<IEnumerable<ChatMessageDto>>>> GetMessagesInConversation(
             [FromRoute] long conversationId)
         {
-            if (!currentUserProvider.IsSupervisor())
+            if (!currentUserProvider.CurrentUser.IsSupervisor())
             {
                 return NotAuthorized("Only supervisor can read messages from customers", "chats.notAuthorized");
             }
@@ -104,7 +104,7 @@ namespace Vysotsky.API.Controllers
         [HttpPost("{conversationId:long}/read")]
         public async Task<ActionResult<ApiResponse>> MarkConversationAsRead([FromRoute] long conversationId)
         {
-            if (!currentUserProvider.IsSupervisor())
+            if (!currentUserProvider.CurrentUser.IsSupervisor())
             {
                 return NotAuthorized("Only supervisor can read messages from customers", "chats.notAuthorized");
             }

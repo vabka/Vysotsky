@@ -21,7 +21,7 @@ namespace Vysotsky.Service.Impl
             Id = issue.Id,
             CategoryId = issue.CategoryId,
             Description = issue.Description,
-            RoomId =issue.RoomId,
+            RoomId = issue.RoomId,
             Status = issue.Status,
             Title = issue.Title,
             Version = issue.Version,
@@ -114,14 +114,19 @@ namespace Vysotsky.Service.Impl
             }
         }
 
-        public async Task<Issue> TakeToWorkAsync(Issue issue, User supervisor, User worker,
-            Category newCategory)
+        public async Task<Issue> TakeToWorkAsync(Issue issue, User supervisor, User worker, string message)
         {
             switch (issue.Status)
             {
                 case IssueStatus.New:
                 case IssueStatus.NeedInfo:
                 {
+                    await using var transaction = await db.BeginTransactionAsync();
+                    await db.IssueComments
+                        .InsertAsync(() => new IssueCommentRecord
+                        {
+                            IssueId = issue.Id, AuthorId = supervisor.Id, Text = message
+                        });
                     await db.Issues
                         .Where(i => i.Id == issue.Id && i.Version == issue.Version)
                         .Take(1)
@@ -136,12 +141,13 @@ namespace Vysotsky.Service.Impl
                                 Description = i.Description,
                                 Note = i.Note,
                                 Title = i.Title,
-                                CategoryId = newCategory.Id,
+                                CategoryId = i.CategoryId,
                                 AuthorId = i.AuthorId,
                                 CreatedAt = i.CreatedAt,
                                 UpdatedAt = DateTimeOffset.Now,
                                 RoomId = i.RoomId
                             });
+                    await transaction.CommitAsync();
                     return await GetIssueByIdWithSpecificVersion(issue.Id, issue.Version + 1);
                 }
                 case IssueStatus.Accepted:
@@ -156,6 +162,7 @@ namespace Vysotsky.Service.Impl
                     throw new InvalidOperationException();
             }
         }
+        public Task<Issue> CompleteIssueAsync(Issue issue, User worker, string message) => throw new NotImplementedException();
 
         private static readonly Expression<Func<IssueRecord, ShortIssue>> MapToShortIssue = record => new ShortIssue
         {
@@ -181,7 +188,10 @@ namespace Vysotsky.Service.Impl
                 {Role: UserRole.OrganizationOwner or UserRole.OrganizationMember}
                     => query
                         .InnerJoin(db.Users, (l, r) => l.AuthorId == r.Id,
-                            (i, u) => new {Issue = i, u.OrganizationId})
+                            (i, u) => new
+                            {
+                                Issue = i, u.OrganizationId
+                            })
                         .Where(x => x.OrganizationId == user.OrganizationId)
                         .Select(x => x.Issue),
                 _ => throw new InvalidOperationException()

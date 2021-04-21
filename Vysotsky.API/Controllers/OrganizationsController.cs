@@ -41,7 +41,7 @@ namespace Vysotsky.API.Controllers
                 return OrganizationNotFound(organizationId);
             }
 
-            if (!currentUserProvider.CanReadOrganization(organizationId))
+            if (!currentUserProvider.CurrentUser.CanReadOrganization(organizationId))
             {
                 return NotAuthorized("Only organization member can read organization data",
                     "organization.read.notAuthorized");
@@ -85,7 +85,7 @@ namespace Vysotsky.API.Controllers
                 return OrganizationNotFound(organizationId);
             }
 
-            if (!currentUserProvider.CanReadOrganization(organizationId))
+            if (!currentUserProvider.CurrentUser.CanReadOrganization(organizationId))
             {
                 return NotAuthorized("Only organization member can read organization data",
                     "organization.read.notAuthorized");
@@ -106,7 +106,7 @@ namespace Vysotsky.API.Controllers
                 return OrganizationNotFound(organizationId);
             }
 
-            if (!currentUserProvider.CanWriteOrganization(organizationId))
+            if (!currentUserProvider.CurrentUser.CanWriteOrganization(organizationId))
             {
                 return NotAuthorized("Only organization owner can edit organization",
                     "organizations.edit.notAuthorized");

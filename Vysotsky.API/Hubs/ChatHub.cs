@@ -23,7 +23,7 @@ namespace Vysotsky.API.Hubs
 
         public async Task SendMessageToSupport(MessageContentDto content)
         {
-            if (currentUserProvider.IsCustomer())
+            if (currentUserProvider.CurrentUser.IsCustomer())
             {
                 var chat = await chatService.GetConversationByUserAsync(currentUserProvider.CurrentUser);
                 await Send(content, chat);
@@ -32,7 +32,7 @@ namespace Vysotsky.API.Hubs
 
         public async Task SendMessageToCustomer(long customerId, MessageContentDto content)
         {
-            if (currentUserProvider.IsSupervisor())
+            if (currentUserProvider.CurrentUser.IsSupervisor())
             {
                 var chat = await chatService.GetConversationByIdOrNullAsync(customerId);
                 if (chat != null)

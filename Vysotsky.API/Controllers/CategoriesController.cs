@@ -34,7 +34,7 @@ namespace Vysotsky.API.Controllers
         public async Task<ActionResult<ApiResponse<PersistedCategoryDto>>> CreateCategory(
             [FromBody] CategoryDto data)
         {
-            if (!currentUserProvider.CanEditCategories())
+            if (!currentUserProvider.CurrentUser.CanEditCategories())
             {
                 return NotAuthorizedToEdit();
             }

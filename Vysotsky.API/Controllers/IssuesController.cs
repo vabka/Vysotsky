@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -58,7 +59,7 @@ namespace Vysotsky.API.Controllers
             }
 
             var issueCustomer = await userService.GetUserByIdOrNullAsync(issue.AuthorId);
-            if (currentUserProvider.IsCustomer() &&
+            if (currentUserProvider.CurrentUser.IsCustomer() &&
                 currentUserProvider.CurrentUser.OrganizationId != issueCustomer?.OrganizationId)
             {
                 return NotAuthorized("Customer can read only authored issues", "issues.notAuthorized");
@@ -106,7 +107,7 @@ namespace Vysotsky.API.Controllers
                 return IssueNotFound();
             }
 
-            if (!currentUserProvider.IsSupervisor())
+            if (!currentUserProvider.CurrentUser.IsSupervisor())
             {
                 return NotAuthorized("Only supervisor can move task to NeedInfo state", "issues.notAuthorized");
             }
@@ -127,11 +128,37 @@ namespace Vysotsky.API.Controllers
 
         private ActionResult IssueNotFound() => NotFound("Issue not found", "issue.notFound");
 
+        [HttpPost("{issueId:long}/completed")]
+        public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToCompleted([FromRoute] long issueId, [FromBody] MoveIssueToCompletedDto data)
+        {
+            var issue = await issueService.GetIssueByIdOrNullAsync(issueId);
+            if (issue == null)
+            {
+                return IssueNotFound();
+            }
+
+
+            if (issue.WorkerId == null)
+            {
+                throw new NotImplementedException();
+            }
+
+            if (!currentUserProvider.CurrentUser.CanCompleteIssue(issue.WorkerId.Value))
+            {
+                return NotAuthorized("Only worker can complete issue", "issues.notAuthorized");
+            }
+
+            var worker = currentUserProvider.CurrentUser;
+            var message = data.Message;
+            var newState = await issueService.CompleteIssueAsync(issue, worker, message);
+            return Ok(newState.ToDto());
+        }
+
         [HttpPost("{issueId:long}/inProgress")]
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToInProgress([FromRoute] long issueId,
             [FromBody] MoveIssueToInPgoressDto data)
         {
-            if (!currentUserProvider.IsSupervisor())
+            if (!currentUserProvider.CurrentUser.IsSupervisor())
             {
                 return NotAuthorized("Only supervisor can move task to InProgress state", "issues.notAuthorized");
             }
@@ -148,21 +175,17 @@ namespace Vysotsky.API.Controllers
                 return WorkerNotFound();
             }
 
-            var category = await categoriesService.GetByIdOrNullAsync(data.CategoryId);
-            if (category == null)
-            {
-                return CategoryNotFound();
-            }
-
             var newState =
-                await issueService.TakeToWorkAsync(issue, currentUserProvider.CurrentUser, worker, category);
+                await issueService.TakeToWorkAsync(issue, currentUserProvider.CurrentUser, worker, data.Message);
             return Ok(newState.ToDto());
         }
 
-        private static ActionResult<ApiResponse<PersistedIssueDto>> CategoryNotFound() =>
-            BadRequest("Category or area not found", "categories.notFound");
-
         private static ActionResult<ApiResponse<PersistedIssueDto>> WorkerNotFound() =>
             BadRequest("Worker not found", "workers.notFound");
+    }
+
+    public class MoveIssueToCompletedDto
+    {
+        public string Message { get; init; } = "";
     }
 }

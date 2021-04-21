@@ -11,12 +11,15 @@ namespace Vysotsky.Service.Interfaces
             User author);
 
         Task<Issue?> GetIssueByIdOrNullAsync(long issueId);
-        Task<Issue> MoveIssueToNeedInformationAsync(Issue issue, User supervisor, string message);
-        Task<Issue> TakeToWorkAsync(Issue issue, User supervisor, User worker, Category newCategory);
-
         Task<(int Total, IEnumerable<ShortIssue> Issues)> GetIssuesToShowUser(User user, DateTimeOffset maxDate,
             int limit, int offset);
 
         Task<IEnumerable<Issue>> GetIssueHistoryAsync(Issue issue);
+
+
+        Task<Issue> MoveIssueToNeedInformationAsync(Issue issue, User supervisor, string message);
+        Task<Issue> TakeToWorkAsync(Issue issue, User supervisor, User worker, string message);
+        Task<Issue> CompleteIssueAsync(Issue issue, User worker, string message);
+
     }
 }
