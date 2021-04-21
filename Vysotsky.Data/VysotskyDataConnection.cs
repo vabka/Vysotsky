@@ -20,7 +20,7 @@ namespace Vysotsky.Data
         private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
             Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
-            Converters = {new JsonStringEnumConverter()},
+            Converters = { new JsonStringEnumConverter() },
             PropertyNameCaseInsensitive = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
@@ -36,7 +36,8 @@ namespace Vysotsky.Data
                 .MapEnum<UserRole>("user_role", new NpgsqlNullNameTranslator())
                 .MapEnum<IssueStatus>("issue_status", new NpgsqlNullNameTranslator())
                 .MapEnum<RoomStatus>("room_status", new NpgsqlNullNameTranslator())
-                .MapEnum<NotificationPlatform>("notification_platform", new NpgsqlNullNameTranslator());
+                .MapEnum<NotificationPlatform>("notification_platform", new NpgsqlNullNameTranslator())
+                .MapEnum<ChatMessageStatus>("chat_message_status", new NpgsqlNullNameTranslator());
 
         public VysotskyDataConnection(LinqToDbConnectionOptions<VysotskyDataConnection> options) : base(options)
         {
