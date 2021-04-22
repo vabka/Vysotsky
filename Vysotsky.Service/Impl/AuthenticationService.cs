@@ -40,7 +40,7 @@ namespace Vysotsky.Service.Impl
                     x.Role,
                     x.OrganizationId
                 })
-                .SingleOrDefaultAsync();
+                .FirstOrDefaultAsync();
             if (user != null)
             {
                 var passwordHash = hasher.Hash(password);
@@ -93,7 +93,7 @@ namespace Vysotsky.Service.Impl
                 .Where(u => u.Username == username)
                 .Select(u => u.LastPasswordChange)
                 .Cast<DateTimeOffset?>()
-                .SingleOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
         public Task<bool> CheckTokenRevokedAsync(Guid tokenIdentifier) =>
             vysotskyDataConnection.BlockedTokens.AnyAsync(x => x.Jti == tokenIdentifier);

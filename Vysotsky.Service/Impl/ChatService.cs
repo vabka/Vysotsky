@@ -60,11 +60,11 @@ namespace Vysotsky.Service.Impl
             await db.Conversations
                 .Where(x => x.Id == id)
                 .Select(x => new Conversation {AttachedUserId = x.Id, HasUnreadMessages = x.HasUnreadForSupport})
-                .SingleOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
         public async Task<Conversation> GetConversationByUserAsync(User user)
         {
-            var conversation = await db.Conversations.SingleOrDefaultAsync(x => x.Id == user.Id);
+            var conversation = await db.Conversations.FirstOrDefaultAsync(x => x.Id == user.Id);
             if (conversation == null)
             {
                 await db.Conversations.InsertAsync(() =>

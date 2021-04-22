@@ -63,7 +63,7 @@ namespace Vysotsky.Service.Impl
                 .Where(x => x.Id == issueId)
                 .GetActualVersions()
                 .Select(MapToIssue)
-                .SingleOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
         public async Task<Issue> MoveIssueToNeedInformationAsync(Issue issue, User supervisor, string message)
         {

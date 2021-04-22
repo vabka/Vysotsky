@@ -57,7 +57,7 @@ namespace Vysotsky.Service.Impl
                     Id = b.Id,
                     Name = b.Name
                 })
-                .SingleOrDefaultAsync(b => b.Id == buildingId);
+                .FirstOrDefaultAsync(b => b.Id == buildingId);
             return result;
         }
 
@@ -70,7 +70,7 @@ namespace Vysotsky.Service.Impl
                     BuildingId = floor.BuildingId,
                     Number = floor.Number,
                 })
-                .SingleOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
         public async Task<Building[]> GetAllBuildingsAsync() =>
             await dataConnection.Buildings
@@ -127,7 +127,7 @@ namespace Vysotsky.Service.Impl
             await dataConnection.Rooms
                 .Where(r => r.Id == roomId)
                 .Select(MapToRoomExpr)
-                .SingleOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
         public async Task<Floor> CreateFloorAsync(Building building, string number)
         {

@@ -41,7 +41,7 @@ namespace Vysotsky.Service.Impl
                     Id = o.Id,
                     Name = o.Name
                 })
-                .SingleOrDefaultAsync(x => x.Id == organizationId);
+                .FirstOrDefaultAsync(x => x.Id == organizationId);
 
         public async Task UpdateOrganization(Organization newOrganization) =>
             await dataConnection.Organizations

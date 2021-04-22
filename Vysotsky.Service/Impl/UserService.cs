@@ -77,13 +77,13 @@ namespace Vysotsky.Service.Impl
             await db.Users
                 .Where(u => u.Id == userId)
                 .Select(MapToUser)
-                .SingleOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
         public async Task<User?> GetUserByUsernameOrNullAsync(string username) =>
             await db.Users
                 .Where(u => u.Username == username)
                 .Select(MapToUser)
-                .SingleOrDefaultAsync();
+                .FirstOrDefaultAsync();
 
         public async Task<IEnumerable<User>> GetAllOrganizationMembersAsync(Organization organization) =>
             await db.Users
@@ -122,6 +122,6 @@ namespace Vysotsky.Service.Impl
             await db.Users.Where(u => u.Role == UserRole.Worker)
                 .Where(u => u.Id == workerId)
                 .Select(MapToUser)
-                .SingleOrDefaultAsync();
+                .FirstOrDefaultAsync();
     }
 }
