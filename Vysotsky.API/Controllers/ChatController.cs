@@ -35,11 +35,13 @@ namespace Vysotsky.API.Controllers
         }
 
         [HttpGet("support/messages")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<ChatMessageDto>>>> GetMessagesInSupportChat()
+        public async Task<ActionResult<ApiResponse<PaginatedData<ChatMessageDto>>>> GetMessagesInSupportChat(
+            [FromQuery] PaginationParameters paginationParameters)
         {
             var chat = await chatService.GetConversationByUserAsync(currentUserProvider.CurrentUser);
-            var messages = await chatService.GetMessagesAsync(chat);
-            return Ok(messages.Select(m => m.ToDto()));
+            var (total, messages) = await chatService.GetMessagesAsync(chat, paginationParameters.Until,
+                paginationParameters.Skip, paginationParameters.Take);
+            return Ok(PaginatedData.Create(paginationParameters, total, messages.Select(m => m.ToDto())));
         }
 
         [HttpPost("support/messages")]
@@ -75,7 +77,8 @@ namespace Vysotsky.API.Controllers
         private NotFoundObjectResult ConversationNotFound() => NotFound("Conversation not found", "chats.notFound");
 
         [HttpGet("{conversationId:long}/messages")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<ChatMessageDto>>>> GetMessagesInConversation(
+        public async Task<ActionResult<ApiResponse<PaginatedData<ChatMessageDto>>>> GetMessagesInConversation(
+            [FromQuery] PaginationParameters paginationParameters,
             [FromRoute] long conversationId)
         {
             if (!currentUserProvider.CurrentUser.IsSupervisor())
@@ -89,8 +92,9 @@ namespace Vysotsky.API.Controllers
                 return ConversationNotFound();
             }
 
-            var messages = await chatService.GetMessagesAsync(conversation);
-            return Ok(messages.Select(m => m.ToDto()));
+            var (total, messages) = await chatService.GetMessagesAsync(conversation, paginationParameters.Until,
+                paginationParameters.Skip, paginationParameters.Take);
+            return Ok(PaginatedData.Create(paginationParameters, total, messages.Select(m => m.ToDto())));
         }
 
         [HttpPost("support/read")]

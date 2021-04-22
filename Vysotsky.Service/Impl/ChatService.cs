@@ -53,8 +53,23 @@ namespace Vysotsky.Service.Impl
                 .SingleAsync();
         }
 
-        public Task<IEnumerable<ChatMessage>> GetMessagesAsync(Conversation conversation) =>
-            throw new NotImplementedException();
+        public async Task<(int Total, IEnumerable<ChatMessage> Data)> GetMessagesAsync(Conversation conversation,
+            DateTimeOffset until, int skip, int take)
+        {
+            var query = db.Messages
+                .Where(x => x.UserId == conversation.AttachedUserId)
+                .Where(x => x.CreatedAt < until)
+                .Select(x => new ChatMessage
+                {
+                    Content = new MessageContent {Text = x.TextContent,},
+                    From = x.AuthorId,
+                    Status = x.Status,
+                    CreatedAt = x.CreatedAt
+                });
+            var total = await query.CountAsync();
+            var data = await query.Skip(skip).Take(take).ToArrayAsync();
+            return (total, data);
+        }
 
         public async Task<Conversation?> GetConversationByIdOrNullAsync(long id) =>
             await db.Conversations

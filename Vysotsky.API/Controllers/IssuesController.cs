@@ -2,12 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Vysotsky.API.Dto;
 using Vysotsky.API.Dto.Common;
 using Vysotsky.API.Dto.Issues;
 using Vysotsky.API.Infrastructure;
-using Vysotsky.Data.Entities;
 using Vysotsky.Service.Interfaces;
 using Vysotsky.Service.Types;
 
@@ -22,15 +20,13 @@ namespace Vysotsky.API.Controllers
         private readonly IWorkerService workerService;
         private readonly ICategoriesService categoriesService;
         private readonly IUserService userService;
-        private readonly ILogger<IssuesController> logger;
 
         public IssuesController(ICurrentUserProvider currentUserProvider,
             IIssueService issueService,
             IRoomService roomService,
             IWorkerService workerService,
             ICategoriesService categoriesService,
-            IUserService userService,
-            ILogger<IssuesController> logger)
+            IUserService userService)
         {
             this.currentUserProvider = currentUserProvider;
             this.issueService = issueService;
@@ -38,15 +34,12 @@ namespace Vysotsky.API.Controllers
             this.workerService = workerService;
             this.categoriesService = categoriesService;
             this.userService = userService;
-            this.logger = logger;
         }
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PaginatedData<ShortPersistedIssueDto>>>> GetAllIssues(
             [FromQuery] PaginationParameters paginationParameters)
         {
-            logger.LogDebug("Invoking GetAllIssues");
-            logger.InterpolatedDebug($"Pagination parameters is: {paginationParameters:PaginationParameters}");
             var (total, data) = await issueService.GetIssuesToShowUser(currentUserProvider.CurrentUser,
                 paginationParameters.Until, paginationParameters.Take, paginationParameters.Skip);
             return Ok(PaginatedData.Create(paginationParameters,
@@ -77,20 +70,19 @@ namespace Vysotsky.API.Controllers
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> CreateIssue([FromBody] IssueDto newIssue)
         {
             var currentUser = currentUserProvider.CurrentUser;
-            if (currentUser!.Role == UserRole.Worker)
+            if (currentUser.CanCreateIssue())
             {
                 return NotAuthorized("Worker is not authorized to create issues", "issues.notAuthorized");
             }
 
-            var categoryTask = categoriesService.GetByIdOrNullAsync(newIssue.CategoryId);
-            var roomTask = roomService.GetRoomByIdOrNullAsync(newIssue.RoomId);
-            var category = await categoryTask;
+            var category = await categoriesService.GetByIdOrNullAsync(newIssue.CategoryId);
             if (category == null)
             {
                 return BadRequest("Category not found", "categories.categoryNotFound");
             }
 
-            var room = await roomTask;
+            var room = await roomService.GetRoomByIdOrNullAsync(newIssue.RoomId);
+
             if (room == null)
             {
                 return BadRequest("Room not found", "rooms.roomNotFound");

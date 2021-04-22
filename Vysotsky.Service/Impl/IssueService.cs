@@ -41,6 +41,7 @@ namespace Vysotsky.Service.Impl
         {
             var id = await db.Issues.InsertWithInt64IdentityAsync(() => new IssueRecord
             {
+                Version = 1,
                 Title = title,
                 Description = description,
                 AuthorId = author.Id,
@@ -216,11 +217,6 @@ namespace Vysotsky.Service.Impl
             }
         }
 
-        private static readonly Expression<Func<IssueRecord, ShortIssue>> MapToShortIssue = record => new ShortIssue
-        {
-            Id = record.Id, Status = record.Status, Title = record.Title, CreatedAt = record.CreatedAt
-        };
-
         public async Task<(int Total, IEnumerable<ShortIssue> Issues)> GetIssuesToShowUser(User user,
             DateTimeOffset maxDate,
             int limit,
@@ -228,13 +224,20 @@ namespace Vysotsky.Service.Impl
         {
             var query = db.Issues
                 .Where(i => i.CreatedAt < maxDate)
-                .OrderByDescending(i => i.CreatedAt)
-                .ThenBy(i => i.Id)
                 .AsQueryable();
             query = user switch
             {
                 {Role: UserRole.SuperUser or UserRole.Supervisor}
-                    => query,
+                    => query
+                        .OrderBy(x =>
+                            x.Status == IssueStatus.New
+                                ? 0
+                                : x.Status == IssueStatus.NeedInfo
+                                    ? 1
+                                    : x.Status == IssueStatus.Completed
+                                        ? 2
+                                        : 3
+                        ),
                 {Role: UserRole.Worker}
                     => query.Where(i => i.WorkerId == user.Id),
                 {Role: UserRole.OrganizationOwner or UserRole.OrganizationMember}
@@ -248,7 +251,24 @@ namespace Vysotsky.Service.Impl
             query = query.GetActualVersions();
             var count = await query.CountAsync();
             var data = await query
-                .Select(MapToShortIssue)
+                .ThenOrBy(i => i.CreatedAt)
+                .ThenBy(i => i.Id)
+                .InnerJoin(db.Rooms, (i, r) => i.RoomId == r.Id, (i, r) => new {Issue = i, Room = r})
+                .Select(x => new ShortIssue
+                {
+                    Id = x.Issue.Id,
+                    Status = x.Issue.Status,
+                    Title = x.Issue.Title,
+                    CreatedAt = x.Issue.CreatedAt,
+                    Room = new Room
+                    {
+                        Id = x.Room.Id,
+                        Name = x.Room.Name,
+                        Number = x.Room.Number,
+                        Status = x.Room.Status,
+                        OwnerId = x.Room.OwnerId
+                    }
+                })
                 .Skip(offset)
                 .Take(limit)
                 .ToArrayAsync();

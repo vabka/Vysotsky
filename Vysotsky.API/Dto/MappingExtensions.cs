@@ -73,7 +73,12 @@ namespace Vysotsky.API.Dto
 
         public static ShortPersistedIssueDto ToDto(this ShortIssue issue) => new()
         {
-            Id = issue.Id, Title = issue.Title, CreatedAt = issue.CreatedAt, Status = issue.Status.ToDto()
+            Id = issue.Id,
+            Title = issue.Title,
+            CreatedAt = issue.CreatedAt,
+            Status = issue.Status.ToDto(),
+            Room = issue.Room.ToDto(),
+            HasUnread = false //TODO unreads in issues
         };
 
         public static IssueStatusDto ToDto(this IssueStatus status) => status switch
@@ -104,7 +109,8 @@ namespace Vysotsky.API.Dto
                 Status = issue.Status.ToDto(),
                 Title = issue.Title,
                 CategoryId = issue.CategoryId,
-                RoomId = issue.RoomId
+                RoomId = issue.RoomId,
+                AuthorId = issue.AuthorId
             };
 
         public static PersistedBuildingDto ToDto(this Building building) => new()

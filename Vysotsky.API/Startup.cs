@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Security;
+using OpenTelemetry.Trace;
 using Vysotsky.API.Hubs;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Data;
@@ -36,11 +37,16 @@ namespace Vysotsky.API
 
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            services.AddHealthChecks();
+            ConfigureTelemetry(services);
+            ConfigureDocumentation(services);
+            ConfigureDatabase(services);
+            ConfigureInfrastructure(services, configuration);
+            ConfigureDomainServices(services);
+            ConfigureSecretServices(services);
+        }
+
+        private static void ConfigureDocumentation(IServiceCollection services) =>
             services
-                .AddSingleton<ICurrentUserProvider, CurrentUserProvider>()
-                .AddSingleton<UnhandledExceptionMiddleware>()
-                .AddScoped<RevokableAuthenticationMiddleware>()
                 .AddOpenApiDocument(document =>
                 {
                     // Add an authenticate button to Swagger for JWT tokens
@@ -53,7 +59,20 @@ namespace Vysotsky.API
                         Description =
                             "Type into the textbox: Bearer {your JWT token}. You can get a JWT token from /Authorization/Authenticate."
                     }));
-                })
+                });
+
+        private static void ConfigureTelemetry(IServiceCollection services)
+        {
+            services.AddHealthChecks();
+            services.AddOpenTelemetryTracing(t =>
+            {
+                t.AddAspNetCoreInstrumentation();
+                t.AddJaegerExporter();
+            });
+        }
+
+        private static void ConfigureDatabase(IServiceCollection services) =>
+            services
                 .AddScoped(s =>
                 {
                     var logger = s.GetRequiredService<ILogger<VysotskyDataConnection>>();
@@ -62,32 +81,38 @@ namespace Vysotsky.API
                     var options = new LinqToDbConnectionOptionsBuilder()
                         .UsePostgreSQL(connectionString)
                         .WithTraceLevel(TraceLevel.Info)
-                        .WriteTraceWith((text, _, l) =>
+                        .WriteTraceWith((text, category, l) =>
                         {
-                            switch (l)
+                            if (category != null && text != null && l != TraceLevel.Off)
                             {
-                                case TraceLevel.Off:
-                                    break;
-                                case TraceLevel.Error:
-                                    logger.InterpolatedError($"{text}");
-                                    break;
-                                case TraceLevel.Warning:
-                                    logger.InterpolatedWarning($"{text}");
-                                    break;
-                                case TraceLevel.Info:
-                                    logger.InterpolatedInformation($"{text}");
-                                    break;
-                                case TraceLevel.Verbose:
-                                    logger.InterpolatedTrace($"{text}");
-                                    break;
-                                default:
-                                    throw new ArgumentOutOfRangeException(nameof(l), l, null);
+                                FormattableString str = $"{category:LinqToDbCategory}: {text:LinqToDbText}";
+                                switch (l)
+                                {
+                                    case TraceLevel.Error:
+                                        logger.InterpolatedError(str);
+                                        break;
+                                    case TraceLevel.Warning:
+                                        logger.InterpolatedWarning(str);
+                                        break;
+                                    case TraceLevel.Info:
+                                        logger.InterpolatedInformation(str);
+                                        break;
+                                    case TraceLevel.Verbose:
+                                        logger.InterpolatedDebug(str);
+                                        break;
+                                    default:
+                                        throw new ArgumentOutOfRangeException(nameof(l), l, null);
+                                }
                             }
                         })
                         .Build<VysotskyDataConnection>();
                     var connection = new VysotskyDataConnection(options);
                     return connection;
-                })
+                });
+
+        private static void ConfigureInfrastructure(IServiceCollection services, IConfiguration configuration)
+        {
+            services
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -105,9 +130,12 @@ namespace Vysotsky.API
                                 Encoding.UTF8.GetBytes(configuration.GetValue<string>("SECRET"))),
                     };
                 });
-            services.AddHttpContextAccessor();
-            services.AddAuthorizationCore();
             services
+                .AddHttpContextAccessor()
+                .AddAuthorizationCore()
+                .AddSingleton<ICurrentUserProvider, CurrentUserProvider>()
+                .AddSingleton<UnhandledExceptionMiddleware>()
+                .AddScoped<RevokableAuthenticationMiddleware>()
                 .AddControllers()
                 .AddJsonOptions(options =>
                 {
@@ -120,7 +148,23 @@ namespace Vysotsky.API
                     options.JsonSerializerOptions.Converters.Add(new DateTimeOffsetConverter());
                     options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
                 });
+            services.AddSignalR();
+        }
 
+        private static void ConfigureSecretServices(IServiceCollection services)
+        {
+            services.AddSingleton(s => new SecureHasherOptions
+            {
+                Salt = s.GetRequiredService<IConfiguration>().GetValue<string>("SALT")
+            });
+
+            services.AddSingleton(s => new AuthenticationServiceOptions
+            {
+                Secret = s.GetRequiredService<IConfiguration>().GetValue<string>("SECRET")
+            });
+        }
+
+        private static void ConfigureDomainServices(IServiceCollection services) =>
             services.Scan(t =>
                 t.FromAssemblyOf<IStringHasher>()
                     .AddClasses(f =>
@@ -128,17 +172,6 @@ namespace Vysotsky.API
                             .Where(x => x.IsPublic))
                     .AsImplementedInterfaces()
                     .WithScopedLifetime());
-            services.AddSingleton(s => new SecureHasherOptions
-            {
-                Salt = s.GetRequiredService<IConfiguration>().GetValue<string>("SALT")
-            });
-            services.AddSingleton(s => new AuthenticationServiceOptions
-            {
-                Secret = s.GetRequiredService<IConfiguration>().GetValue<string>("SECRET")
-            });
-
-            services.AddSignalR();
-        }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) =>
             ConfigureWebApp(app, env);

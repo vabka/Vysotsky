@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Vysotsky.API.Dto.Common
@@ -28,9 +29,11 @@ namespace Vysotsky.API.Dto.Common
 
     internal static class PaginatedData
     {
-        public static PaginatedData<T> Create<T>(PaginationParameters paginationParameters, int total, IReadOnlyCollection<T> data)
+        public static PaginatedData<T> Create<T>(PaginationParameters paginationParameters, int total,
+            IEnumerable<T> lines)
         {
-            var hasNext = total - paginationParameters.Skip - data.Count > 0;
+            var data = lines.ToArray();
+            var hasNext = total - paginationParameters.Skip - data.Length > 0;
             var hasPrevious = paginationParameters.PageNumber > 0;
 
             return new PaginatedData<T>
@@ -45,16 +48,10 @@ namespace Vysotsky.API.Dto.Common
                     {
                         Next =
                             hasNext
-                                ? paginationParameters with
-                                {
-                                    PageNumber = paginationParameters.PageNumber + 1,
-                                }
+                                ? paginationParameters with {PageNumber = paginationParameters.PageNumber + 1,}
                                 : null,
                         Previous = hasPrevious
-                            ? paginationParameters with
-                            {
-                                PageNumber = paginationParameters.PageNumber - 1,
-                            }
+                            ? paginationParameters with {PageNumber = paginationParameters.PageNumber - 1,}
                             : null
                     }
                     : null

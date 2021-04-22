@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vysotsky.Service.Types;
@@ -7,7 +8,10 @@ namespace Vysotsky.Service.Interfaces
     public interface IChatService
     {
         Task<ChatMessage> SendAsync(User author, Conversation destination, MessageContent messageContent);
-        Task<IEnumerable<ChatMessage>> GetMessagesAsync(Conversation conversation);
+
+        Task<(int Total, IEnumerable<ChatMessage> Data)> GetMessagesAsync(Conversation conversation,
+            DateTimeOffset until, int skip, int take);
+
         Task<Conversation?> GetConversationByIdOrNullAsync(long id);
         Task<Conversation> GetConversationByUserAsync(User user);
         Task<IEnumerable<Conversation>> GetAllStartedConversationsAsync();

@@ -12,7 +12,6 @@ namespace Vysotsky.API.Hubs
     public class ChatHub : Hub<IChatHubClient>
     {
         private readonly ICurrentUserProvider currentUserProvider;
-
         private readonly IChatService chatService;
 
         public ChatHub(ICurrentUserProvider currentUserProvider, IChatService chatService)
@@ -23,21 +22,36 @@ namespace Vysotsky.API.Hubs
 
         public async Task SendMessageToSupport(MessageContentDto content)
         {
-            if (currentUserProvider.CurrentUser.IsCustomer())
-            {
-                var chat = await chatService.GetConversationByUserAsync(currentUserProvider.CurrentUser);
-                await Send(content, chat);
-            }
+            var chat = await chatService.GetConversationByUserAsync(currentUserProvider.CurrentUser);
+            await Send(content, chat);
         }
 
         public async Task SendMessageToCustomer(long customerId, MessageContentDto content)
         {
-            if (currentUserProvider.CurrentUser.IsSupervisor())
+            if (currentUserProvider.CurrentUser.CanReadAnyChat())
             {
                 var chat = await chatService.GetConversationByIdOrNullAsync(customerId);
                 if (chat != null)
                 {
                     await Send(content, chat);
+                }
+            }
+        }
+
+        public async Task ReadSupportChatMessages()
+        {
+            var chat = await chatService.GetConversationByUserAsync(currentUserProvider.CurrentUser);
+            await chatService.MarkAllMessagesReadAsync(currentUserProvider.CurrentUser, chat);
+        }
+
+        public async Task ReadCustomerChatMessages(long customerId)
+        {
+            if (currentUserProvider.CurrentUser.CanReadAnyChat())
+            {
+                var chat = await chatService.GetConversationByIdOrNullAsync(customerId);
+                if (chat != null)
+                {
+                    await chatService.MarkAllMessagesReadAsync(currentUserProvider.CurrentUser, chat);
                 }
             }
         }

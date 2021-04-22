@@ -28,6 +28,8 @@ namespace Vysotsky.API.Infrastructure
                 _                          => false
             };
 
+        public static bool CanCreateIssue(this User currentUser) =>
+            currentUser.IsCustomer();
 
         public static bool IsWorker(this User currentUser) =>
             currentUser.Role is UserRole.Worker;
@@ -40,6 +42,8 @@ namespace Vysotsky.API.Infrastructure
 
         public static bool IsSupervisor(this User currentUser) =>
             currentUser.Role is UserRole.Supervisor or UserRole.SuperUser;
+
+        public static bool CanReadAnyChat(this User currentUser) => currentUser.IsSupervisor();
 
         public static bool IsSuperuser(this User currentUser) =>
             currentUser.Role == UserRole.SuperUser;
