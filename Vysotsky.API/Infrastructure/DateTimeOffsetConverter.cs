@@ -13,7 +13,7 @@ namespace Vysotsky.API.Infrastructure
                 : throw new InvalidOperationException("Cannot parse DateTimeOffset");
 
         public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options) =>
-            writer.WriteStringValue(value.ToUniversalTime());
+            writer.WriteStringValue(value.ToString("u"));
     }
 
     public class DateTimeConverter : JsonConverter<DateTime>
@@ -24,6 +24,6 @@ namespace Vysotsky.API.Infrastructure
                 : throw new InvalidOperationException("Cannot parse DateTime");
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options) =>
-            writer.WriteStringValue(value.ToUniversalTime());
+            writer.WriteStringValue(value.ToString("u"));
     }
 }

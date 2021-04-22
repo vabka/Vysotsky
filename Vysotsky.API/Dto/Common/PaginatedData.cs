@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using Flurl;
 
 namespace Vysotsky.API.Dto.Common
 {
@@ -11,59 +10,28 @@ namespace Vysotsky.API.Dto.Common
     /// <typeparam name="T"></typeparam>
     public class PaginatedData<T>
     {
-        /// <summary>
-        /// Всего записей
-        /// </summary>
         public int Total { get; init; }
 
-        /// <summary>
-        /// Размер сраницы
-        /// </summary>
         public int PageSize { get; init; }
 
-        /// <summary>
-        /// Номер страницы
-        /// </summary>
         public int PageNumber { get; init; }
 
-        /// <summary>
-        /// Дата, до которой предоставляются данные (верхняя граница)
-        /// </summary>
         public DateTimeOffset Until { get; init; }
 
-        /// <summary>
-        /// Страницы для перехода
-        /// </summary>
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public Pages? Pages { get; init; }
 
-        /// <summary>
-        /// Данные
-        /// </summary>
 
         public IEnumerable<T> Data { get; init; } = Array.Empty<T>();
     }
 
     internal static class PaginatedData
     {
-        public static PaginatedData<T> Create<T>(PaginationParameters paginationParameters, int total,
-            IReadOnlyCollection<T> data,
-            string resource)
+        public static PaginatedData<T> Create<T>(PaginationParameters paginationParameters, int total, IReadOnlyCollection<T> data)
         {
-            var hasNext = total - paginationParameters.ToSkip() - data.Count > 0;
-            var next = hasNext
-                ? resource
-                    .SetQueryParams(
-                        paginationParameters with { PageNumber = paginationParameters.PageNumber + 1 })
-                : null;
-
-            var hasPrevious = paginationParameters.PageNumber > 1;
-            var previous = hasPrevious
-                ? resource
-                    .SetQueryParams(
-                        paginationParameters with { PageNumber = paginationParameters.PageNumber - 1 })
-                : null;
+            var hasNext = total - paginationParameters.Skip - data.Count > 0;
+            var hasPrevious = paginationParameters.PageNumber > 0;
 
             return new PaginatedData<T>
             {
@@ -75,8 +43,19 @@ namespace Vysotsky.API.Dto.Common
                 Pages = hasNext || hasPrevious
                     ? new Pages
                     {
-                        Next = next,
-                        Previous = previous
+                        Next =
+                            hasNext
+                                ? paginationParameters with
+                                {
+                                    PageNumber = paginationParameters.PageNumber + 1,
+                                }
+                                : null,
+                        Previous = hasPrevious
+                            ? paginationParameters with
+                            {
+                                PageNumber = paginationParameters.PageNumber - 1,
+                            }
+                            : null
                     }
                     : null
             };

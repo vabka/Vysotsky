@@ -22,9 +22,8 @@ namespace Vysotsky.API.Controllers
             [FromQuery] PaginationParameters paginationParameters)
         {
             var (total, workers) = await userService.GetAllUsersWithRoleAsync(UserRole.Worker,
-                paginationParameters.Until, paginationParameters.ToTake(), paginationParameters.ToSkip());
-            return Ok(PaginatedData.Create(paginationParameters, total, workers.Select(w => w.ToDto()).ToArray(),
-                Resources.Workers));
+                paginationParameters.Until, paginationParameters.Take, paginationParameters.Skip);
+            return Ok(PaginatedData.Create(paginationParameters, total, workers.Select(w => w.ToDto()).ToArray()));
         }
     }
 }

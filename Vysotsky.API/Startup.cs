@@ -85,7 +85,8 @@ namespace Vysotsky.API
                             }
                         })
                         .Build<VysotskyDataConnection>();
-                    return new VysotskyDataConnection(options);
+                    var connection = new VysotskyDataConnection(options);
+                    return connection;
                 })
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -144,9 +145,15 @@ namespace Vysotsky.API
 
         public static void ConfigureWebApp(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            if (env.IsDevelopment())
+            {
+                app.UseCors(c => c.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
+            }
+
             app.UseHealthChecks("/api/health");
             app.UseSwaggerUi3();
             app.UseOpenApi();
+
             app.UseMiddleware<UnhandledExceptionMiddleware>();
             app.UseRouting();
             app.UseAuthentication();
@@ -238,29 +245,6 @@ namespace Vysotsky.API
                                     true)
                             }
                         }, new JsonSerializerOptions {WriteIndented = true});
-                    });
-                    endpoints.MapPost("/api/users/admin", async ctx =>
-                    {
-                        var hasher = ctx.RequestServices.GetRequiredService<IStringHasher>();
-                        var database = ctx.RequestServices.GetRequiredService<VysotskyDataConnection>();
-                        var hash = hasher.Hash("admin");
-                        await database.Users.InsertAsync(() => new UserRecord
-                        {
-                            Username = "admin",
-                            PasswordHash = hash,
-                            Role = UserRole.SuperUser,
-                            FirstName = "Админ",
-                            LastName = "Админович",
-                            Contacts = Array.Empty<UserContact>(),
-                            LastPasswordChange = DateTimeOffset.Now
-                        });
-                        await ctx.Response.WriteAsync("OK");
-                    });
-                    endpoints.MapGet("/api/currentUser", async ctx =>
-                    {
-                        var currentUser = ctx.RequestServices.GetRequiredService<ICurrentUserProvider>().CurrentUser;
-                        await ctx.Response.WriteAsJsonAsync(currentUser,
-                            new JsonSerializerOptions {Converters = {new JsonStringEnumConverter()}});
                     });
                 }
             });

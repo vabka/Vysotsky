@@ -7,17 +7,11 @@ namespace Vysotsky.API.Dto.Common
     /// </summary>
     public class Pages
     {
-        /// <summary>
-        /// URL Предыдущей страницы
-        /// </summary>
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Previous { get; init; }
+        public PaginationParameters? Next { get; init; }
 
-        /// <summary>
-        /// URL следующей страницы
-        /// </summary>
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? Next { get; init; }
+        public PaginationParameters? Previous { get; init; }
     }
 }

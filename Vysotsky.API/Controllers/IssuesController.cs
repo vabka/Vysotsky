@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Vysotsky.API.Dto;
 using Vysotsky.API.Dto.Common;
 using Vysotsky.API.Dto.Issues;
@@ -22,12 +22,15 @@ namespace Vysotsky.API.Controllers
         private readonly IWorkerService workerService;
         private readonly ICategoriesService categoriesService;
         private readonly IUserService userService;
+        private readonly ILogger<IssuesController> logger;
 
         public IssuesController(ICurrentUserProvider currentUserProvider,
             IIssueService issueService,
             IRoomService roomService,
             IWorkerService workerService,
-            ICategoriesService categoriesService, IUserService userService)
+            ICategoriesService categoriesService,
+            IUserService userService,
+            ILogger<IssuesController> logger)
         {
             this.currentUserProvider = currentUserProvider;
             this.issueService = issueService;
@@ -35,18 +38,20 @@ namespace Vysotsky.API.Controllers
             this.workerService = workerService;
             this.categoriesService = categoriesService;
             this.userService = userService;
+            this.logger = logger;
         }
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PaginatedData<ShortPersistedIssueDto>>>> GetAllIssues(
             [FromQuery] PaginationParameters paginationParameters)
         {
+            logger.LogDebug("Invoking GetAllIssues");
+            logger.InterpolatedDebug($"Pagination parameters is: {paginationParameters:PaginationParameters}");
             var (total, data) = await issueService.GetIssuesToShowUser(currentUserProvider.CurrentUser,
-                paginationParameters.Until, paginationParameters.ToTake(), paginationParameters.ToSkip());
+                paginationParameters.Until, paginationParameters.Take, paginationParameters.Skip);
             return Ok(PaginatedData.Create(paginationParameters,
                 total,
-                data.Select(x => x.ToDto()).ToArray(),
-                Resources.Issues));
+                data.Select(x => x.ToDto()).ToArray()));
         }
 
         [HttpGet("{issueId:long}")]
@@ -82,7 +87,7 @@ namespace Vysotsky.API.Controllers
             var category = await categoryTask;
             if (category == null)
             {
-                return BadRequest("Area not found", "issues.areaNotFound");
+                return BadRequest("Category not found", "categories.categoryNotFound");
             }
 
             var room = await roomTask;
@@ -97,7 +102,15 @@ namespace Vysotsky.API.Controllers
         }
 
 
-        [HttpPost("{issueId:long}/needInfo")]
+        [HttpGet("{issueId:long}/history")]
+        public async Task<ActionResult<ApiResponse<IEnumerable<Issue>>>> GetHistory([FromRoute] long issueId) =>
+            await issueService.GetIssueByIdOrNullAsync(issueId) switch
+            {
+                null      => IssueNotFound(),
+                var issue => Ok((await issueService.GetIssueHistoryAsync(issue)).Select(i => i.ToDto()))
+            };
+
+        [HttpPost("{issueId:long}/state/needInfo")]
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToNeedInfo([FromRoute] long issueId,
             [FromBody] MoveIssueToNeedInfoDto data)
         {
@@ -118,18 +131,14 @@ namespace Vysotsky.API.Controllers
             return Ok(newState.ToDto());
         }
 
-        [HttpGet("{issueId:long}/history")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Issue>>>> GetHistory([FromRoute] long issueId) =>
-            await issueService.GetIssueByIdOrNullAsync(issueId) switch
-            {
-                null      => IssueNotFound(),
-                var issue => Ok((await issueService.GetIssueHistoryAsync(issue)).Select(i => i.ToDto()))
-            };
-
         private ActionResult IssueNotFound() => NotFound("Issue not found", "issue.notFound");
 
-        [HttpPost("{issueId:long}/completed")]
-        public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToCompleted([FromRoute] long issueId, [FromBody] MoveIssueToCompletedDto data)
+        private static ActionResult<ApiResponse<PersistedIssueDto>> WorkerNotFound() =>
+            BadRequest("Worker not found", "workers.notFound");
+
+        [HttpPost("{issueId:long}/state/completed")]
+        public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToCompleted([FromRoute] long issueId,
+            [FromBody] MoveIssueToCompletedDto data)
         {
             var issue = await issueService.GetIssueByIdOrNullAsync(issueId);
             if (issue == null)
@@ -140,10 +149,10 @@ namespace Vysotsky.API.Controllers
 
             if (issue.WorkerId == null)
             {
-                throw new NotImplementedException();
+                return BadRequest("Issue in invalid state", "issue.invalidState");
             }
 
-            if (!currentUserProvider.CurrentUser.CanCompleteIssue(issue.WorkerId.Value))
+            if (!currentUserProvider.CurrentUser.CanCompleteIssue(issue))
             {
                 return NotAuthorized("Only worker can complete issue", "issues.notAuthorized");
             }
@@ -154,7 +163,7 @@ namespace Vysotsky.API.Controllers
             return Ok(newState.ToDto());
         }
 
-        [HttpPost("{issueId:long}/inProgress")]
+        [HttpPost("{issueId:long}/state/inProgress")]
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> MoveIssueToInProgress([FromRoute] long issueId,
             [FromBody] MoveIssueToInPgoressDto data)
         {
@@ -180,8 +189,28 @@ namespace Vysotsky.API.Controllers
             return Ok(newState.ToDto());
         }
 
-        private static ActionResult<ApiResponse<PersistedIssueDto>> WorkerNotFound() =>
-            BadRequest("Worker not found", "workers.notFound");
+        [HttpPost("{issueId:long}/state/rejected")]
+        public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> RejectIssue([FromRoute] long issueId,
+            [FromBody] MoveIssueToRejectedDto data)
+        {
+            var issue = await issueService.GetIssueByIdOrNullAsync(issueId);
+            if (issue == null)
+            {
+                return IssueNotFound();
+            }
+
+            if (!currentUserProvider.CurrentUser.IsSupervisor())
+            {
+                return NotAuthorized("Only supervisor can reject task", "issues.notAuthorized");
+            }
+
+            return Ok((await issueService.RejectIssueAsync(issue, data.Message)).ToDto());
+        }
+    }
+
+    public class MoveIssueToRejectedDto
+    {
+        public string Message { get; init; } = "";
     }
 
     public class MoveIssueToCompletedDto

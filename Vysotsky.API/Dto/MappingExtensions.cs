@@ -53,7 +53,7 @@ namespace Vysotsky.API.Dto
                 Id = user.Id,
                 Patronymic = user.Patronymic,
                 Username = user.Username,
-                FirstName = user.Firstname,
+                FirstName = user.FirstName,
                 LastName = user.LastName,
                 OrganizationId = user.OrganizationId
             };
@@ -147,7 +147,7 @@ namespace Vysotsky.API.Dto
         public static PersistedUserDto ToDto(this User user) => new()
         {
             Id = user.Id,
-            FirstName = user.Firstname,
+            FirstName = user.FirstName,
             LastName = user.LastName,
             Patronymic = user.Patronymic,
             Contacts = user.Contacts.Select(c => new UserContactDto

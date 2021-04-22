@@ -21,5 +21,6 @@ namespace Vysotsky.Service.Interfaces
         Task<Issue> TakeToWorkAsync(Issue issue, User supervisor, User worker, string message);
         Task<Issue> CompleteIssueAsync(Issue issue, User worker, string message);
 
+        Task<Issue> RejectIssueAsync(Issue issue, string message);
     }
 }

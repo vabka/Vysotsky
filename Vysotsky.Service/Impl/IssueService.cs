@@ -162,7 +162,59 @@ namespace Vysotsky.Service.Impl
                     throw new InvalidOperationException();
             }
         }
-        public Task<Issue> CompleteIssueAsync(Issue issue, User worker, string message) => throw new NotImplementedException();
+
+        public Task<Issue> CompleteIssueAsync(Issue issue, User worker, string message) =>
+            throw new NotImplementedException();
+
+        public async Task<Issue> RejectIssueAsync(Issue issue, string message)
+        {
+            switch (issue.Status)
+            {
+                case IssueStatus.New:
+                case IssueStatus.NeedInfo:
+                {
+                    await using var transaction = await db.BeginTransactionAsync();
+                    // await db.IssueComments
+                    //     .InsertAsync(() => new IssueCommentRecord
+                    //     {
+                    //         IssueId = issue.Id, AuthorId = supervisor.Id, Text = message
+                    //     });
+                    await db.Issues
+                        .Where(i => i.Id == issue.Id && i.Version == issue.Version)
+                        .Take(1)
+                        .InsertAsync(db.Issues,
+                            i => new IssueRecord
+                            {
+                                Id = i.Id,
+                                Version = i.Version + 1,
+                                Status = IssueStatus.InProgress,
+                                WorkerId = i.WorkerId,
+                                SupervisorId = i.SupervisorId,
+                                Description = i.Description,
+                                Note = i.Note,
+                                Title = i.Title,
+                                CategoryId = i.CategoryId,
+                                AuthorId = i.AuthorId,
+                                CreatedAt = i.CreatedAt,
+                                UpdatedAt = DateTimeOffset.Now,
+                                RoomId = i.RoomId
+                            });
+                    await transaction.CommitAsync();
+                    return await GetIssueByIdWithSpecificVersion(issue.Id, issue.Version + 1);
+                }
+                case IssueStatus.Accepted:
+                case IssueStatus.InProgress:
+                case IssueStatus.Completed:
+                    throw new NotImplementedException();
+                case IssueStatus.Rejected:
+                    return issue;
+                case IssueStatus.CancelledByCustomer:
+                case IssueStatus.Closed:
+                    throw CannotMoveFromTerminalState();
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
 
         private static readonly Expression<Func<IssueRecord, ShortIssue>> MapToShortIssue = record => new ShortIssue
         {
@@ -188,10 +240,7 @@ namespace Vysotsky.Service.Impl
                 {Role: UserRole.OrganizationOwner or UserRole.OrganizationMember}
                     => query
                         .InnerJoin(db.Users, (l, r) => l.AuthorId == r.Id,
-                            (i, u) => new
-                            {
-                                Issue = i, u.OrganizationId
-                            })
+                            (i, u) => new {Issue = i, u.OrganizationId})
                         .Where(x => x.OrganizationId == user.OrganizationId)
                         .Select(x => x.Issue),
                 _ => throw new InvalidOperationException()

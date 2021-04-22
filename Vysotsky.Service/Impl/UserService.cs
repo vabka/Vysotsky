@@ -20,7 +20,7 @@ namespace Vysotsky.Service.Impl
         {
             Id = u.Id,
             Username = u.Username,
-            Firstname = u.FirstName,
+            FirstName = u.FirstName,
             LastName = u.LastName,
             Patronymic = u.Patronymic,
             Role = u.Role,
@@ -63,7 +63,7 @@ namespace Vysotsky.Service.Impl
             return new User
             {
                 Id = id,
-                Firstname = firstName,
+                FirstName = firstName,
                 LastName = lastName,
                 Patronymic = patronymic,
                 Username = username,
