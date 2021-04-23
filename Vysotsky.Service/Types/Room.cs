@@ -6,7 +6,6 @@ namespace Vysotsky.Service.Types
     {
         public long Id { get; init; }
         public string? Number { get; init; }
-        public string? Name { get; init; }
         public RoomStatus Status { get; init; }
         public long? OwnerId { get; set; }
     }

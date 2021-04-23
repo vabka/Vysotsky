@@ -8,7 +8,7 @@ namespace Vysotsky.Service.Types
         public long Id { get; init; }
         public long CategoryId { get; init; }
         public string Description { get; init; } = null!;
-        public long RoomId { get; init; }
+        public Room Room { get; init; } = null!;
         public IssueStatus Status { get; init; }
         public string Title { get; init; } = null!;
         public long Version { get; init; }

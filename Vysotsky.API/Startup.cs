@@ -16,7 +16,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Security;
-using OpenTelemetry.Trace;
 using Vysotsky.API.Hubs;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Data;
@@ -61,15 +60,8 @@ namespace Vysotsky.API
                     }));
                 });
 
-        private static void ConfigureTelemetry(IServiceCollection services)
-        {
+        private static void ConfigureTelemetry(IServiceCollection services) =>
             services.AddHealthChecks();
-            services.AddOpenTelemetryTracing(t =>
-            {
-                t.AddAspNetCoreInstrumentation();
-                t.AddJaegerExporter();
-            });
-        }
 
         private static void ConfigureDatabase(IServiceCollection services) =>
             services

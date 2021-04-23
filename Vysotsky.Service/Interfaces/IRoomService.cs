@@ -9,7 +9,7 @@ namespace Vysotsky.Service.Interfaces
     {
         Task<IEnumerable<FullBuilding>> GetOrganizationBuildingsAsync(Organization organization);
         Task<Floor> CreateFloorAsync(Building building, string number);
-        Task<Room> CreateRoomAsync(Floor floor, string? name, string? number, RoomStatus status);
+        Task<Room> CreateRoomAsync(Floor floor, string? number, RoomStatus status, Organization? owner);
         Task<Building> CreateBuildingAsync(string name);
         Task<Building?> GetBuildingByIdOrNullAsync(long buildingId);
         Task<Floor?> GetFloorByIdOrNullAsync(long floorId);

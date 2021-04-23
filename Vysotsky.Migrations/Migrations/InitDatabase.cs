@@ -31,7 +31,6 @@ namespace Vysotsky.Migrations.Migrations
                 .WithColumn("floor_id").References("floor")
                 .WithColumn("owner_id").References("organization").Nullable()
                 .WithColumn("status").AsEnum("room_status")
-                .WithColumn("name").AsString().Nullable()
                 .WithColumn("number").AsString().Nullable();
 
             Create.Index()

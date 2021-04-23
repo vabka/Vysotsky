@@ -22,5 +22,13 @@ namespace Vysotsky.Service.Interfaces
         Task<Issue> CompleteIssueAsync(Issue issue, User worker, string message);
 
         Task<Issue> RejectIssueAsync(Issue issue, string message);
+        Task<IEnumerable<IssueComment>> GetCommentsAsync(Issue issue);
+    }
+
+    public class IssueComment
+    {
+        public DateTimeOffset CreatedAt { get; init; }
+        public long AuthorId { get; init; }
+        public MessageContent Content { get; init; } = null!;
     }
 }

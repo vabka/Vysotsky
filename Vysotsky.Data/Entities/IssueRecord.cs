@@ -29,7 +29,7 @@ namespace Vysotsky.Data.Entities
             OtherKey = nameof(RoomRecord.Id),
             CanBeNull = false,
             Relationship = Relationship.ManyToOne)]
-        public RoomRecord? Room { get; init; }
+        public RoomRecord Room { get; init; } = null!;
 
         [Association(ThisKey = nameof(WorkerId),
             OtherKey = nameof(UserRecord.Id),

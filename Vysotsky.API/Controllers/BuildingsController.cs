@@ -70,8 +70,9 @@ namespace Vysotsky.API.Controllers
                 return FloorInBuildingNotFound(buildingId, floorId);
             }
 
-            var room = await roomService.CreateRoomAsync(floor, roomToCreate.Name, roomToCreate.Number,
-                ToModel(roomToCreate.Status));
+            //TODO !!!
+            var room = await roomService.CreateRoomAsync(floor, roomToCreate.Number,
+                ToModel(roomToCreate.Status), null);
             return Created(
                 Resources.Buildings.AppendPathSegments(buildingId, "floors", floorId, "rooms", room.Id),
                 room.ToDto());
@@ -81,7 +82,8 @@ namespace Vysotsky.API.Controllers
             NotFound($"Floor with id {floorId} not found in building with id {buildingId}",
                 "buildings.floorInBuildingNotFound");
 
-        private NotFoundObjectResult BuildingNotFound(long buildingId) => NotFound($"Building with id {buildingId} not found", "buildings.notFound");
+        private NotFoundObjectResult BuildingNotFound(long buildingId) =>
+            NotFound($"Building with id {buildingId} not found", "buildings.notFound");
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PersistedBuildingDto[]>>> GetAllBuildings()
@@ -129,11 +131,11 @@ namespace Vysotsky.API.Controllers
         private static RoomStatus ToModel(RoomStatusDto statusDto) =>
             statusDto switch
             {
-                RoomStatusDto.Free => RoomStatus.Free,
-                RoomStatusDto.Owned => RoomStatus.Owned,
-                RoomStatusDto.Rented => RoomStatus.Rented,
+                RoomStatusDto.Free       => RoomStatus.Free,
+                RoomStatusDto.Owned      => RoomStatus.Owned,
+                RoomStatusDto.Rented     => RoomStatus.Rented,
                 RoomStatusDto.Unavalable => RoomStatus.Unavailable,
-                _ => throw new InvalidOperationException()
+                _                        => throw new InvalidOperationException()
             };
     }
 }

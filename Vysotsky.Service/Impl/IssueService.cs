@@ -22,7 +22,13 @@ namespace Vysotsky.Service.Impl
             Id = issue.Id,
             CategoryId = issue.CategoryId,
             Description = issue.Description,
-            RoomId = issue.RoomId,
+            Room = new Room
+            {
+                Id = issue.Room.Id,
+                Number = issue.Room.Number,
+                Status = issue.Room.Status,
+                OwnerId = issue.Room.OwnerId
+            },
             Status = issue.Status,
             Title = issue.Title,
             Version = issue.Version,
@@ -222,6 +228,18 @@ namespace Vysotsky.Service.Impl
             }
         }
 
+        public async Task<IEnumerable<IssueComment>> GetCommentsAsync(Issue issue) =>
+            await db.IssueComments
+                .Where(x => x.IssueId == issue.Id)
+                .OrderBy(x => x.CreatedAt)
+                .Select(x => new IssueComment
+                {
+                    Content = new MessageContent {Text = x.Text},
+                    AuthorId = x.AuthorId,
+                    CreatedAt = x.CreatedAt
+                })
+                .ToArrayAsync();
+
         public async Task<(int Total, IEnumerable<ShortIssue> Issues)> GetIssuesToShowUser(User user,
             DateTimeOffset maxDate,
             int limit,
@@ -277,11 +295,7 @@ namespace Vysotsky.Service.Impl
                     CreatedAt = x.Issue.CreatedAt,
                     Room = new Room
                     {
-                        Id = x.Room.Id,
-                        Name = x.Room.Name,
-                        Number = x.Room.Number,
-                        Status = x.Room.Status,
-                        OwnerId = x.Room.OwnerId
+                        Id = x.Room.Id, Number = x.Room.Number, Status = x.Room.Status, OwnerId = x.Room.OwnerId
                     }
                 })
                 .Skip(offset)

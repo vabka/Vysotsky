@@ -1,7 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Flurl;
 using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Dto;
 using Vysotsky.API.Dto.Common;
@@ -45,7 +45,9 @@ namespace Vysotsky.API.Controllers
                 paginationParameters.Until, paginationParameters.Take, paginationParameters.Skip);
             return Ok(PaginatedData.Create(paginationParameters,
                 total,
-                data.Select(x => x.ToDto()).ToArray()));
+                data
+                    .Select(x => x.ToDto())
+                    .ToArray()));
         }
 
         [HttpGet("{issueId:long}")]
@@ -68,9 +70,25 @@ namespace Vysotsky.API.Controllers
         }
 
         [HttpGet("{issueId}/comments")]
-        public Task<ActionResult<ApiResponse>> GetComments()
+        public async Task<ActionResult<ApiResponse<IEnumerable<PersistedIssueCommentDto>>>> GetComments(
+            [FromRoute] long issueId)
         {
-            throw new NotImplementedException();
+            var issue = await issueService.GetIssueByIdOrNullAsync(issueId);
+            if (issue == null)
+            {
+                return IssueNotFound();
+            }
+
+
+            var issueCustomer = await userService.GetUserByIdOrNullAsync(issue.AuthorId);
+            if (currentUserProvider.CurrentUser.IsCustomer() &&
+                currentUserProvider.CurrentUser.OrganizationId != issueCustomer?.OrganizationId)
+            {
+                return NotAuthorized("Customer can read issues in organization", "issues.notAuthorized");
+            }
+
+            var comments = await issueService.GetCommentsAsync(issue);
+            return Ok(comments.Select(c => c.ToDto()));
         }
 
         [HttpPost]
@@ -97,7 +115,7 @@ namespace Vysotsky.API.Controllers
 
             var createdIssue =
                 await issueService.CreateIssueAsync(newIssue.Title, newIssue.Description, category, room, currentUser);
-            return Ok(createdIssue.ToDto());
+            return Created(Resources.Issues.AppendPathSegment(createdIssue.Id), createdIssue.ToDto());
         }
 
 

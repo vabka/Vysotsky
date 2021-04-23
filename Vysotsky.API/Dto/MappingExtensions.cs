@@ -78,7 +78,7 @@ namespace Vysotsky.API.Dto
             CreatedAt = issue.CreatedAt,
             Status = issue.Status.ToDto(),
             Room = issue.Room.ToDto(),
-            HasUnread = false //TODO unreads in issues
+            HasUnread = true //TODO unreads in issues
         };
 
         public static IssueStatusDto ToDto(this IssueStatus status) => status switch
@@ -99,17 +99,20 @@ namespace Vysotsky.API.Dto
             Id = category.Id, Name = category.Name
         };
 
+        public static PersistedIssueCommentDto ToDto(this IssueComment comment) =>
+            new();
 
         public static PersistedIssueDto ToDto(this Issue issue) =>
             new()
             {
                 Id = issue.Id,
+                CreatedAt = issue.CreatedAt,
                 Version = issue.Version,
                 Description = issue.Description,
                 Status = issue.Status.ToDto(),
                 Title = issue.Title,
                 CategoryId = issue.CategoryId,
-                RoomId = issue.RoomId,
+                Room = issue.Room.ToDto(),
                 AuthorId = issue.AuthorId
             };
 
@@ -123,7 +126,6 @@ namespace Vysotsky.API.Dto
         public static PersistedRoomDto ToDto(this Room room) => new()
         {
             Id = room.Id,
-            Name = room.Name,
             Number = room.Number,
             Status = room.Status switch
             {
@@ -143,10 +145,7 @@ namespace Vysotsky.API.Dto
             {
                 Id = f.Id,
                 Number = f.Number,
-                Rooms = f.Rooms.Select(r => new OrganizationRoomDto
-                {
-                    Id = r.Id, Name = r.Name, Number = r.Number
-                })
+                Rooms = f.Rooms.Select(r => new OrganizationRoomDto {Id = r.Id, Number = r.Number})
             })
         };
 
@@ -174,5 +173,9 @@ namespace Vysotsky.API.Dto
         {
             Id = organization.Id, Name = organization.Name
         };
+    }
+
+    public class PersistedIssueCommentDto
+    {
     }
 }
