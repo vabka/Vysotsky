@@ -17,5 +17,6 @@ namespace Vysotsky.Service.Types
         public long? WorkerId { get; init; }
         public DateTimeOffset CreatedAt { get; init; }
         public DateTimeOffset UpdatedAt { get; init; }
+        public bool HasUnreadComments { get; init; }
     }
 }

@@ -14,5 +14,6 @@ namespace Vysotsky.API.Dto.Issues
         public string Description { get; init; } = "";
         public long CategoryId { get; init; }
         public PersistedRoomDto Room { get; init; } = null!;
+        public bool HasUnreadComments { get; init; }
     }
 }

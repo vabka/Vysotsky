@@ -36,7 +36,8 @@ namespace Vysotsky.Service.Impl
             SupervisorId = issue.SupervisorId,
             CreatedAt = issue.CreatedAt,
             UpdatedAt = issue.UpdatedAt,
-            WorkerId = issue.WorkerId
+            WorkerId = issue.WorkerId,
+            HasUnreadComments = issue.HasUnreadComments
         };
 
         public IssueService(VysotskyDataConnection vysotskyDataConnection, IEventBus eventBus)
@@ -234,9 +235,7 @@ namespace Vysotsky.Service.Impl
                 .OrderBy(x => x.CreatedAt)
                 .Select(x => new IssueComment
                 {
-                    Content = new MessageContent {Text = x.Text},
-                    AuthorId = x.AuthorId,
-                    CreatedAt = x.CreatedAt
+                    Content = new MessageContent {Text = x.Text}, AuthorId = x.AuthorId, CreatedAt = x.CreatedAt
                 })
                 .ToArrayAsync();
 
@@ -274,11 +273,13 @@ namespace Vysotsky.Service.Impl
                         .GetActualVersions()
                         .OrderBy(x => x.Status == IssueStatus.NeedInfo
                             ? 0
-                            : x.Status == IssueStatus.Accepted
-                                ? 1
-                                : x.Status == IssueStatus.New
-                                    ? 2
-                                    : 3
+                            : x.Status == IssueStatus.Closed ||
+                              x.Status == IssueStatus.Completed ||
+                              x.Status == IssueStatus.Rejected ||
+                              x.Status == IssueStatus.CancelledByCustomer ||
+                              x.Status == IssueStatus.Accepted
+                                ? 2
+                                : 1
                         ),
                 _ => throw new InvalidOperationException()
             };
@@ -296,7 +297,8 @@ namespace Vysotsky.Service.Impl
                     Room = new Room
                     {
                         Id = x.Room.Id, Number = x.Room.Number, Status = x.Room.Status, OwnerId = x.Room.OwnerId
-                    }
+                    },
+                    HasUnreadComments = x.Issue.HasUnreadComments
                 })
                 .Skip(offset)
                 .Take(limit)

@@ -16,6 +16,7 @@ namespace Vysotsky.Data.Entities
         [Column("title")] public string Title { get; init; } = null!;
 
         [Column("description")] public string Description { get; init; } = "";
+        [Column("author_has_unread_comments")] public bool HasUnreadComments { get; init; }
 
         [Column("author_id")] public long AuthorId { get; init; }
 

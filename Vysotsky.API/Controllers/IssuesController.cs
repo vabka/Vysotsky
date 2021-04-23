@@ -91,6 +91,25 @@ namespace Vysotsky.API.Controllers
             return Ok(comments.Select(c => c.ToDto()));
         }
 
+        [HttpPost("{issueId}/comments")]
+        public async Task<ActionResult<ApiResponse<PersistedIssueCommentDto>>> PostComment([FromRoute] long issueId)
+        {
+            var issue = await issueService.GetIssueByIdOrNullAsync(issueId);
+            if (issue == null)
+            {
+                return IssueNotFound();
+            }
+
+            var issueCustomer = await userService.GetUserByIdOrNullAsync(issue.AuthorId);
+            if (currentUserProvider.CurrentUser.IsCustomer() &&
+                currentUserProvider.CurrentUser.OrganizationId != issueCustomer?.OrganizationId)
+            {
+                return NotAuthorized("Customer can read issues in organization", "issues.notAuthorized");
+            }
+
+            return Ok();
+        }
+
         [HttpPost]
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> CreateIssue([FromBody] IssueDto newIssue)
         {

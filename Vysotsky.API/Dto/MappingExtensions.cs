@@ -78,7 +78,7 @@ namespace Vysotsky.API.Dto
             CreatedAt = issue.CreatedAt,
             Status = issue.Status.ToDto(),
             Room = issue.Room.ToDto(),
-            HasUnread = true //TODO unreads in issues
+            HasUnread = issue.HasUnreadComments,
         };
 
         public static IssueStatusDto ToDto(this IssueStatus status) => status switch
@@ -113,7 +113,8 @@ namespace Vysotsky.API.Dto
                 Title = issue.Title,
                 CategoryId = issue.CategoryId,
                 Room = issue.Room.ToDto(),
-                AuthorId = issue.AuthorId
+                AuthorId = issue.AuthorId,
+                HasUnreadComments = issue.HasUnreadComments,
             };
 
         public static PersistedBuildingDto ToDto(this Building building) => new()

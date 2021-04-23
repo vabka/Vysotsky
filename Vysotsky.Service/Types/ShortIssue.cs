@@ -10,5 +10,6 @@ namespace Vysotsky.Service.Types
         public Room Room { get; init; } = null!;
         public DateTimeOffset CreatedAt { get; init; }
         public IssueStatus Status { get; init; }
+        public bool HasUnreadComments { get; init; }
     }
 }

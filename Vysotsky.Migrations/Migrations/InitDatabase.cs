@@ -81,7 +81,8 @@ namespace Vysotsky.Migrations.Migrations
                 .WithColumn("author_id").References("user")
                 .WithColumn("supervisor_id").References("user").Nullable()
                 .WithColumn("worker_id").References("user").Nullable()
-                .WithColumn("room_id").References("room");
+                .WithColumn("room_id").References("room")
+                .WithColumn("author_has_unread_comments").AsBoolean();
 
             Create.Table("issue_image")
                 .WithColumn("issue_id").AsInt64().PrimaryKey() // References(issue)
