@@ -164,7 +164,9 @@ namespace Vysotsky.API
             });
         }
 
-        private static void ConfigureDomainServices(IServiceCollection services) =>
+        private static void ConfigureDomainServices(IServiceCollection services)
+        {
+            services.AddScoped<IEventBus, SignalREventBus>();
             services.Scan(t =>
                 t.FromAssemblyOf<IStringHasher>()
                     .AddClasses(f =>
@@ -172,6 +174,7 @@ namespace Vysotsky.API
                             .Where(x => x.IsPublic))
                     .AsImplementedInterfaces()
                     .WithScopedLifetime());
+        }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) =>
             ConfigureWebApp(app, env);

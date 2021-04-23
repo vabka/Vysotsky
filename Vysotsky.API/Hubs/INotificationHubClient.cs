@@ -4,6 +4,6 @@ namespace Vysotsky.API.Hubs
 {
     public interface INotificationHubClient
     {
-        Task ReceiveNotification<T>(string title, string text, T payload);
+        Task ReceiveEvent<TPayload>(string type, TPayload payload);
     }
 }

@@ -70,9 +70,9 @@ namespace Vysotsky.API.Controllers
         public async Task<ActionResult<ApiResponse<PersistedIssueDto>>> CreateIssue([FromBody] IssueDto newIssue)
         {
             var currentUser = currentUserProvider.CurrentUser;
-            if (currentUser.CanCreateIssue())
+            if (!currentUser.CanCreateIssue())
             {
-                return NotAuthorized("Worker is not authorized to create issues", "issues.notAuthorized");
+                return NotAuthorized("User is not authorized to create issues", "issues.notAuthorized");
             }
 
             var category = await categoriesService.GetByIdOrNullAsync(newIssue.CategoryId);
