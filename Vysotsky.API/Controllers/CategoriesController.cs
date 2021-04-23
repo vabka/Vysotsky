@@ -55,5 +55,29 @@ namespace Vysotsky.API.Controllers
             var categories = await categoriesService.GetAllAsync();
             return Ok(categories.Select(c => c.ToDto()));
         }
+
+        [HttpPut("{categoryId:long}")]
+        public async Task<ActionResult<ApiResponse>> EditCategory([FromRoute] long categoryId, CategoryDto data)
+        {
+            if (!currentUserProvider.CurrentUser.CanEditCategories())
+            {
+                return NotAuthorizedToEdit();
+            }
+
+            var category = await categoriesService.GetByIdOrNullAsync(categoryId);
+            if (category == null)
+            {
+                return NotFound("Category not found", "categories.notFound");
+            }
+
+            var image = await imagesService.GetImageByIdOrNullAsync(data.ImageId);
+            if (image == null)
+            {
+                throw new InvalidOperationException("TODO");
+            }
+
+            await categoriesService.ChangeAsync(category, data.Name, image);
+            return Ok();
+        }
     }
 }

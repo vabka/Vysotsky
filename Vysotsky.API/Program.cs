@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Serilog;
-using Serilog.Sinks.Elasticsearch;
 using Vysotsky.API;
 
 Host.CreateDefaultBuilder(args)
@@ -15,13 +14,9 @@ Host.CreateDefaultBuilder(args)
         l
             .Enrich.FromLogContext()
             .WriteTo.Console()
-            .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://localhost:9200"))
-            {
-                AutoRegisterTemplate = true, AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv6
-            }).MinimumLevel.Information()
+            .MinimumLevel.Information()
     )
     .ConfigureWebHost(builder => builder
-        // Defaults
         .UseKestrel((builderContext, options) =>
             options.Configure(builderContext.Configuration.GetSection("Kestrel"), true))
         .ConfigureServices((hostingContext, services) =>

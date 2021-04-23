@@ -10,5 +10,8 @@ namespace Vysotsky.Data.Entities
         public string Name { get; init; } = null!;
         [Column("image_id")]
         public long ImageId { get; init; }
+        [Column("order")]
+        public int? Order { get; init; }
+
     }
 }
