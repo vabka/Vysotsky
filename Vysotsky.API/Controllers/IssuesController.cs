@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -64,6 +65,12 @@ namespace Vysotsky.API.Controllers
             }
 
             return Ok(issue.ToDto());
+        }
+
+        [HttpGet("{issueId}/comments")]
+        public Task<ActionResult<ApiResponse>> GetComments()
+        {
+            throw new NotImplementedException();
         }
 
         [HttpPost]

@@ -5,6 +5,6 @@ namespace Vysotsky.Service.Interfaces
 {
     public interface IEventBus
     {
-        Task PushAsync<TEvent>(TEvent data) where TEvent : Event;
+        Task PushAsync<TEvent>(TEvent data) where TEvent : BaseEvent;
     }
 }

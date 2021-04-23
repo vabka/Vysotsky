@@ -54,10 +54,7 @@ namespace Vysotsky.Service.Impl
                 Note = "",
                 Status = IssueStatus.New
             });
-            _ = eventBus.PushAsync(new IssueCreated
-            {
-                Id = id,
-            });
+            _ = eventBus.PushAsync(new IssueCreated {Id = id,});
             return (await GetIssueByIdOrNullAsync(id))!;
         }
 
@@ -237,6 +234,7 @@ namespace Vysotsky.Service.Impl
             {
                 {Role: UserRole.SuperUser or UserRole.Supervisor}
                     => query
+                        .GetActualVersions()
                         .OrderBy(x =>
                             x.Status == IssueStatus.New
                                 ? 0
@@ -247,20 +245,29 @@ namespace Vysotsky.Service.Impl
                                         : 3
                         ),
                 {Role: UserRole.Worker}
-                    => query.Where(i => i.WorkerId == user.Id),
+                    => query.Where(i => i.WorkerId == user.Id)
+                        .OrderBy(i => i.Status == IssueStatus.InProgress ? 0 : 1),
                 {Role: UserRole.OrganizationOwner or UserRole.OrganizationMember}
                     => query
                         .InnerJoin(db.Users, (l, r) => l.AuthorId == r.Id,
                             (i, u) => new {Issue = i, u.OrganizationId})
                         .Where(x => x.OrganizationId == user.OrganizationId)
-                        .Select(x => x.Issue),
+                        .Select(x => x.Issue)
+                        .GetActualVersions()
+                        .OrderBy(x => x.Status == IssueStatus.NeedInfo
+                            ? 0
+                            : x.Status == IssueStatus.Accepted
+                                ? 1
+                                : x.Status == IssueStatus.New
+                                    ? 2
+                                    : 3
+                        ),
                 _ => throw new InvalidOperationException()
             };
-            query = query.GetActualVersions();
             var count = await query.CountAsync();
             var data = await query
-                .ThenOrBy(i => i.CreatedAt)
-                .ThenBy(i => i.Id)
+                .ThenOrByDescending(i => i.CreatedAt)
+                .ThenByDescending(i => i.Id)
                 .InnerJoin(db.Rooms, (i, r) => i.RoomId == r.Id, (i, r) => new {Issue = i, Room = r})
                 .Select(x => new ShortIssue
                 {
