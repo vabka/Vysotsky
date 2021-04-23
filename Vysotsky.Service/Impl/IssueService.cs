@@ -15,6 +15,7 @@ namespace Vysotsky.Service.Impl
     public class IssueService : IIssueService
     {
         private readonly VysotskyDataConnection db;
+        private readonly IEventBus eventBus;
 
         private static readonly Expression<Func<IssueRecord, Issue>> MapToIssue = issue => new Issue
         {
@@ -32,8 +33,11 @@ namespace Vysotsky.Service.Impl
             WorkerId = issue.WorkerId
         };
 
-        public IssueService(VysotskyDataConnection vysotskyDataConnection) =>
+        public IssueService(VysotskyDataConnection vysotskyDataConnection, IEventBus eventBus)
+        {
             db = vysotskyDataConnection;
+            this.eventBus = eventBus;
+        }
 
 
         public async Task<Issue> CreateIssueAsync(string title, string description, Category category, Room room,
@@ -49,6 +53,10 @@ namespace Vysotsky.Service.Impl
                 CategoryId = category.Id,
                 Note = "",
                 Status = IssueStatus.New
+            });
+            _ = eventBus.PushAsync(new IssueCreated
+            {
+                Id = id,
             });
             return (await GetIssueByIdOrNullAsync(id))!;
         }
