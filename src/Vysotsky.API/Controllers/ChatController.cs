@@ -6,6 +6,7 @@ using Vysotsky.API.Dto;
 using Vysotsky.API.Dto.Chats;
 using Vysotsky.API.Dto.Common;
 using Vysotsky.API.Infrastructure;
+using Vysotsky.Service.Impl;
 using Vysotsky.Service.Interfaces;
 
 namespace Vysotsky.API.Controllers
@@ -36,10 +37,12 @@ namespace Vysotsky.API.Controllers
 
         [HttpGet("support/messages")]
         public async Task<ActionResult<ApiResponse<PaginatedData<ChatMessageDto>>>> GetMessagesInSupportChat(
-            [FromQuery] PaginationParameters paginationParameters)
+            [FromQuery] PaginationParameters paginationParameters,
+            [FromQuery] SortingParameters sortingParameters)
         {
             var chat = await chatService.GetConversationByUserAsync(currentUserProvider.CurrentUser);
             var (total, messages) = await chatService.GetMessagesAsync(chat, paginationParameters.Until,
+                Ordering.OldFirst,
                 paginationParameters.Skip, paginationParameters.Take);
             return Ok(PaginatedData.Create(paginationParameters, total, messages.Select(m => m.ToDto())));
         }
@@ -93,6 +96,7 @@ namespace Vysotsky.API.Controllers
             }
 
             var (total, messages) = await chatService.GetMessagesAsync(conversation, paginationParameters.Until,
+                Ordering.OldFirst,
                 paginationParameters.Skip, paginationParameters.Take);
             return Ok(PaginatedData.Create(paginationParameters, total, messages.Select(m => m.ToDto())));
         }

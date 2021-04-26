@@ -30,22 +30,22 @@ namespace Vysotsky.Service.Impl
             if (author.Id == destination.AttachedUserId)
             {
                 await db.Conversations.UpdateAsync(x => x.Id == destination.AttachedUserId,
-                    x => new ConversationRecord { HasUnreadForSupport = true });
+                    x => new ConversationRecord {HasUnreadForSupport = true});
             }
             else
             {
                 await db.Conversations.UpdateAsync(x => x.Id == destination.AttachedUserId,
-                    x => new ConversationRecord { HasUnreadForCustomer = true });
+                    x => new ConversationRecord {HasUnreadForCustomer = true});
             }
 
             await transaction.CommitAsync();
             return await db.Messages
                 .Where(x => x.Id == msgId)
                 .InnerJoin(db.Users, (l, r) => l.AuthorId == r.Id,
-                    (l, r) => new { Message = l, Author = r })
+                    (l, r) => new {Message = l, Author = r})
                 .Select(m => new ChatMessage
                 {
-                    Content = new MessageContent { Text = m.Message.TextContent },
+                    Content = new MessageContent {Text = m.Message.TextContent},
                     From = m.Author.Id,
                     Status = m.Message.Status,
                     CreatedAt = m.Message.CreatedAt
@@ -54,21 +54,25 @@ namespace Vysotsky.Service.Impl
         }
 
         public async Task<(int Total, IEnumerable<ChatMessage> Data)> GetMessagesAsync(Conversation conversation,
-            DateTimeOffset until, int skip, int take)
+            DateTimeOffset until, Ordering ordering, int skip, int take)
         {
             var query = db.Messages
                 .Where(x => x.UserId == conversation.AttachedUserId)
                 .Where(x => x.CreatedAt < until)
-                .OrderBy(x => x.CreatedAt)
-                .ThenBy(x => x.Id)
                 .Select(x => new ChatMessage
                 {
                     Id = x.Id,
-                    Content = new MessageContent { Text = x.TextContent, },
+                    Content = new MessageContent {Text = x.TextContent,},
                     From = x.AuthorId,
                     Status = x.Status,
                     CreatedAt = x.CreatedAt
                 });
+            query = ordering switch
+            {
+                Ordering.OldFirst => query.OrderBy(x => x.CreatedAt).ThenBy(x => x.Id),
+                Ordering.NewFirst => query.OrderByDescending(x => x.CreatedAt).ThenByDescending(x => x.Id),
+                _                 => throw new ArgumentOutOfRangeException(nameof(ordering), ordering, null)
+            };
             var total = await query.CountAsync();
             var data = await query.Skip(skip).Take(take).ToArrayAsync();
             return (total, data);
@@ -77,7 +81,7 @@ namespace Vysotsky.Service.Impl
         public async Task<Conversation?> GetConversationByIdOrNullAsync(long id) =>
             await db.Conversations
                 .Where(x => x.Id == id)
-                .Select(x => new Conversation { AttachedUserId = x.Id, HasUnreadMessages = x.HasUnreadForSupport })
+                .Select(x => new Conversation {AttachedUserId = x.Id, HasUnreadMessages = x.HasUnreadForSupport})
                 .FirstOrDefaultAsync();
 
         public async Task<Conversation> GetConversationByUserAsync(User user)
@@ -86,20 +90,19 @@ namespace Vysotsky.Service.Impl
             if (conversation == null)
             {
                 await db.Conversations.InsertAsync(() =>
-                    new ConversationRecord { Id = user.Id, HasUnreadForCustomer = false, HasUnreadForSupport = false });
+                    new ConversationRecord {Id = user.Id, HasUnreadForCustomer = false, HasUnreadForSupport = false});
             }
 
             return new Conversation
             {
-                AttachedUserId = user.Id,
-                HasUnreadMessages = conversation?.HasUnreadForSupport ?? false
+                AttachedUserId = user.Id, HasUnreadMessages = conversation?.HasUnreadForSupport ?? false
             };
         }
 
         public async Task<IEnumerable<Conversation>> GetAllStartedConversationsAsync() =>
             await db.Conversations
                 .Select(
-                    x => new Conversation { AttachedUserId = x.Id, HasUnreadMessages = x.HasUnreadForSupport })
+                    x => new Conversation {AttachedUserId = x.Id, HasUnreadMessages = x.HasUnreadForSupport})
                 .OrderByDescending(x => x.HasUnreadMessages).ToArrayAsync();
 
         public async Task MarkAllMessagesReadAsync(User reader, Conversation conversation)
@@ -109,17 +112,17 @@ namespace Vysotsky.Service.Impl
                     x.UserId == conversation.AttachedUserId &&
                     x.AuthorId != reader.Id &&
                     x.Status == ChatMessageStatus.Sent,
-                x => new SupportChatMessageRecord { Status = ChatMessageStatus.Read }
+                x => new SupportChatMessageRecord {Status = ChatMessageStatus.Read}
             );
             switch (reader.Role)
             {
                 case UserRole.Supervisor or UserRole.SuperUser:
                     await db.Conversations.UpdateAsync(x => x.Id == conversation.AttachedUserId,
-                        x => new ConversationRecord { HasUnreadForSupport = false });
+                        x => new ConversationRecord {HasUnreadForSupport = false});
                     break;
                 case UserRole.OrganizationMember or UserRole.OrganizationOwner:
                     await db.Conversations.UpdateAsync(x => x.Id == conversation.AttachedUserId,
-                        x => new ConversationRecord { HasUnreadForCustomer = false });
+                        x => new ConversationRecord {HasUnreadForCustomer = false});
                     break;
                 default:
                     throw new InvalidOperationException();
@@ -127,5 +130,11 @@ namespace Vysotsky.Service.Impl
 
             await t.CommitAsync();
         }
+    }
+
+    public enum Ordering
+    {
+        OldFirst,
+        NewFirst
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using NSwag.Annotations;
+using Vysotsky.Service.Impl;
 
 namespace Vysotsky.API.Dto.Common
 {
@@ -22,6 +23,24 @@ namespace Vysotsky.API.Dto.Common
 
             return Task.CompletedTask;
         }
+    }
+
+    public class SortingParameters
+    {
+        [FromQuery(Name = "order")] public OrderingDto Order { get; init; } = OrderingDto.Desc;
+
+        public Ordering Ordering => Order switch
+        {
+            OrderingDto.Asc  => Ordering.OldFirst,
+            OrderingDto.Desc => Ordering.NewFirst,
+            _                      => throw new ArgumentOutOfRangeException()
+        };
+    }
+
+    public enum OrderingDto
+    {
+        Asc,
+        Desc
     }
 
     public record PaginationParameters
