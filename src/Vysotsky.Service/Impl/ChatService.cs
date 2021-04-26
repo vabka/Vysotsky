@@ -61,6 +61,7 @@ namespace Vysotsky.Service.Impl
                 .Where(x => x.CreatedAt < until)
                 .Select(x => new ChatMessage
                 {
+                    Id = x.Id,
                     Content = new MessageContent {Text = x.TextContent,},
                     From = x.AuthorId,
                     Status = x.Status,
