@@ -6,8 +6,6 @@ WORKDIR /source/src/Vysotsky.API
 
 RUN dotnet publish \
     -c Release \
-    -r linux-x64 \
-    -p:PublishReadyToRun=true \
     -o /app
 
 # final stage/image
