@@ -95,8 +95,8 @@ namespace Vysotsky.Service.Impl
                 .Cast<DateTimeOffset?>()
                 .FirstOrDefaultAsync();
 
-        public Task<bool> CheckTokenRevokedAsync(Guid tokenIdentifier) =>
-            vysotskyDataConnection.BlockedTokens.AnyAsync(x => x.Jti == tokenIdentifier);
+        public async Task<bool> CheckTokenRevokedAsync(Guid tokenIdentifier) =>
+            await vysotskyDataConnection.BlockedTokens.AnyAsync(x => x.Jti == tokenIdentifier);
 
         private string EncodeToken(TokenPayload payload) =>
             JwtBuilder.Create()
