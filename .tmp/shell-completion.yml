@@ -1,0 +1,36 @@
+Continue: 
+Help: 
+Host:
+- AppVeyor
+- AzurePipelines
+- Bamboo
+- Bitrise
+- GitHubActions
+- GitLab
+- Jenkins
+- SpaceAutomation
+- TeamCity
+- Terminal
+- TravisCI
+NoLogo: 
+Plan: 
+Profile: 
+Root: 
+Skip:
+- Clean
+- Compile
+- PrepareDocker
+- Restore
+Target:
+- Clean
+- Compile
+- PrepareDocker
+- Restore
+Verbosity:
+- Minimal
+- Normal
+- Quiet
+- Verbose
+configuration:
+- Debug
+- Release
