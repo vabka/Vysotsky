@@ -1,1 +1,1 @@
-docker build ./src/Vysotksy.API/Dockerfile
+docker build . -f ./src/Vysotsky.API/Dockerfile

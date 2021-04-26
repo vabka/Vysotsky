@@ -173,10 +173,10 @@ namespace Vysotsky.API
 
         public static void ConfigureWebApp(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseCors(c => c.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod());
-            }
+            app.UseCors(c => c
+                .AllowAnyHeader()
+                .AllowAnyOrigin()
+                .AllowAnyMethod());
 
             app.UseHealthChecks("/api/health");
             app.UseSwaggerUi3();

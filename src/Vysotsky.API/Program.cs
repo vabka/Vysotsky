@@ -18,7 +18,8 @@ Host.CreateDefaultBuilder(args)
     )
     .ConfigureWebHost(builder => builder
         .UseKestrel((builderContext, options) =>
-            options.Configure(builderContext.Configuration.GetSection("Kestrel"), true))
+            options.Configure(builderContext.Configuration.GetSection("Kestrel"), true)
+                .AnyIPEndpoint(3001))
         .ConfigureServices((hostingContext, services) =>
         {
             services.PostConfigure<HostFilteringOptions>(options =>
