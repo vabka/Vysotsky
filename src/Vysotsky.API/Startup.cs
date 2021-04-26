@@ -3,15 +3,12 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using LinqToDB;
 using LinqToDB.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
@@ -19,7 +16,6 @@ using NSwag.Generation.Processors.Security;
 using Vysotsky.API.Hubs;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Data;
-using Vysotsky.Data.Entities;
 using Vysotsky.Service.Impl;
 using Vysotsky.Service.Interfaces;
 
@@ -179,7 +175,8 @@ namespace Vysotsky.API
                 .AllowAnyMethod());
 
             app.UseHealthChecks("/api/health");
-            app.UseSwaggerUi3();
+            app.UseSwaggerUi3(c => c.Path = "/swagger");
+            app.UseReDoc(c => c.Path = "/redoc");
             app.UseOpenApi();
 
             app.UseMiddleware<UnhandledExceptionMiddleware>();
@@ -192,89 +189,6 @@ namespace Vysotsky.API
                 endpoints.MapHub<NotificationHub>("/notification-hub");
                 endpoints.MapHub<ChatHub>("/chat-hub");
                 endpoints.MapControllers();
-                if (env.IsDevelopment())
-                {
-                    endpoints.MapGet("/test", async ctx =>
-                    {
-                        var hasher = ctx.RequestServices.GetRequiredService<IStringHasher>();
-                        var database = ctx.RequestServices.GetRequiredService<VysotskyDataConnection>();
-                        var authService = ctx.RequestServices.GetRequiredService<IAuthenticationService>();
-                        if (!await database.Users.AnyAsync(i => i.Username == "test_superuser"))
-                        {
-                            await using var transaction = await database.BeginTransactionAsync();
-                            var hash = hasher.Hash("test");
-                            await database.Users.InsertAsync(() => new UserRecord
-                            {
-                                Username = "test_superuser",
-                                PasswordHash = hash,
-                                Role = UserRole.SuperUser,
-                                FirstName = "Админ",
-                                LastName = "Админович",
-                                Contacts = Array.Empty<UserContact>(),
-                                LastPasswordChange = DateTimeOffset.MinValue
-                            });
-                            await database.Users.InsertAsync(() => new UserRecord
-                            {
-                                Username = "test_supervisor",
-                                PasswordHash = hash,
-                                Role = UserRole.Supervisor,
-                                FirstName = "Диспетчер",
-                                LastName = "Админович",
-                                Contacts = Array.Empty<UserContact>(),
-                                LastPasswordChange = DateTimeOffset.MinValue
-                            });
-                            await database.Users.InsertAsync(() => new UserRecord
-                            {
-                                Username = "test_worker",
-                                PasswordHash = hash,
-                                Role = UserRole.Worker,
-                                FirstName = "Работник",
-                                LastName = "Админович",
-                                Contacts = Array.Empty<UserContact>(),
-                                LastPasswordChange = DateTimeOffset.MinValue
-                            });
-                            await transaction.CommitAsync();
-                        }
-
-                        await ctx.Response.WriteAsJsonAsync(new
-                        {
-                            superuser = new
-                            {
-                                username = "test_superuser",
-                                token = await authService.TryIssueTokenByUserCredentialsAsync("test_superuser", "test",
-                                    true),
-                            },
-                            supervisor = new
-                            {
-                                username = "test_supervisor",
-                                token = await authService.TryIssueTokenByUserCredentialsAsync("test_supervisor",
-                                    "test",
-                                    true),
-                            },
-                            worker = new
-                            {
-                                username = "test_worker",
-                                token = await authService.TryIssueTokenByUserCredentialsAsync("test_worker",
-                                    "test",
-                                    true),
-                            },
-                            representative = new
-                            {
-                                username = "representative",
-                                token = await authService.TryIssueTokenByUserCredentialsAsync("representative",
-                                    "test",
-                                    true)
-                            },
-                            customer = new
-                            {
-                                username = "customer",
-                                token = await authService.TryIssueTokenByUserCredentialsAsync("customer",
-                                    "test",
-                                    true)
-                            }
-                        }, new JsonSerializerOptions {WriteIndented = true});
-                    });
-                }
             });
         }
     }

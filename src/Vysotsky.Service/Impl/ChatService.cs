@@ -41,14 +41,13 @@ namespace Vysotsky.Service.Impl
             await transaction.CommitAsync();
             return await db.Messages
                 .Where(x => x.Id == msgId)
-                .InnerJoin(db.Users, (l, r) => l.AuthorId == r.Id,
-                    (l, r) => new {Message = l, Author = r})
                 .Select(m => new ChatMessage
                 {
-                    Content = new MessageContent {Text = m.Message.TextContent},
-                    From = m.Author.Id,
-                    Status = m.Message.Status,
-                    CreatedAt = m.Message.CreatedAt
+                    Id = m.Id,
+                    Content = new MessageContent {Text = m.TextContent},
+                    From = m.AuthorId,
+                    Status = m.Status,
+                    CreatedAt = m.CreatedAt
                 })
                 .SingleAsync();
         }
