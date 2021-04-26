@@ -42,7 +42,7 @@ namespace Vysotsky.API.Controllers
         {
             var chat = await chatService.GetConversationByUserAsync(currentUserProvider.CurrentUser);
             var (total, messages) = await chatService.GetMessagesAsync(chat, paginationParameters.Until,
-                Ordering.OldFirst,
+                sortingParameters.Ordering,
                 paginationParameters.Skip, paginationParameters.Take);
             return Ok(PaginatedData.Create(paginationParameters, total, messages.Select(m => m.ToDto())));
         }
