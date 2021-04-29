@@ -6,7 +6,6 @@ using Vysotsky.API.Dto;
 using Vysotsky.API.Dto.Chats;
 using Vysotsky.API.Dto.Common;
 using Vysotsky.API.Infrastructure;
-using Vysotsky.Service.Impl;
 using Vysotsky.Service.Interfaces;
 
 namespace Vysotsky.API.Controllers
@@ -43,7 +42,8 @@ namespace Vysotsky.API.Controllers
             var chat = await chatService.GetConversationByUserAsync(currentUserProvider.CurrentUser);
             var (total, messages) = await chatService.GetMessagesAsync(chat, paginationParameters.Until,
                 sortingParameters.Ordering,
-                paginationParameters.Skip, paginationParameters.Take);
+                paginationParameters.Skip,
+                paginationParameters.Take);
             return Ok(PaginatedData.Create(paginationParameters, total, messages.Select(m => m.ToDto())));
         }
 
@@ -81,8 +81,10 @@ namespace Vysotsky.API.Controllers
 
         [HttpGet("{conversationId:long}/messages")]
         public async Task<ActionResult<ApiResponse<PaginatedData<ChatMessageDto>>>> GetMessagesInConversation(
+            [FromRoute] long conversationId,
             [FromQuery] PaginationParameters paginationParameters,
-            [FromRoute] long conversationId)
+            [FromQuery] SortingParameters sort
+        )
         {
             if (!currentUserProvider.CurrentUser.IsSupervisor())
             {
@@ -96,7 +98,7 @@ namespace Vysotsky.API.Controllers
             }
 
             var (total, messages) = await chatService.GetMessagesAsync(conversation, paginationParameters.Until,
-                Ordering.OldFirst,
+                sort.Ordering,
                 paginationParameters.Skip, paginationParameters.Take);
             return Ok(PaginatedData.Create(paginationParameters, total, messages.Select(m => m.ToDto())));
         }

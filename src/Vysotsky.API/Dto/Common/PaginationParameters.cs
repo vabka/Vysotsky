@@ -27,7 +27,7 @@ namespace Vysotsky.API.Dto.Common
 
     public class SortingParameters
     {
-        [FromQuery(Name = "order")] public OrderingDto Order { get; init; } = OrderingDto.Desc;
+        [FromQuery(Name = "ord")] public OrderingDto Order { get; init; } = OrderingDto.Desc;
 
         public Ordering Ordering => Order switch
         {
