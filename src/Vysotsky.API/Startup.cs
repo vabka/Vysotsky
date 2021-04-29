@@ -88,6 +88,8 @@ namespace Vysotsky.API
                                     case TraceLevel.Verbose:
                                         logger.InterpolatedDebug(str);
                                         break;
+                                    case TraceLevel.Off:
+                                        break;
                                     default:
                                         throw new ArgumentOutOfRangeException(nameof(l), l, null);
                                 }
@@ -169,11 +171,11 @@ namespace Vysotsky.API
 
         public static void ConfigureWebApp(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseCors(c => c
+            app.UseCors(x => x
+                .AllowAnyMethod()
                 .AllowAnyHeader()
                 .AllowAnyOrigin()
-                .AllowAnyMethod());
-
+                .AllowCredentials());
             app.UseHealthChecks("/api/health");
             app.UseSwaggerUi3(c => c.Path = "/swagger");
             app.UseReDoc(c => c.Path = "/redoc");
