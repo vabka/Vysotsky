@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using LinqToDB.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -119,7 +120,25 @@ namespace Vysotsky.API
                             new SymmetricSecurityKey(
                                 Encoding.UTF8.GetBytes(configuration.GetValue<string>("SECRET"))),
                     };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) &&
+                                (path.StartsWithSegments("/chat-hub") ||
+                                path.StartsWithSegments("/notification-hub")))
+                            {
+                                context.Token = accessToken;
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
+
             services
                 .AddHttpContextAccessor()
                 .AddAuthorizationCore()
@@ -174,7 +193,7 @@ namespace Vysotsky.API
             app.UseCors(x => x
                 .AllowAnyMethod()
                 .AllowAnyHeader()
-                .AllowAnyOrigin()
+                .SetIsOriginAllowed(_ => true)
                 .AllowCredentials());
             app.UseHealthChecks("/api/health");
             app.UseSwaggerUi3(c => c.Path = "/swagger");

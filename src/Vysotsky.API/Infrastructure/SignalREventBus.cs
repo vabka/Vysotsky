@@ -14,7 +14,6 @@ namespace Vysotsky.API.Infrastructure
             this.notificationHub = notificationHub;
 
         public async Task PushAsync<TEvent>(TEvent data) where TEvent : BaseEvent =>
-            //TODO Отправлять не всем
             await notificationHub.Clients.All.ReceiveEvent(typeof(TEvent).Name, data);
     }
 }
