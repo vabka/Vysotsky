@@ -18,21 +18,20 @@ Host.CreateDefaultBuilder(args)
     )
     .ConfigureWebHost(builder => builder
         .UseKestrel((builderContext, options) =>
-            options.Configure(builderContext.Configuration.GetSection("Kestrel"), true)
-                .AnyIPEndpoint(3001))
+            options.Configure(builderContext.Configuration.GetSection("Kestrel"), true))
         .ConfigureServices((hostingContext, services) =>
         {
             services.PostConfigure<HostFilteringOptions>(options =>
             {
-                if (options.AllowedHosts is null or {Count: 0})
+                if (options.AllowedHosts is null or { Count: 0 })
                 {
                     var hosts = hostingContext
                         .Configuration["AllowedHosts"]
-                        ?.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
+                        ?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                     options.AllowedHosts = hosts switch
                     {
-                        {Length: > 0} => hosts,
-                        _             => new[] {"*"}
+                        { Length: > 0 } => hosts,
+                        _ => new[] { "*" }
                     };
                 }
             });
@@ -42,10 +41,7 @@ Host.CreateDefaultBuilder(args)
         })
         .ConfigureServices((ctx, services) => Startup.ConfigureServices(services, ctx.Configuration))
         .Configure(app => app.UseHostFiltering())
-        .Configure(app =>
-        {
-            app.UseSerilogRequestLogging();
-        })
+        .Configure(app => app.UseSerilogRequestLogging())
         .Configure((ctx, app) => Startup.ConfigureWebApp(app, ctx.HostingEnvironment)))
     .Build()
     .Run();

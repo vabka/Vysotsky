@@ -8,7 +8,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DOTNET_ENVIRONMENT": "Development",
-        "PG_CONNECTION_STRING": "User ID=postgres;Password=postgres;Host=localhost;Port=5432;Database=vysotsky",
+        "PG_CONNECTION_STRING": "User ID=postgres;Password=postgres;Host=localhost;Port=5432;Database=vysotsky"
       }
     }
   }
