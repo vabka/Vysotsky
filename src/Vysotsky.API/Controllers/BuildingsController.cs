@@ -107,7 +107,8 @@ namespace Vysotsky.API.Controllers
         }
 
         [HttpGet("{buildingId:long}/floors/{floorId:long}/rooms")]
-        public async Task<ActionResult<ApiResponse<PersistedRoomDto[]>>> GetAllRoomsOnFloor([FromRoute] long buildingId,
+        public async Task<ActionResult<ApiResponse<ListDto<PersistedRoomDto>>>> GetAllRoomsOnFloor(
+            [FromRoute] long buildingId,
             [FromRoute] long floorId)
         {
             var building = await roomService.GetBuildingByIdOrNullAsync(buildingId);
@@ -125,17 +126,18 @@ namespace Vysotsky.API.Controllers
             var rooms = await roomService.GetAllRoomsOnFloorAsync(floor);
             return Ok(rooms
                 .Select(r => r.ToDto())
+                .ToDto()
             );
         }
 
         private static RoomStatus ToModel(RoomStatusDto statusDto) =>
             statusDto switch
             {
-                RoomStatusDto.Free       => RoomStatus.Free,
-                RoomStatusDto.Owned      => RoomStatus.Owned,
-                RoomStatusDto.Rented     => RoomStatus.Rented,
+                RoomStatusDto.Free => RoomStatus.Free,
+                RoomStatusDto.Owned => RoomStatus.Owned,
+                RoomStatusDto.Rented => RoomStatus.Rented,
                 RoomStatusDto.Unavalable => RoomStatus.Unavailable,
-                _                        => throw new InvalidOperationException()
+                _ => throw new InvalidOperationException()
             };
     }
 }
