@@ -89,8 +89,6 @@ namespace Vysotsky.API
                                     case TraceLevel.Verbose:
                                         logger.InterpolatedDebug(str);
                                         break;
-                                    case TraceLevel.Off:
-                                        break;
                                     default:
                                         throw new ArgumentOutOfRangeException(nameof(l), l, null);
                                 }

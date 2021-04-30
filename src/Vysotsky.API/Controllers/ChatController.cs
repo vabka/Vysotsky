@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +22,7 @@ namespace Vysotsky.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<IEnumerable<ConversationDto>>>> GetChats()
+        public async Task<ActionResult<ApiResponse<ListDto<ConversationDto>>>> GetChats()
         {
             if (!currentUserProvider.CurrentUser.IsSupervisor())
             {
@@ -31,7 +30,7 @@ namespace Vysotsky.API.Controllers
             }
 
             var conversations = await chatService.GetAllStartedConversationsAsync();
-            return Ok(conversations.Select(x => x.ToDto()));
+            return Ok(conversations.Select(x => x.ToDto()).ToDto());
         }
 
         [HttpGet("support/messages")]

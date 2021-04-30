@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Flurl;
@@ -70,7 +69,7 @@ namespace Vysotsky.API.Controllers
         }
 
         [HttpGet("{issueId}/comments")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<PersistedIssueCommentDto>>>> GetComments(
+        public async Task<ActionResult<ApiResponse<ListDto<PersistedIssueCommentDto>>>> GetComments(
             [FromRoute] long issueId)
         {
             var issue = await issueService.GetIssueByIdOrNullAsync(issueId);
@@ -88,7 +87,7 @@ namespace Vysotsky.API.Controllers
             }
 
             var comments = await issueService.GetCommentsAsync(issue);
-            return Ok(comments.Select(c => c.ToDto()));
+            return Ok(comments.Select(c => c.ToDto()).ToDto());
         }
 
         [HttpPost("{issueId}/comments")]
@@ -139,11 +138,11 @@ namespace Vysotsky.API.Controllers
 
 
         [HttpGet("{issueId:long}/history")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Issue>>>> GetHistory([FromRoute] long issueId) =>
+        public async Task<ActionResult<ApiResponse<ListDto<Issue>>>> GetHistory([FromRoute] long issueId) =>
             await issueService.GetIssueByIdOrNullAsync(issueId) switch
             {
                 null      => IssueNotFound(),
-                var issue => Ok((await issueService.GetIssueHistoryAsync(issue)).Select(i => i.ToDto()))
+                var issue => Ok((await issueService.GetIssueHistoryAsync(issue)).Select(i => i.ToDto()).ToDto())
             };
 
         [HttpPost("{issueId:long}/state/needInfo")]
