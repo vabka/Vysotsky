@@ -6,14 +6,18 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Serilog.Formatting.Compact;
+using Serilog.Formatting.Display;
 using Vysotsky.API;
 
 Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration(_ => { })
-    .UseSerilog((_, _, l) =>
+    .UseSerilog((h, _, l) =>
         l
             .Enrich.FromLogContext()
-            .WriteTo.Console()
+            .WriteTo.Console(h.HostingEnvironment.IsDevelopment()
+                ? new MessageTemplateTextFormatter("[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+                : new CompactJsonFormatter())
             .MinimumLevel.Information()
     )
     .ConfigureWebHost(builder => builder
@@ -23,15 +27,15 @@ Host.CreateDefaultBuilder(args)
         {
             services.PostConfigure<HostFilteringOptions>(options =>
             {
-                if (options.AllowedHosts is null or { Count: 0 })
+                if (options.AllowedHosts is null or {Count: 0})
                 {
                     var hosts = hostingContext
                         .Configuration["AllowedHosts"]
-                        ?.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        ?.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
                     options.AllowedHosts = hosts switch
                     {
-                        { Length: > 0 } => hosts,
-                        _ => new[] { "*" }
+                        {Length: > 0} => hosts,
+                        _             => new[] {"*"}
                     };
                 }
             });

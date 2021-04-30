@@ -5,11 +5,12 @@ using System.Text.Json.Serialization;
 
 namespace Vysotsky.API.Dto.Common
 {
-    /// <summary>
-    /// Данные с разбивкой по страницам
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class PaginatedData<T>
+    public class PaginatedData<T> : ListDto<T>
+    {
+        public PaginationData Pagination { get; init; } = null!;
+    }
+
+    public class PaginationData
     {
         public int Total { get; init; }
 
@@ -22,9 +23,6 @@ namespace Vysotsky.API.Dto.Common
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public Pages? Pages { get; init; }
-
-
-        public IEnumerable<T> Data { get; init; } = Array.Empty<T>();
     }
 
     internal static class PaginatedData
@@ -38,23 +36,26 @@ namespace Vysotsky.API.Dto.Common
 
             return new PaginatedData<T>
             {
-                Total = total,
-                PageNumber = paginationParameters.PageNumber,
-                PageSize = paginationParameters.PageSize,
+                Pagination = new PaginationData
+                {
+                    Total = total,
+                    PageNumber = paginationParameters.PageNumber,
+                    PageSize = paginationParameters.PageSize,
+                    Until = paginationParameters.Until,
+                    Pages = hasNext || hasPrevious
+                        ? new Pages
+                        {
+                            Next =
+                                hasNext
+                                    ? paginationParameters with {PageNumber = paginationParameters.PageNumber + 1,}
+                                    : null,
+                            Previous = hasPrevious
+                                ? paginationParameters with {PageNumber = paginationParameters.PageNumber - 1,}
+                                : null
+                        }
+                        : null
+                },
                 Data = data,
-                Until = paginationParameters.Until,
-                Pages = hasNext || hasPrevious
-                    ? new Pages
-                    {
-                        Next =
-                            hasNext
-                                ? paginationParameters with {PageNumber = paginationParameters.PageNumber + 1,}
-                                : null,
-                        Previous = hasPrevious
-                            ? paginationParameters with {PageNumber = paginationParameters.PageNumber - 1,}
-                            : null
-                    }
-                    : null
             };
         }
     }

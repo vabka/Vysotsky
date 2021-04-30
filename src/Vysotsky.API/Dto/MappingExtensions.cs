@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Vysotsky.API.Dto.Auth;
 using Vysotsky.API.Dto.Buildings;
 using Vysotsky.API.Dto.Categories;
 using Vysotsky.API.Dto.Chats;
+using Vysotsky.API.Dto.Common;
 using Vysotsky.API.Dto.Images;
 using Vysotsky.API.Dto.Issues;
 using Vysotsky.API.Dto.Organizations;
@@ -16,6 +18,9 @@ namespace Vysotsky.API.Dto
 {
     public static class MappingExtensions
     {
+        public static ListDto<T> ToDto<T>(this IEnumerable<T> collection) =>
+            new() {Data = collection};
+
         public static ConversationDto ToDto(this Conversation conversation) => new()
         {
             Id = conversation.AttachedUserId,

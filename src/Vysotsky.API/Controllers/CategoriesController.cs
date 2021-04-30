@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Flurl;
@@ -50,10 +49,10 @@ namespace Vysotsky.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<IEnumerable<PersistedCategoryDto>>>> GetAllCategoriesInArea()
+        public async Task<ActionResult<ApiResponse<ListDto<PersistedCategoryDto>>>> GetAllCategoriesInArea()
         {
             var categories = await categoriesService.GetAllAsync();
-            return Ok(categories.Select(c => c.ToDto()));
+            return Ok(categories.Select(c => c.ToDto()).ToDto());
         }
 
         [HttpPut("{categoryId:long}")]
