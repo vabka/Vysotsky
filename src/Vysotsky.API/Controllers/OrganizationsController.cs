@@ -32,7 +32,7 @@ namespace Vysotsky.API.Controllers
         }
 
         [HttpGet("{organizationId:long}/rooms")]
-        public async Task<ActionResult<ApiResponse<OrganizationBuildingDto[]>>> GetOrganizationRooms(
+        public async Task<ActionResult<ApiResponse<ListDto<OrganizationBuildingDto>>>> GetOrganizationRooms(
             long organizationId)
         {
             var organization = await organizationService.GetOrganizationByIdOrNullAsync(organizationId);
@@ -48,7 +48,7 @@ namespace Vysotsky.API.Controllers
             }
 
             var buildings = await roomService.GetOrganizationBuildingsAsync(organization);
-            return Ok(buildings.Select(b => b.ToDto()));
+            return Ok(buildings.Select(b => b.ToDto()).ToDto());
         }
 
         [HttpGet("{organizationId:long}/representatives")]

@@ -86,14 +86,14 @@ namespace Vysotsky.API.Controllers
             NotFound($"Building with id {buildingId} not found", "buildings.notFound");
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<PersistedBuildingDto[]>>> GetAllBuildings()
+        public async Task<ActionResult<ApiResponse<ListDto<PersistedBuildingDto>>>> GetAllBuildings()
         {
             var data = await roomService.GetAllBuildingsAsync();
-            return Ok(data.Select(b => b.ToDto()));
+            return Ok(data.Select(b => b.ToDto()).ToDto());
         }
 
         [HttpGet("{buildingId:long}/floors")]
-        public async Task<ActionResult<ApiResponse<PersistedFloorDto[]>>> GetAllFloorsInBuilding(
+        public async Task<ActionResult<ApiResponse<ListDto<PersistedFloorDto>>>> GetAllFloorsInBuilding(
             [FromRoute] long buildingId)
         {
             var building = await roomService.GetBuildingByIdOrNullAsync(buildingId);
@@ -103,7 +103,7 @@ namespace Vysotsky.API.Controllers
             }
 
             var data = await roomService.GetAllFloorsInBuildingAsync(building);
-            return Ok(data.Select(f => f.ToDto()));
+            return Ok(data.Select(f => f.ToDto()).ToDto());
         }
 
         [HttpGet("{buildingId:long}/floors/{floorId:long}/rooms")]
