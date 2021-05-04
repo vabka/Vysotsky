@@ -7,7 +7,6 @@ using Vysotsky.API.Dto.Common;
 using Vysotsky.API.Dto.Issues;
 using Vysotsky.API.Infrastructure;
 using Vysotsky.Service.Interfaces;
-using Vysotsky.Service.Types;
 
 namespace Vysotsky.API.Controllers
 {
@@ -69,7 +68,7 @@ namespace Vysotsky.API.Controllers
         }
 
         [HttpGet("{issueId}/comments")]
-        public async Task<ActionResult<ApiResponse<ListDto<PersistedIssueCommentDto>>>> GetComments(
+        public async Task<ActionResult<ApiResponse<WrappedListDto<PersistedIssueCommentDto>>>> GetComments(
             [FromRoute] long issueId)
         {
             var issue = await issueService.GetIssueByIdOrNullAsync(issueId);
@@ -138,7 +137,7 @@ namespace Vysotsky.API.Controllers
 
 
         [HttpGet("{issueId:long}/history")]
-        public async Task<ActionResult<ApiResponse<ListDto<Issue>>>> GetHistory([FromRoute] long issueId) =>
+        public async Task<ActionResult<ApiResponse<WrappedListDto<PersistedIssueDto>>>> GetHistory([FromRoute] long issueId) =>
             await issueService.GetIssueByIdOrNullAsync(issueId) switch
             {
                 null      => IssueNotFound(),

@@ -22,7 +22,7 @@ namespace Vysotsky.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<ListDto<ConversationDto>>>> GetChats()
+        public async Task<ActionResult<ApiResponse<WrappedListDto<ConversationDto>>>> GetChats()
         {
             if (!currentUserProvider.CurrentUser.IsSupervisor())
             {

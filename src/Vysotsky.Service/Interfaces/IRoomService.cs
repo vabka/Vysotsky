@@ -17,7 +17,8 @@ namespace Vysotsky.Service.Interfaces
         Task<Floor[]> GetAllFloorsInBuildingAsync(Building building);
         Task<Room[]> GetAllRoomsOnFloorAsync(Floor floor);
         Task DeleteBuildingCascadeByIdAsync(long buildingId);
-        Task<Room[]> GetRoomsAsync(long[] organizationRooms);
+        Task<Room[]> GetRoomsByIdAsync(long[] roomIds);
         Task<Room?> GetRoomByIdOrNullAsync(long roomId);
+        Task<Room[]> GetRoomsByOrganizationIdAsync(long organizationId);
     }
 }

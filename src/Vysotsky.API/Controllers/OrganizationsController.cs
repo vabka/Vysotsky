@@ -31,8 +31,8 @@ namespace Vysotsky.API.Controllers
             this.currentUserProvider = currentUserProvider;
         }
 
-        [HttpGet("{organizationId:long}/rooms")]
-        public async Task<ActionResult<ApiResponse<ListDto<OrganizationBuildingDto>>>> GetOrganizationRooms(
+        [HttpGet("{organizationId:long}/buildings")]
+        public async Task<ActionResult<ApiResponse<WrappedListDto<OrganizationBuildingDto>>>> GetOrganizationRooms(
             long organizationId)
         {
             var organization = await organizationService.GetOrganizationByIdOrNullAsync(organizationId);
@@ -52,7 +52,8 @@ namespace Vysotsky.API.Controllers
         }
 
         [HttpGet("{organizationId:long}/representatives")]
-        public async Task<ActionResult<ApiResponse<PersistedUserDto>>> GetAllRepresentatives(long organizationId)
+        public async Task<ActionResult<ApiResponse<WrappedListDto<PersistedUserDto>>>> GetAllRepresentatives(
+            long organizationId)
         {
             var organization = await organizationService.GetOrganizationByIdOrNullAsync(organizationId);
             if (organization != null)
@@ -72,7 +73,7 @@ namespace Vysotsky.API.Controllers
             }
 
             var users = await userService.GetAllOrganizationMembersAsync(organization);
-            return Ok(users.Select(u => u.ToDto()));
+            return Ok(users.Select(u => u.ToDto()).ToDto());
         }
 
         [HttpGet("{organizationId:long}")]
@@ -94,7 +95,8 @@ namespace Vysotsky.API.Controllers
             return Ok(organization.ToDto());
         }
 
-        private NotFoundObjectResult OrganizationNotFound(long organizationId) => NotFound($"Organization by id {organizationId} not found", "organizations.organizationNotFound");
+        private NotFoundObjectResult OrganizationNotFound(long organizationId) =>
+            NotFound($"Organization by id {organizationId} not found", "organizations.organizationNotFound");
 
         [HttpPut("{organizationId:long}")]
         public async Task<ActionResult<ApiResponse>> UpdateOrganization([FromRoute] long organizationId,
@@ -112,16 +114,16 @@ namespace Vysotsky.API.Controllers
                     "organizations.edit.notAuthorized");
             }
 
-            var newOrganization = organization with { Name = organizationDtoProperties.Name };
+            var newOrganization = organization with {Name = organizationDtoProperties.Name};
             await organizationService.UpdateOrganization(newOrganization);
             return Ok();
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<PersistedOrganizationDto[]>>> GetAllOrganizations()
+        public async Task<ActionResult<ApiResponse<WrappedListDto<PersistedOrganizationDto>>>> GetAllOrganizations()
         {
             var organizations = await organizationService.GetAllOrganizations();
-            return Ok(organizations.Select(o => o.ToDto()));
+            return Ok(organizations.Select(o => o.ToDto()).ToDto());
         }
     }
 }

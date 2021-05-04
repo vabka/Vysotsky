@@ -49,7 +49,7 @@ namespace Vysotsky.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<ListDto<PersistedCategoryDto>>>> GetAllCategoriesInArea()
+        public async Task<ActionResult<ApiResponse<WrappedListDto<PersistedCategoryDto>>>> GetAllCategoriesInArea()
         {
             var categories = await categoriesService.GetAllAsync();
             return Ok(categories.Select(c => c.ToDto()).ToDto());

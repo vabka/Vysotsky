@@ -18,7 +18,7 @@ namespace Vysotsky.API.Dto
 {
     public static class MappingExtensions
     {
-        public static ListDto<T> ToDto<T>(this IEnumerable<T> collection) =>
+        public static WrappedListDto<T> ToDto<T>(this IEnumerable<T> collection) =>
             new() {Data = collection};
 
         public static ConversationDto ToDto(this Conversation conversation) => new()

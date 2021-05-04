@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Vysotsky.API.Dto;
+using Vysotsky.API.Dto.Buildings;
 using Vysotsky.API.Dto.Common;
 using Vysotsky.API.Dto.Users;
 using Vysotsky.API.Infrastructure;
@@ -14,16 +15,26 @@ namespace Vysotsky.API.Controllers
     {
         private readonly IUserService userService;
         private readonly ICurrentUserProvider currentUserProvider;
+        private readonly IRoomService roomService;
 
-        public SelfController(IUserService userService, ICurrentUserProvider currentUserProvider)
+        public SelfController(IUserService userService, ICurrentUserProvider currentUserProvider,
+            IRoomService roomService)
         {
             this.userService = userService;
             this.currentUserProvider = currentUserProvider;
+            this.roomService = roomService;
         }
 
+        [HttpGet("organization/rooms")]
+        public async Task<ActionResult<ApiResponse<WrappedListDto<PersistedRoomDto>>>>
+            GetRoomsAttachedToUsersOrganization() =>
+            currentUserProvider.CurrentUser.OrganizationId is not null and var orgId
+                ? Ok((await roomService.GetRoomsByOrganizationIdAsync(orgId.Value)).Select(x => x.ToDto()).ToDto())
+                : NotAuthorized("Current user is not attached to organization", "user.noOrganization");
+
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<PersistedUserDto>>> Get() =>
-            Ok(await userService.GetUserByIdOrNullAsync(currentUserProvider.CurrentUser.Id));
+        public ActionResult<ApiResponse<PersistedUserDto>> Get() =>
+            Ok(currentUserProvider.CurrentUser.ToDto());
 
         [HttpPut]
         public async Task<ActionResult<ApiResponse>> Post([FromBody] EditableUserFieldsDto user)

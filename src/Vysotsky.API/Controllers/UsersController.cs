@@ -73,7 +73,7 @@ namespace Vysotsky.API.Controllers
                     return BadRequest("Organization field in necessary", "users.necessaryFieldMissing");
                 }
 
-                var rooms = await roomService.GetRoomsAsync(user.Organization.Rooms);
+                var rooms = await roomService.GetRoomsByIdAsync(user.Organization.Rooms);
                 if (rooms.Any(room => room.OwnerId.HasValue))
                 {
                     return BadRequest("Can't obtain room", "rooms.occupied");

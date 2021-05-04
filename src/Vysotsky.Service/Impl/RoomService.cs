@@ -84,9 +84,9 @@ namespace Vysotsky.Service.Impl
             await transaction.CommitAsync();
         }
 
-        public async Task<Room[]> GetRoomsAsync(long[] organizationRooms) =>
+        public async Task<Room[]> GetRoomsByIdAsync(long[] roomIds) =>
             await dataConnection.Rooms
-                .Where(r => r.Id.In(organizationRooms))
+                .Where(r => r.Id.In(roomIds))
                 .Select(MapToRoomExpr)
                 .ToArrayAsync();
 
@@ -101,6 +101,11 @@ namespace Vysotsky.Service.Impl
                 .Where(r => r.Id == roomId)
                 .Select(MapToRoomExpr)
                 .FirstOrDefaultAsync();
+
+        public async Task<Room[]> GetRoomsByOrganizationIdAsync(long organizationId) =>
+            await dataConnection.Rooms.Where(x => x.OwnerId == organizationId)
+                .Select(MapToRoomExpr)
+                .ToArrayAsync();
 
         public async Task<Floor> CreateFloorAsync(Building building, string number)
         {

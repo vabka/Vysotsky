@@ -37,7 +37,7 @@ namespace Vysotsky.API.Controllers
         /// <param name="result"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        protected static OkObjectResult Ok<T>(T result) => new(CreateSuccess(result));
+        protected static ActionResult<ApiResponse<T>> Ok<T>(T result) => new(CreateSuccess(result));
 
         protected static OkObjectResult Ok() => new(CreateSuccess());
 

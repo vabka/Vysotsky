@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Vysotsky.API.Dto.Common
 {
-    public class PaginatedData<T> : ListDto<T>
+    public class PaginatedData<T> : WrappedListDto<T>
     {
         public PaginationData Pagination { get; init; } = null!;
     }
