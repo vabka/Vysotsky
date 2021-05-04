@@ -4,7 +4,7 @@ using Serilog.Context;
 
 namespace Vysotsky.API.Infrastructure
 {
-    public class CurrentUserLoggingMiddleware: IMiddleware
+    public class CurrentUserLoggingMiddleware : IMiddleware
     {
         private readonly ICurrentUserProvider currentUserProvider;
 
@@ -13,7 +13,11 @@ namespace Vysotsky.API.Infrastructure
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            LogContext.PushProperty("CurrentUserName", currentUserProvider.CurrentUser.Username);
+            if (currentUserProvider.IsAuthenticated)
+            {
+                LogContext.PushProperty("CurrentUserName", currentUserProvider.CurrentUser.Username);
+            }
+
             await next(context);
         }
     }

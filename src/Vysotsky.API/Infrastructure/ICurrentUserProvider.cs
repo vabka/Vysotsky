@@ -5,5 +5,6 @@ namespace Vysotsky.API.Infrastructure
     public interface ICurrentUserProvider
     {
         User CurrentUser { get; }
+        bool IsAuthenticated { get; }
     }
 }

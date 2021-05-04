@@ -53,7 +53,7 @@ namespace Vysotsky.API.Infrastructure
                     return;
                 }
 
-                logger.InterpolatedInformation($"User {user?.Username:Username} authenticated");
+                logger.InterpolatedInformation($"User {user.Username:Username} authenticated");
 
                 context.Items.Add("CurrentUser", user);
             }
