@@ -6,15 +6,18 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Serilog.Enrichers.AspNetCore;
 using Serilog.Formatting.Compact;
 using Serilog.Formatting.Display;
 using Vysotsky.API;
 
 Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration(_ => { })
-    .UseSerilog((h, _, l) =>
+    .UseSerilog((h, s, l) =>
         l
             .Enrich.FromLogContext()
+            .Enrich.WithThreadId()
+            .Enrich.WithHttpContext(s)
             .WriteTo.Console(h.HostingEnvironment.IsDevelopment()
                 ? new MessageTemplateTextFormatter("[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
                 : new CompactJsonFormatter())

@@ -203,6 +203,7 @@ namespace Vysotsky.API
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseMiddleware<RevokableAuthenticationMiddleware>();
+            app.UseMiddleware<CurrentUserLoggingMiddleware>();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<NotificationHub>("/notification-hub");
