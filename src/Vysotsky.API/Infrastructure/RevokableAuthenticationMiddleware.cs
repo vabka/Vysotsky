@@ -48,12 +48,12 @@ namespace Vysotsky.API.Infrastructure
                 var user = await userService.GetUserByUsernameOrNullAsync(sub);
                 if (user == null)
                 {
-                    logger.InterpolatedInformation($"User by {sub:Sub} not authenticated, because not found");
+                    logger.InterpolatedDebug($"User by {sub:Sub} not authenticated, because not found");
                     context.Response.StatusCode = 401;
                     return;
                 }
 
-                logger.InterpolatedInformation($"User {user.Username:Username} authenticated");
+                logger.InterpolatedDebug($"User {user.Username:Username} authenticated");
 
                 context.Items.Add("CurrentUser", user);
             }
