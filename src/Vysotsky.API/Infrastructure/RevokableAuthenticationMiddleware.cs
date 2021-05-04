@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Vysotsky.Service.Interfaces;
 
 namespace Vysotsky.API.Infrastructure
@@ -12,12 +13,14 @@ namespace Vysotsky.API.Infrastructure
     {
         private readonly IAuthenticationService authenticationService;
         private readonly IUserService userService;
+        private readonly ILogger<RevokableAuthenticationMiddleware> logger;
 
         public RevokableAuthenticationMiddleware(IAuthenticationService authenticationService,
-            IUserService userService)
+            IUserService userService, ILogger<RevokableAuthenticationMiddleware> logger)
         {
             this.authenticationService = authenticationService;
             this.userService = userService;
+            this.logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
@@ -43,6 +46,15 @@ namespace Vysotsky.API.Infrastructure
                 }
 
                 var user = await userService.GetUserByUsernameOrNullAsync(sub);
+                if (user == null)
+                {
+                    logger.InterpolatedInformation($"User by {sub:Sub} not authenticated, because not found");
+                    context.Response.StatusCode = 401;
+                    return;
+                }
+
+                logger.InterpolatedInformation($"User {user?.Username:Username} authenticated");
+
                 context.Items.Add("CurrentUser", user);
             }
 
