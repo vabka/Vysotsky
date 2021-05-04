@@ -1,0 +1,32 @@
+data_dir = "/var/lib/vector"
+
+[api]
+enabled = true
+address = "0.0.0.0:8383"
+playground = true
+
+
+[sources.docker_in]
+type = "docker_logs"
+docker_host = "http://host.docker.internal:2375"
+
+[transforms.json_transform]
+type = "remap"
+inputs = ["docker_in"]
+source = '''
+json = parse_json!(.message)
+. = merge!(json, { "container_name": .container_name })
+.timestamp = .Timestamp
+del(.Timestamp)
+'''
+
+[sinks.loki_out]
+type = "loki"
+inputs = ["json_transform"]
+endpoint = "http://loki:3100"
+encoding.codec = "json"
+encoding.exclexcept_fields = ["container_name"]
+healthcheck.enabled = true
+
+labels.container_name = "{{ container_name }}"
+labels.level = "{{ Level }}"

@@ -102,6 +102,7 @@ namespace Vysotsky.API
         private static void ConfigureInfrastructure(IServiceCollection services, IConfiguration configuration)
         {
             services
+                .AddScoped<CurrentUserLoggingMiddleware>()
                 .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {

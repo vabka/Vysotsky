@@ -1,0 +1,52 @@
+version: "3"
+networks:
+  loki:
+services:
+  grafana:
+    depends_on:
+      - loki
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    volumes: 
+      - ./grafana/storage:/var/lib/grafana
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-worldmap-panel,grafana-github-datasource,snuids-trafficlights-panel,marcusolsson-calendar-panel
+    networks: 
+      - loki
+
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - 3100:3100
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki/local-config.yaml:/etc/loki/local-config.yaml:ro
+      - ./loki/tmp:/tmp
+    networks:
+      - loki
+
+  vector:
+    depends_on: 
+      - loki
+    image: timberio/vector:latest-alpine
+    ports:
+      - 8383:8383
+    volumes:
+      - ./vector/vector.toml:/etc/vector/vector.toml:ro
+      - ./vector/data:/var/lib/vector
+    command: ["--config", "/etc/vector/vector.toml"]
+    networks:
+      - loki
+  
+  vysotsky-api:
+    depends_on:
+      - vector
+    image: vysotsky-api:latest
+    ports:
+      - 3001:8081
+    environment: 
+      - PG_CONNECTION_STRING=User ID=postgres;Password=postgres;Host=host.docker.internal;Port=5432;Database=vysotsky
+      - SALT=ZWFzeVNhbHQ=
+      - SECRET=FZXKVt98zxy4VYMVI5uEBIV3lDNKWp4yxesZnKxHEKX8ZYwtB0ss6bdPpEFCCcWnNwWShmuoJH4O76ByZ1k4XdIsW22yDeDmaSKPtGKyVcCieNjXhVh47MzTg0pPNCEo
+      - DOTNET_ENVIRONMENT=Production

@@ -13,7 +13,7 @@ namespace Vysotsky.API.Infrastructure
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            LogContext.PushProperty("CurrentUser", currentUserProvider.CurrentUser.Username);
+            LogContext.PushProperty("CurrentUserName", currentUserProvider.CurrentUser.Username);
             await next(context);
         }
     }
