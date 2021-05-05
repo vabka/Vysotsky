@@ -21,8 +21,7 @@ Host.CreateDefaultBuilder(args)
             .MinimumLevel.Information()
     )
     .ConfigureWebHost(builder => builder
-        .UseKestrel((builderContext, options) =>
-            options.Configure(builderContext.Configuration.GetSection("Kestrel"), true))
+        .UseKestrel()
         .ConfigureServices((hostingContext, services) =>
         {
             services.PostConfigure<HostFilteringOptions>(options =>

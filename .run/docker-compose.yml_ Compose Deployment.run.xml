@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Vysotsky-Compose" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker">
+    <deployment type="docker-compose.yml">
+      <settings>
+        <option name="commandLineOptions" value="--build" />
+        <option name="sourceFilePath" value="docker-compose.yml" />
+      </settings>
+    </deployment>
+    <method v="2">
+      <option name="Build" default="false" projectName="Vysotsky.API" projectPath="C:\Users\User\RiderProjects\Vysotsky\src\Vysotsky.API\Vysotsky.API.csproj" />
+    </method>
+  </configuration>
+</component>

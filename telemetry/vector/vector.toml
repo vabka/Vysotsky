@@ -9,6 +9,7 @@ playground = true
 [sources.docker_in]
 type = "docker_logs"
 docker_host = "http://host.docker.internal:2375"
+retry_backoff_secs = 5
 
 [transforms.json_transform]
 type = "remap"
