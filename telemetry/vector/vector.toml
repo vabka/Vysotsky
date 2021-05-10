@@ -31,3 +31,4 @@ healthcheck.enabled = true
 
 labels.container_name = "{{ container_name }}"
 labels.level = "{{ Level }}"
+labels.status_code = "{{ Properties.StatusCode }}"
